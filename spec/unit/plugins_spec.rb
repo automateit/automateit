@@ -6,7 +6,7 @@ class MyManager < AutomateIt::Plugin::Manager
   alias_methods :mymethod
 
   def mymethod(opts)
-    dispatch(:mymethod, opts)
+    dispatch(opts)
   end
 end
 
@@ -128,7 +128,6 @@ describe "MyManager drivers" do
   it "should determine suitability levels" do
     m = MyManager.new
     rs = m.driver_suitability_levels_for(:mymethod, :one => 1)
-    #rs[:my_first_driver].should == 10
     rs[:my_first_driver].should eql?(10)
     rs[:my_second_driver].should eql?(5)
     rs[:my_unsuitable_driver].should be_nil
@@ -142,22 +141,22 @@ describe "MyManager drivers" do
     lambda { MyManager.new.driver_for(:mymethod, :one => 9) }.should raise_error(ArgumentError)
   end
 
-  it "should dispatch to suitable driver" do
+  it "should dispatch_to suitable driver" do
     m = MyManager.new
-    m.dispatch(:mymethod, :one => 1).should eql?(1)
+    m.dispatch_to(:mymethod, :one => 1).should eql?(1)
     m.mymethod(:one => 1).should eql?(1)
   end
 
-  it "should fail to dispatch if no suitable driver is found" do
+  it "should fail dispatch_to if no suitable driver is found" do
     m = MyManager.new
-    lambda { m.dispatch(:mymethod, :one => 9) }.should raise_error(ArgumentError)
+    lambda { m.dispatch_to(:mymethod, :one => 9) }.should raise_error(ArgumentError)
     lambda { m.mymethod(:one => 9) }.should raise_error(ArgumentError)
   end
 
-  it "should dispatch to default driver regardless of suitability" do
+  it "should dispatch_to to default driver regardless of suitability" do
     m = MyManager.new
     m.default(:my_unimplemented_driver)
-    lambda { m.dispatch(:mymethod, :one => 1) }.should raise_error(NoMethodError)
+    lambda { m.dispatch_to(:mymethod, :one => 1) }.should raise_error(NoMethodError)
     lambda { m.mymethod(:one => 1) }.should raise_error(NoMethodError)
   end
 

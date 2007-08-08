@@ -221,7 +221,13 @@ module AutomateIt #:main: AutomateIt
         end
       end
 
-      def dispatch(method, *args, &block)
+      def dispatch(*args, &block)
+        # Extract caller's method as symbol to save user from having to specify it
+        method = caller[0].match(/:in `(.+?)'/)[1].to_sym
+        dispatch_to(method, *args, &block)
+      end
+
+      def dispatch_to(method, *args, &block)
         if default
           @drivers[default].send(method, *args, &block)
         else
@@ -263,6 +269,38 @@ module AutomateIt #:main: AutomateIt
       end
     end
 
+  end
+
+  class FieldManager < Plugin::Manager
+    alias_methods :lookup
+
+    def lookup(query)
+      dispatch(query)
+    end
+
+    def struct
+      dispatch
+    end
+
+    def struct=(value)
+      dispatch(value)
+    end
+
+    class Struct < Plugin::Driver
+      attr_accessor :struct
+
+      def suitability(method, *args)
+        return 1
+      end
+
+      def lookup(query)
+        ref = @struct
+        for key in query.to_s.split("#")
+          ref = ref[key]
+        end
+        ref
+      end
+    end
   end
 
 end
