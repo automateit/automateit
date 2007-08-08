@@ -2,7 +2,15 @@ require 'spec/rake/spectask'
 
 task :default => :spec
 
-Spec::Rake::SpecTask.new(:spec) do |t|
-  #IK# t.rcov = true
-  t.spec_files = FileList['spec/unit/**/*_spec.rb']
+task :spec do
+  Spec::Rake::SpecTask.new(:raw_spec) do |t|
+    t.rcov = @rcov
+    t.spec_files = FileList['spec/unit/**/*_spec.rb']
+  end
+  Rake::Task[:raw_spec].invoke
+end
+
+task :rcov do
+  @rcov = true
+  Rake::Task[:spec].invoke
 end
