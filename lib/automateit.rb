@@ -21,7 +21,7 @@ module AutomateIt #:main: AutomateIt
     end
 
     def setup(opts={})
-      self.interpreter = opts[:interpreter]
+      @interpreter = opts[:interpreter]
     end
 
     def omfg(*args)
@@ -36,57 +36,57 @@ module AutomateIt #:main: AutomateIt
       expose_plugins
 
       if opts[:logger]
-        self.logger = opts[:logger]
+        @logger = opts[:logger]
       elsif logger.nil?
-          self.logger = Logger.new(STDOUT)
-          self.logger.level = Logger::INFO
+          @logger = Logger.new(STDOUT)
+          @logger.level = Logger::INFO
       end
 
       unless opts[:logger_level].nil?
-        self.logger.level = opts[:logger_level]
+        @logger.level = opts[:logger_level]
       end
 
       if opts[:noop].nil?
         unless defined?(@noop)
-          self.noop = false
+          @noop = false
         end
       else
-        self.noop = opts[:noop]
+        @noop = opts[:noop]
       end
     end
 
     attr_accessor :plugins
 
     def instantiate_plugins
-      self.plugins ||= {}
+      @plugins ||= {}
       AutomateIt::Plugin::Manager.classes.each do |plugin_class|
         plugin_token = plugin_class.token
 
-        if plugin = plugins[plugin_token]
+        if plugin = @plugins[plugin_token]
           plugin.instantiate_drivers
         else
-          plugins[plugin_token] = plugin_class.new(:interpreter=> self)
+          @plugins[plugin_token] = plugin_class.new(:interpreter=> self)
         end
       end
     end
 
     def expose_plugin_instances
-      plugins.each_pair do |token, plugin|
+      @plugins.each_pair do |token, plugin|
         unless methods.include?(token.to_s)
           self.class.send(:define_method, token) do
-            plugins[token]
+            @plugins[token]
           end
         end
       end
     end
 
     def expose_plugin_methods
-      plugins.values.each do |plugin|
+      @plugins.values.each do |plugin|
         next unless plugin.class.aliased_methods
         plugin.class.aliased_methods.each do |method|
           unless methods.include?(method.to_s)
             self.class.send(:define_method, method) do |*args|
-              plugins[plugin.class.token].send(method, *args)
+              @plugins[plugin.class.token].send(method, *args)
             end
           end
         end
@@ -143,11 +143,11 @@ module AutomateIt #:main: AutomateIt
     class Base < Common
       def setup(opts={})
         super(opts)
-        self.interpreter = AutomateIt::Interpreter.new unless interpreter
+        @interpreter = AutomateIt::Interpreter.new unless @interpreter
       end
 
       def self.token
-        return self.to_s.demodulize.underscore.to_sym
+        return to_s.demodulize.underscore.to_sym
       end
 
       def self.collect_registrations
@@ -168,17 +168,19 @@ module AutomateIt #:main: AutomateIt
     class Manager < Base
       collect_registrations
 
+      attr_accessor :drivers
+
       def setup(opts={})
         super(opts)
         instantiate_drivers
       end
 
       def instantiate_drivers
-        self.drivers ||= {}
+        @drivers ||= {}
         self.class.driver_classes.each do |driver_class|
           driver_token = driver_class.token
-          unless drivers[driver_token]
-            driver = drivers[driver_token] = driver_class.new(:interpreter => interpreter)
+          unless @drivers[driver_token]
+            driver = @drivers[driver_token] = driver_class.new(:interpreter => @interpreter)
           end
         end
       end
@@ -187,10 +189,8 @@ module AutomateIt #:main: AutomateIt
         return self.class.token
       end
 
-      attr_accessor :drivers
-
       def [](key)
-        return self.drivers[key]
+        return @drivers[key]
       end
 
       # Get or set the default driver token. Without arguments, gets the driver token. With arguments, sets the +token+, e.g. +my_driver+ is the token for the +MyDriver+ class.
@@ -215,7 +215,7 @@ module AutomateIt #:main: AutomateIt
 
       def dispatch(method, *args, &block)
         if default
-          drivers[default].send(method, *args, &block)
+          @drivers[default].send(method, *args, &block)
         else
           driver_for(method, *args, &block).send(method, *args, &block)
         end
@@ -223,7 +223,7 @@ module AutomateIt #:main: AutomateIt
 
       def driver_suitability_levels_for(method, *args, &block)
         results = {}
-        drivers.each_pair do |name, driver|
+        @drivers.each_pair do |name, driver|
           next unless driver.respond_to?(method)
           results[name] = driver.suitability(method, *args, &block)
         end
@@ -238,7 +238,7 @@ module AutomateIt #:main: AutomateIt
           level = -1
         end
         if driver and level > 0
-          return drivers[driver]
+          return @drivers[driver]
         else
           raise ArgumentError.new("can't find driver for method '#{method}' with arguments: #{args.inspect}")
         end
