@@ -1,7 +1,7 @@
-task :default => :test
+require 'spec/rake/spectask'
 
-task :test do
-  # FIXME integrate spec
-  # FIXME scan files
-  sh "spec test/unit/plugins_spec.rb"
+task :default => :spec
+
+Spec::Rake::SpecTask.new(:spec) do |t|
+  t.spec_files = FileList['test/unit/**/*_spec.rb']
 end
