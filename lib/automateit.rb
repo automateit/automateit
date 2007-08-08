@@ -168,7 +168,24 @@ module AutomateIt #:main: AutomateIt
     class Manager < Base
       collect_registrations
 
+      class_inheritable_accessor :aliased_methods
+
+      # Methods to alias into +Interpreter+, specified as an array of symbols.
+      def self.alias_methods(*args)
+        if args.empty?
+          self.aliased_methods
+        else
+          self.aliased_methods ||= Set.new
+          self.aliased_methods.merge(args.flatten)
+        end
+      end
+
       attr_accessor :drivers
+
+      # +Driver+ classes used by this +Manager+
+      def self.driver_classes
+        Driver.classes.select{|driver|driver.to_s.match(/^#{self}::/)}
+      end
 
       def setup(opts={})
         super(opts)
@@ -185,32 +202,23 @@ module AutomateIt #:main: AutomateIt
         end
       end
 
+      # Returns token for this +Manager+ as a symbol. E.g. the token for +TagManager+ is +:tag+.
       def token
         return self.class.token
       end
 
-      def [](key)
-        return @drivers[key]
+      # Returns the +Driver+ with the specified token. E.g. +:apt+ will return the +APT+ driver.
+      def [](token)
+        return @drivers[token]
       end
 
-      # Get or set the default driver token. Without arguments, gets the driver token. With arguments, sets the +token+, e.g. +my_driver+ is the token for the +MyDriver+ class.
+      # Manipulate the default driver. Without arguments, gets the driver token as a symbol. With argument, sets the default driver to the +token+, e.g. the argument +:apt+ will make the +APT+ driver the default.
       def default(token=nil)
         if token.nil?
           return defined?(@default) ? @default : nil
         else
           @default = token
         end
-      end
-
-      class_inheritable_accessor :aliased_methods
-
-      def self.alias_methods(*args)
-        self.aliased_methods ||= Set.new
-        self.aliased_methods.merge(args)
-      end
-
-      def self.driver_classes
-        Driver.classes.select{|driver|driver.to_s.match(/^#{self}::/)}
       end
 
       def dispatch(method, *args, &block)
