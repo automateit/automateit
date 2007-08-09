@@ -25,7 +25,7 @@ module AutomateIt #:main: AutomateIt
     end
 
     def setup(opts={})
-      @interpreter = opts[:interpreter]
+      @interpreter = opts[:interpreter] if opts[:interpreter]
     end
 
     def omfg(*args)
@@ -70,16 +70,18 @@ module AutomateIt #:main: AutomateIt
 
     def instantiate_plugins
       @plugins ||= {}
+      # XXX cleanup
       if defined?(@parent) and @parent and @parent.is_a?(Plugin::Manager)
         plugins[@parent.class.token] = @parent
       end
-      AutomateIt::Plugin::Manager.classes.reject{|t|t==@parent if @parent}.each do |plugin_class|
+      AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}.each do |plugin_class|
         plugin_token = plugin_class.token
 
         if plugin = @plugins[plugin_token]
           plugin.instantiate_drivers
         else
-          @plugins[plugin_token] = plugin_class.new(:interpreter=> self)
+          @plugins[plugin_token] = plugin_class.new(:interpreter => self,
+                                                    :instantiating => true)
         end
       end
     end
@@ -157,9 +159,6 @@ module AutomateIt #:main: AutomateIt
     class Base < Common
       def setup(opts={})
         super(opts)
-
-        # TODO How to ensure that the same objects are shared when either the Manager, Plugin or Interpreter is instantiated?
-        #puts "base self: #{self} // interpreter #{@interpreter}"
         @interpreter = AutomateIt::Interpreter.new(:parent => self) unless @interpreter
       end
 
@@ -177,7 +176,7 @@ module AutomateIt #:main: AutomateIt
         self.classes = Set.new
 
         def self.inherited(subclass)
-          classes << subclass
+          classes.add(subclass)
         end
 
         def self.abstract_plugin
@@ -210,6 +209,9 @@ module AutomateIt #:main: AutomateIt
 
       def setup(opts={})
         super(opts)
+
+        @default ||= nil
+
         instantiate_drivers
 
         if driver = opts[:default] || opts[:driver]
@@ -223,7 +225,8 @@ module AutomateIt #:main: AutomateIt
         self.class.driver_classes.each do |driver_class|
           driver_token = driver_class.token
           unless @drivers[driver_token]
-            driver = @drivers[driver_token] = driver_class.new(:interpreter => @interpreter)
+            @drivers[driver_token] = driver_class.new(
+              :interpreter => @interpreter, :instantiating => true)
           end
         end
       end
@@ -241,7 +244,7 @@ module AutomateIt #:main: AutomateIt
       # Manipulate the default driver. Without arguments, gets the driver token as a symbol. With argument, sets the default driver to the +token+, e.g. the argument +:apt+ will make the +APT+ driver the default.
       def default(token=nil)
         if token.nil?
-          return defined?(@default) ? @default : nil
+          @default
         else
           @default = token
         end
@@ -354,7 +357,7 @@ module AutomateIt #:main: AutomateIt
     class Struct < Plugin::Driver
       attr_accessor :struct
 
-      # Hash mapping of keys that have many common names, e.g. "relase" and "version" 
+      # Hash mapping of keys that have many common names, e.g. "relase" and "version"
       attr_accessor :key_aliases
 
       def suitability(method, *args)
@@ -382,7 +385,7 @@ module AutomateIt #:main: AutomateIt
             if @struct.has_key?(key_alias)
               key = key_alias
             else
-              raise IndexError.new("platform doesn't provide key: #{key}") 
+              raise IndexError.new("platform doesn't provide key: #{key}")
             end
           end
           result << @struct[key]
@@ -427,15 +430,27 @@ module AutomateIt #:main: AutomateIt
 
   require 'open3'
   class ShellManager < Plugin::Manager
-    alias_methods :sh, :which
+    alias_methods :rawsh, :sh, :which, :ln, :ln_s, :ln_sF, :rm, :rm_r, :rm_rF, :rmdir, :cp, :cp_R, :mv, :touch, :chmod, :chmod_R, :chown, :chown_R, :own
 
-    def which(command) dispatch(command) end
+    # Executes a raw, unconditional shell command without logging. Unlike +sh+, this executes the command even when you're in +noop+ mode and provides no logging even if you're in +debug+ mode.
+    def rawsh(command) dispatch(command) end
 
     def sh(command) dispatch(command) end
+
+    def which(command) dispatch(command) end
 
     class POSIX < Plugin::Driver
       def suitability(method, *args)
         return 3 # TODO how do I know if this has posix?
+      end
+
+      def rawsh(command)
+        return `#{command}`.chomp
+      end
+
+      def sh(command)
+        interpreter.logger.info("$$$ #{command}")
+        return rawsh(command) if interpreter.writing?
       end
 
       def which(command)
@@ -444,10 +459,82 @@ module AutomateIt #:main: AutomateIt
           data if File.exists?(data)
         end
       end
+    end
+  end
 
-      def sh(command)
-        return `#{command}`.chomp
+  class TagManager < Plugin::Manager
+    alias_methods :tags, :tags=, :tagged?
+
+    def tags() dispatch() end
+
+    def tags=() dispatch() end
+
+    def tagged?(query) dispatch(query) end
+
+    def hostname_aliases() dispatch() end
+
+    def hostname_aliases=(aliases) dispatch(aliases) end
+
+    class Struct < Plugin::Driver
+      attr_accessor :hostname_aliases, :struct, :tags
+
+      def suitability(method, *args)
+        return 1
       end
+
+      def setup(opts={})
+        super(opts)
+
+        if opts[:hostname_aliases]
+          @hostname_aliases = Set.new(opts[:hostname_aliases])
+        else
+          @hostname_aliases ||= Set.new
+        end
+
+        @tags ||= Set.new
+        @tags.merge(@hostname_aliases) unless @hostname_aliases.empty?
+
+        if opts[:struct]
+          # FIXME parse @group and !negation
+          @struct = opts[:struct]
+          hostname_aliases_array = @hostname_aliases.to_a
+          @struct.each_pair do |role, members|
+            unless (hostname_aliases_array & members).empty?
+              @tags.add(role)
+            end
+          end
+        else
+          @struct ||= {}
+        end
+
+        return if opts[:instantiating]
+
+        @tags.add(interpreter.platform_manager.query("os"))
+        @tags.add(interpreter.platform_manager.query("arch"))
+        @tags.add(interpreter.platform_manager.query("distro"))
+        @tags.add(interpreter.platform_manager.query("release"))
+        @tags.add(interpreter.platform_manager.query("os#arch"))
+        @tags.add(interpreter.platform_manager.query("distro#release"))
+      end
+
+      def tagged?(query)
+        query = query.to_s
+        tokens = query.scan(%r{\(|\)|&&|\|\||!?[\.\w]+})
+        if tokens.size > 1
+          booleans = tokens.map do |token|
+            if matches = token.match(/^(!?)([\.\w]+)$/)
+              @tags.include?(matches[2]) && matches[1].empty?
+            else
+              token
+            end
+          end
+          code = booleans.join(" ")
+          return eval(code) # TODO what could possibly go wrong?
+        else
+          return @tags.include?(query)
+        end
+      end
+
     end
   end
 

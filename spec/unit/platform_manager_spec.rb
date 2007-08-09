@@ -4,9 +4,9 @@ describe "AutomateIt::PlatformManager" do
   before do
     @m = AutomateIt::PlatformManager.new(:default => :struct, :struct => {
       :os => "mizrahi", 
+      :arch => "realian",
       :distro => "momo",
       :version => "s100",
-      :arch => "realian",
     })
   end
 

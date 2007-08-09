@@ -15,7 +15,7 @@ else
 
     # TODO what if a non-Linux supports LSB!?
     it "should be linux" do
-      Ai.sh("uname -s").downcase.should == "linux"
+      `uname -s`.chomp.downcase.should == "linux"
       @m.query(:os).should == "linux"
     end
 
