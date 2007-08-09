@@ -22,13 +22,18 @@ describe "AutomateIt::FieldManager", :shared => true do
     @m.object_id.should == @m.interpreter.field_manager.object_id
     @m[:yaml].object_id.should == @m.interpreter.field_manager[:yaml].object_id
   end
+
+  it "should be aliases into the interpreter" do
+    @a.lookup("hash#leafkey").should == "leafvalue"
+  end
 end
 
 describe AutomateIt::FieldManager::Struct do
   it_should_behave_like "AutomateIt::FieldManager"
 
   before do
-    @m = AutomateIt::FieldManager.new
+    @a = AutomateIt.new
+    @m = @a.field_manager
     @m.setup(:default => :struct, :struct => {
       "key" => "value",
       "hash" => {
@@ -45,7 +50,8 @@ describe AutomateIt::FieldManager::YAML do
   it_should_behave_like "AutomateIt::FieldManager"
 
   before do
-    @m = AutomateIt::FieldManager.new
+    @a = AutomateIt.new
+    @m = @a.field_manager
     File.should_receive(:read).with("demo.yml").and_return(<<-EOB)
       <%="key"%>: value
       hash:
