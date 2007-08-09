@@ -30,14 +30,18 @@ module AutomateIt #:main: AutomateIt
   end
 
   class Interpreter < Common
+    attr_accessor :parent
+
     def setup(opts={})
       super(opts.merge(:interpreter => self))
-      instantiate_plugins
-      expose_plugins
+
+      if opts[:parent]
+        @parent = opts[:parent]
+      end
 
       if opts[:logger]
         @logger = opts[:logger]
-      elsif logger.nil?
+      elsif not defined?(@logger) or @logger.nil?
           @logger = Logger.new(STDOUT)
           @logger.level = Logger::INFO
       end
@@ -53,13 +57,19 @@ module AutomateIt #:main: AutomateIt
       else
         @noop = opts[:noop]
       end
+
+      instantiate_plugins
+      expose_plugins
     end
 
     attr_accessor :plugins
 
     def instantiate_plugins
       @plugins ||= {}
-      AutomateIt::Plugin::Manager.classes.each do |plugin_class|
+      if defined?(@parent) and @parent and @parent.is_a?(Plugin::Manager)
+        plugins[@parent.class.token] = @parent
+      end
+      AutomateIt::Plugin::Manager.classes.reject{|t|t==@parent if @parent}.each do |plugin_class|
         plugin_token = plugin_class.token
 
         if plugin = @plugins[plugin_token]
@@ -143,7 +153,14 @@ module AutomateIt #:main: AutomateIt
     class Base < Common
       def setup(opts={})
         super(opts)
-        @interpreter = AutomateIt::Interpreter.new unless @interpreter
+
+        # TODO How to ensure that the same objects are shared when either the Manager, Plugin or Interpreter is instantiated?
+        #puts "base self: #{self} // interpreter #{@interpreter}"
+        @interpreter = AutomateIt::Interpreter.new(:parent => self) unless @interpreter
+      end
+
+      def token
+        self.class.token
       end
 
       def self.token
@@ -190,6 +207,11 @@ module AutomateIt #:main: AutomateIt
       def setup(opts={})
         super(opts)
         instantiate_drivers
+
+        if driver = opts[:default] || opts[:driver]
+          default(opts[:default]) if opts[:default]
+          @drivers[driver].setup(opts)
+        end
       end
 
       def instantiate_drivers
@@ -202,7 +224,7 @@ module AutomateIt #:main: AutomateIt
         end
       end
 
-      # Returns token for this +Manager+ as a symbol. E.g. the token for +TagManager+ is +:tag+.
+      # Returns token for this +Manager+ as a symbol. E.g. the token for +TagManager+ is +:tag_manager+.
       def token
         return self.class.token
       end
@@ -219,6 +241,10 @@ module AutomateIt #:main: AutomateIt
         else
           @default = token
         end
+      end
+
+      def default=(token)
+        default(token)
       end
 
       def dispatch(*args, &block)
@@ -278,19 +304,18 @@ module AutomateIt #:main: AutomateIt
       dispatch(query)
     end
 
-    def struct
-      dispatch
-    end
-
-    def struct=(value)
-      dispatch(value)
-    end
-
     class Struct < Plugin::Driver
       attr_accessor :struct
 
       def suitability(method, *args)
         return 1
+      end
+
+      def setup(opts={})
+        super(opts)
+        if opts[:struct]
+          @struct = opts[:struct]
+        end
       end
 
       def lookup(query)
@@ -301,6 +326,23 @@ module AutomateIt #:main: AutomateIt
         ref
       end
     end
+
+    require 'erb'
+    require 'yaml'
+    class YAML < Struct
+      def suitability(method, *args)
+        return 5
+      end
+
+      def setup(opts={})
+        super(opts)
+        if opts[:file]
+          @struct = ::YAML::load(ERB.new(File.read(opts[:file]), nil, '-').result)
+        end
+      end
+
+    end
+
   end
 
 end
