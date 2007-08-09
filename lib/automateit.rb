@@ -12,6 +12,10 @@ require 'logger'
 # RDoc about AutomateIt
 module AutomateIt #:main: AutomateIt
 
+  def self.new(*a)
+    Interpreter.new(*a)
+  end
+
   # All actual methods are in the included module +CommonLib+.
   class Common
     attr_accessor :interpreter
@@ -300,8 +304,8 @@ module AutomateIt #:main: AutomateIt
   class FieldManager < Plugin::Manager
     alias_methods :lookup
 
-    def lookup(query)
-      dispatch(query)
+    def lookup(search)
+      dispatch(search)
     end
 
     class Struct < Plugin::Driver
@@ -318,9 +322,9 @@ module AutomateIt #:main: AutomateIt
         end
       end
 
-      def lookup(query)
+      def lookup(search)
         ref = @struct
-        for key in query.to_s.split("#")
+        for key in search.to_s.split("#")
           ref = ref[key]
         end
         ref
@@ -343,6 +347,116 @@ module AutomateIt #:main: AutomateIt
 
     end
 
+  end
+
+  class PlatformManager < Plugin::Manager
+    def query(search)
+      dispatch(search)
+    end
+
+    require 'stringio'
+    class Struct < Plugin::Driver
+      attr_accessor :struct
+
+      # Hash mapping of keys that have many common names, e.g. "relase" and "version" 
+      attr_accessor :key_aliases
+
+      def suitability(method, *args)
+        return 1
+      end
+
+      def setup(opts={})
+        super(opts)
+        @struct ||= {}
+        @struct = opts[:struct] if opts[:struct]
+
+        # Generate bi-directional map
+        @key_aliases ||= {
+          :version => :release,
+        }.inject({}){|s,v| s[v[0]] = v[1]; s[v[1]] = v[0]; s}
+      end
+
+      def query(search)
+        result = ""
+        for key in search.to_s.split(/#/)
+          key = key.to_sym
+          result << "_" unless result.empty?
+          unless @struct.has_key?(key)
+            key_alias = key_aliases[key]
+            if @struct.has_key?(key_alias)
+              key = key_alias
+            else
+              raise IndexError.new("platform doesn't provide key: #{key}") 
+            end
+          end
+          result << @struct[key]
+        end
+        result
+      end
+    end
+
+    require 'open3'
+    require 'yaml'
+    class LSB < Struct
+      cattr_accessor :struct_cache
+
+      def suitability(method, *args)
+        # Depend on +setup+ to populate this
+        @struct.empty? ? -1 : 5
+      end
+
+      def setup(opts={})
+        super(opts)
+        populate
+      end
+
+      def populate
+        return unless @struct.empty?
+        unless struct_cache
+          @@struct_cache = {}
+          Open3.popen3("lsb_release -a") do |sin, sout, serr|
+            next if (rawdata = sout.read).empty?
+            yamldata = YAML::load(rawdata.gsub(/\t/, " "))
+            @@struct_cache[:distro] = yamldata["Distributor ID"].to_s.downcase
+            @@struct_cache[:release] = yamldata["Release"].to_s.downcase
+
+            @@struct_cache[:os] = `uname -s`.chomp.downcase
+            @@struct_cache[:arch] = `uname -m`.chomp.downcase
+          end
+        end
+        @struct = @@struct_cache
+      end
+    end
+  end
+
+  require 'open3'
+  class ShellManager < Plugin::Manager
+    alias_methods :sh, :which
+
+    def which(command)
+      dispatch(command)
+    end
+
+    def sh(command)
+      dispatch(command)
+    end
+
+    class POSIX < Plugin::Driver
+      def suitability(method, *args)
+        return 3 # TODO how do I know if this has posix?
+      end
+
+      def which(command)
+        return Open3.popen3("which", command) do |sin, sout, serr|
+          data = sout.read.chomp
+          data if File.exists?(data)
+        end
+      end
+
+      def sh(command)
+        return `#{command}`.chomp
+      end
+    end
   end
 
 end
