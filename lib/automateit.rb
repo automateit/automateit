@@ -304,9 +304,7 @@ module AutomateIt #:main: AutomateIt
   class FieldManager < Plugin::Manager
     alias_methods :lookup
 
-    def lookup(search)
-      dispatch(search)
-    end
+    def lookup(search) dispatch(search) end
 
     class Struct < Plugin::Driver
       attr_accessor :struct
@@ -350,9 +348,7 @@ module AutomateIt #:main: AutomateIt
   end
 
   class PlatformManager < Plugin::Manager
-    def query(search)
-      dispatch(search)
-    end
+    def query(search) dispatch(search) end
 
     require 'stringio'
     class Struct < Plugin::Driver
@@ -433,13 +429,9 @@ module AutomateIt #:main: AutomateIt
   class ShellManager < Plugin::Manager
     alias_methods :sh, :which
 
-    def which(command)
-      dispatch(command)
-    end
+    def which(command) dispatch(command) end
 
-    def sh(command)
-      dispatch(command)
-    end
+    def sh(command) dispatch(command) end
 
     class POSIX < Plugin::Driver
       def suitability(method, *args)
