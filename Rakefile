@@ -31,3 +31,7 @@ task "rcov:all" do
   @rcov = true
   Rake::Task["spec:all"].invoke
 end
+
+task :loc do
+  sh "find lib spec | egrep -v '.hg|.svn/|/CVS|CVS/|(.sw.?|.pyc)' | egrep '*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|rake|po)$$' | xargs wc"
+end
