@@ -96,6 +96,12 @@ describe "AutomateIt::TagManager" do
     @a.tagged?("foo && bar").should be_false
   end
 
+  it "should query tags for a specific host" do
+    @a.tagged?("proxy_servers", "kurou").should be_false
+    @a.tagged?("proxy_servers", "akane.foo").should be_true
+    @a.tagged?("proxy_servers", "akane").should be_true
+  end
+
   it "should append tags" do
     @a.tagged?("magic").should be_false
     @a.tags << "magic"
@@ -123,9 +129,9 @@ describe "AutomateIt::TagManager" do
     hosts.include?("shirou").should be_true
     hosts.include?("akane").should be_false
   end
-=begin
-=end
 
+=begin
   # FIXME add tests for @group and !negation
+=end
 
 end

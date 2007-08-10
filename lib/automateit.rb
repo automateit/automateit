@@ -470,7 +470,7 @@ module AutomateIt #:main: AutomateIt
 
     def tags=() dispatch() end
 
-    def tagged?(query) dispatch(query) end
+    def tagged?(query, hostname=nil) dispatch(query, hostname) end
 
     def tags_for(hostname) dispatch(hostname) end
 
@@ -519,17 +519,19 @@ module AutomateIt #:main: AutomateIt
       end
 
       def hosts_tagged_with(query) 
-        # FIXME
-        []
+        hosts = @struct.values.flatten.uniq
+        return hosts.select{|hostname| tagged?(query, hostname)}
       end
 
-      def tagged?(query)
+      def tagged?(query, hostname=nil)
         query = query.to_s
+        tags = hostname ? tags_for(hostname) : @tags
+        # XXX This tokenization process discards unknown characters, which may hide errors in the query
         tokens = query.scan(%r{\(|\)|&&|\|\||!?[\.\w]+})
         if tokens.size > 1
           booleans = tokens.map do |token|
             if matches = token.match(/^(!?)([\.\w]+)$/)
-              @tags.include?(matches[2]) && matches[1].empty?
+              tags.include?(matches[2]) && matches[1].empty?
             else
               token
             end
@@ -537,7 +539,7 @@ module AutomateIt #:main: AutomateIt
           code = booleans.join(" ")
           return eval(code) # XXX What could possibly go wrong?
         else
-          return @tags.include?(query)
+          return tags.include?(query)
         end
       end
 
@@ -545,7 +547,10 @@ module AutomateIt #:main: AutomateIt
         hostnames = hostname.is_a?(String) ? hostname_aliases_for(hostname) : hostname.to_a
         return @struct.inject(Set.new) do |sum, value|
           role, members = value
-          sum.add(role) unless (hostnames & members).empty?
+          members_aliases = members.inject(Set.new) do |aliases, member| 
+            aliases.merge(hostname_aliases_for(member)); aliases
+          end.to_a
+          sum.add(role) unless (hostnames & members_aliases).empty?
           sum
         end
       end
