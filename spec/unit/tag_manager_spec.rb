@@ -117,13 +117,13 @@ describe "AutomateIt::TagManager" do
     @a.tags_for("akane.foo.bar").include?("proxy_servers").should be_true
   end
 
-=begin
   it "should find hosts with a tag" do
     hosts = @a.hosts_tagged_with("apache_servers")
     hosts.include?("kurou").should be_true
     hosts.include?("shirou").should be_true
     hosts.include?("akane").should be_false
   end
+=begin
 =end
 
   # FIXME add tests for @group and !negation
