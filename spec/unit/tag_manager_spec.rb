@@ -96,6 +96,26 @@ describe "AutomateIt::TagManager" do
     @a.tagged?("foo && bar").should be_false
   end
 
+  it "should append tags" do
+    @a.tagged?("magic").should be_false
+    @a.tags << "magic"
+    @a.tagged?("magic").should be_true
+  end
+
+  it "should find tags for a host" do
+    # TODO
+    @a.tags_for("kurou").include?("apache_servers").should be_true
+    @a.tags_for("akane").include?("proxy_servers").should be_true
+  end
+
+  it "should find hosts with a tag" do
+    # TODO
+    hosts = @a.hosts_tagged_with("apache_servers")
+    hosts.include?("kurou").should be_true
+    hosts.include?("shirou").should be_true
+    hosts.include?("akane").should be_false
+  end
+
   # FIXME add tests for @group and !negation
 
 end

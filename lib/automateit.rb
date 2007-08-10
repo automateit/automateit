@@ -296,8 +296,7 @@ module AutomateIt #:main: AutomateIt
       collect_registrations
 
       def suitability(method, *args, &block)
-        # TODO log.warn("driver author forgot to implement suitability method in #{self.class}")
-        #raise NotImplementedError.new("driver author forgot to implement suitability method in #{self.class}")
+        log.debug("driver #{self.class} doesn't implement the +suitability+ method")
         return -1
       end
     end
@@ -463,13 +462,17 @@ module AutomateIt #:main: AutomateIt
   end
 
   class TagManager < Plugin::Manager
-    alias_methods :tags, :tags=, :tagged?
+    alias_methods :hosts_tagged_with, :tags, :tags=, :tagged?, :tags_for
+
+    def hosts_tagged_with(query) dispatch(query) end
 
     def tags() dispatch() end
 
     def tags=() dispatch() end
 
     def tagged?(query) dispatch(query) end
+
+    def tags_for(hostname) dispatch(hostname) end
 
     def hostname_aliases() dispatch() end
 
@@ -493,6 +496,7 @@ module AutomateIt #:main: AutomateIt
 
         @tags ||= Set.new
         @tags.merge(@hostname_aliases) unless @hostname_aliases.empty?
+        # TODO generate hostname_aliases
 
         if opts[:struct]
           # FIXME parse @group and !negation
@@ -517,6 +521,11 @@ module AutomateIt #:main: AutomateIt
         @tags.add(interpreter.platform_manager.query("distro#release"))
       end
 
+      def hosts_tagged_with(query) 
+        # FIXME
+        []
+      end
+
       def tagged?(query)
         query = query.to_s
         tokens = query.scan(%r{\(|\)|&&|\|\||!?[\.\w]+})
@@ -529,10 +538,15 @@ module AutomateIt #:main: AutomateIt
             end
           end
           code = booleans.join(" ")
-          return eval(code) # TODO what could possibly go wrong?
+          return eval(code) # XXX What could possibly go wrong?
         else
           return @tags.include?(query)
         end
+      end
+
+      def tags_for(hostname) 
+        # FIXME
+        []
       end
 
     end
