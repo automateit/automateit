@@ -462,7 +462,7 @@ module AutomateIt #:main: AutomateIt
   end
 
   class TagManager < Plugin::Manager
-    alias_methods :hosts_tagged_with, :tags, :tags=, :tagged?, :tags_for
+    alias_methods :hosts_tagged_with, :hostname_aliases_for, :tags, :tags=, :tagged?, :tags_for
 
     def hosts_tagged_with(query) dispatch(query) end
 
@@ -477,6 +477,8 @@ module AutomateIt #:main: AutomateIt
     def hostname_aliases() dispatch() end
 
     def hostname_aliases=(aliases) dispatch(aliases) end
+
+    def hostname_aliases_for(hostname) dispatch(hostname) end
 
     class Struct < Plugin::Driver
       attr_accessor :hostname_aliases, :struct, :tags
@@ -501,12 +503,7 @@ module AutomateIt #:main: AutomateIt
         if opts[:struct]
           # FIXME parse @group and !negation
           @struct = opts[:struct]
-          hostname_aliases_array = @hostname_aliases.to_a
-          @struct.each_pair do |role, members|
-            unless (hostname_aliases_array & members).empty?
-              @tags.add(role)
-            end
-          end
+          @tags.merge(tags_for(@hostname_aliases))
         else
           @struct ||= {}
         end
@@ -545,8 +542,20 @@ module AutomateIt #:main: AutomateIt
       end
 
       def tags_for(hostname) 
-        # FIXME
-        []
+        hostnames = hostname.is_a?(String) ? hostname_aliases_for(hostname) : hostname.to_a
+        return @struct.inject(Set.new) do |sum, value|
+          role, members = value
+          sum.add(role) unless (hostnames & members).empty?
+          sum
+        end
+      end
+
+      def hostname_aliases_for(hostname)
+        # Progressively strip a hostname of its domain elements
+        tokens = hostname.split(/\./)
+        return (1..tokens.size).inject([]) do |aliases, i| 
+          aliases << tokens[0,i].join('.');aliases
+        end
       end
 
     end

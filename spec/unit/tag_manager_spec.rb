@@ -102,19 +102,29 @@ describe "AutomateIt::TagManager" do
     @a.tagged?("magic").should be_true
   end
 
-  it "should find tags for a host" do
-    # TODO
-    @a.tags_for("kurou").include?("apache_servers").should be_true
-    @a.tags_for("akane").include?("proxy_servers").should be_true
+  it "should find hostname aliases" do
+    hostnames = @a.hostname_aliases_for("kurou.foo.bar")
+    hostnames.include?("kurou.foo.bar").should be_true
+    hostnames.include?("kurou.foo").should be_true
+    hostnames.include?("kurou").should be_true
   end
 
+  it "should find tags for a host using an array" do
+    @a.tags_for(["kurou"]).include?("apache_servers").should be_true
+  end
+
+  it "should find tags for a host using a string" do
+    @a.tags_for("akane.foo.bar").include?("proxy_servers").should be_true
+  end
+
+=begin
   it "should find hosts with a tag" do
-    # TODO
     hosts = @a.hosts_tagged_with("apache_servers")
     hosts.include?("kurou").should be_true
     hosts.include?("shirou").should be_true
     hosts.include?("akane").should be_false
   end
+=end
 
   # FIXME add tests for @group and !negation
 
