@@ -296,7 +296,7 @@ module AutomateIt #:main: AutomateIt
       collect_registrations
 
       def suitability(method, *args, &block)
-        log.debug("driver #{self.class} doesn't implement the +suitability+ method")
+        interpreter.logger.debug("driver #{self.class} doesn't implement the +suitability+ method")
         return -1
       end
     end
