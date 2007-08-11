@@ -27,13 +27,22 @@ else
       @m.remove(ADDRESS_PROPERTIES) if @m.has?(ADDRESS_PROPERTIES)
     end
 
-    it "should be able to add, remove and check ownership of addresses" do
+    it "should be able to add and remove addresses, check their ownership and presence" do
+      @m.interfaces.include?(ADDRESS_PROPERTIES[:device]).should be_true
+      @m.interfaces.include?(ADDRESS_PROPERTIES[:device]+":"+ADDRESS_PROPERTIES[:label]).should be_false
+      @m.addresses.include?(ADDRESS_PROPERTIES[:address]).should be_false
       @m.has?(ADDRESS_PROPERTIES).should be_false
+
       @m.add(ADDRESS_PROPERTIES).should be_true
+      @m.interfaces.include?(ADDRESS_PROPERTIES[:device]+":"+ADDRESS_PROPERTIES[:label]).should be_true
+      @m.addresses.include?(ADDRESS_PROPERTIES[:address]).should be_true
       @m.has?(ADDRESS_PROPERTIES).should be_true
       @m.has?(:address => ADDRESS_PROPERTIES[:address]).should be_true
       @m.has?(:device => ADDRESS_PROPERTIES[:device], :label => ADDRESS_PROPERTIES[:label]).should be_true
+
       @m.remove(ADDRESS_PROPERTIES).should be_true
+      @m.interfaces.include?(ADDRESS_PROPERTIES[:device]+":"+ADDRESS_PROPERTIES[:label]).should be_false
+      @m.addresses.include?(ADDRESS_PROPERTIES[:address]).should be_false
       @m.has?(ADDRESS_PROPERTIES).should be_false
     end
 
