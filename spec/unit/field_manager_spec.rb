@@ -52,7 +52,7 @@ describe AutomateIt::FieldManager::YAML do
   before do
     @a = AutomateIt.new
     @m = @a.field_manager
-    File.should_receive(:read).with("demo.yml").and_return(<<-EOB)
+    @m[:yaml].should_receive(:_read).and_return(<<-EOB)
       <%="key"%>: value
       hash:
         leafkey: leafvalue

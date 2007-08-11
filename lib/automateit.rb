@@ -341,10 +341,14 @@ module AutomateIt #:main: AutomateIt
         super(opts)
 
         if opts[:file]
-          @struct = ::YAML::load(ERB.new(File.read(opts[:file]), nil, '-').result)
+          @struct = ::YAML::load(ERB.new(_read(opts[:file]), nil, '-').result)
         else
           @struct ||= {}
         end
+      end
+
+      def _read(filename)
+        File.read(filename)
       end
 
     end
