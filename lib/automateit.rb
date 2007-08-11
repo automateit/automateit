@@ -338,17 +338,14 @@ module AutomateIt #:main: AutomateIt
       end
 
       def setup(opts={})
-        super(opts)
-
-        if opts[:file]
-          @struct = ::YAML::load(ERB.new(_read(opts[:file]), nil, '-').result)
-        else
-          @struct ||= {}
+        if filename = opts.delete(:file)
+          opts[:struct] = ::YAML::load(ERB.new(_read(filename), nil, '-').result)
         end
+        super(opts)
       end
 
       def _read(filename)
-        File.read(filename)
+        return File.read(filename)
       end
 
     end
@@ -560,6 +557,26 @@ module AutomateIt #:main: AutomateIt
         return (1..tokens.size).inject([]) do |aliases, i| 
           aliases << tokens[0,i].join('.');aliases
         end
+      end
+
+    end
+
+    require 'erb'
+    require 'yaml'
+    class YAML < Struct
+      def suitability(method, *args)
+        return 5
+      end
+
+      def setup(opts={})
+        if filename = opts.delete(:file)
+          opts[:struct] = ::YAML::load(ERB.new(_read(filename), nil, '-').result)
+        end
+        super(opts)
+      end
+
+      def _read(filename)
+        return File.read(filename)
       end
 
     end

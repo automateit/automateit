@@ -147,3 +147,22 @@ describe "AutomateIt::TagManager::Struct" do
     )
   end
 end
+
+describe "AutomateIt::TagManager::YAML" do
+  it_should_behave_like "AutomateIt::TagManager"
+
+  before do
+    @m[:yaml].should_receive(:_read).with("demo.yml").and_return(<<-EOB)
+      <%="apache_servers"%>:
+        - kurou
+        - shirou
+      proxy_servers:
+        akane.foo
+    EOB
+    @m.setup(
+      :hostname_aliases => ["kurou", "kurou.foo"],
+      :default => :yaml,
+      :file => "demo.yml"
+    )
+  end
+end

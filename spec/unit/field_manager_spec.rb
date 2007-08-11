@@ -53,7 +53,7 @@ describe AutomateIt::FieldManager::YAML do
   it_should_behave_like "AutomateIt::FieldManager"
 
   before do
-    @m[:yaml].should_receive(:_read).and_return(<<-EOB)
+    @m[:yaml].should_receive(:_read).with("demo.yml").and_return(<<-EOB)
       <%="key"%>: value
       hash:
         leafkey: leafvalue
