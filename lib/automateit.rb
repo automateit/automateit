@@ -430,13 +430,11 @@ module AutomateIt #:main: AutomateIt
   end
 
   require 'open3'
+  # TODO expose open3
   class ShellManager < Plugin::Manager
-    alias_methods :rawsh, :sh, :which, :ln, :ln_s, :ln_sF, :rm, :rm_r, :rm_rF, :rmdir, :cp, :cp_R, :mv, :touch, :chmod, :chmod_R, :chown, :chown_R, :own
+    alias_methods :sh, :which, :ln, :ln_s, :ln_sF, :rm, :rm_r, :rm_rF, :rmdir, :cp, :cp_R, :mv, :touch, :chmod, :chmod_R, :chown, :chown_R, :own
 
-    # Executes a raw, unconditional shell command without logging. Unlike +sh+, this executes the command even when you're in +noop+ mode and provides no logging even if you're in +debug+ mode.
-    def rawsh(command) dispatch(command) end
-
-    def sh(command) dispatch(command) end
+    def sh(*args) dispatch(command) end
 
     def which(command) dispatch(command) end
 
@@ -445,13 +443,9 @@ module AutomateIt #:main: AutomateIt
         return 3 # TODO how do I know if this has posix?
       end
 
-      def rawsh(command)
-        return `#{command}`.chomp
-      end
-
-      def sh(command)
-        interpreter.logger.info("$$$ #{command}")
-        return rawsh(command) if interpreter.writing?
+      def sh(*args)
+        interpreter.logger.info("$$$ #{args.join(' ')}")
+        return system(*args) if interpreter.writing?
       end
 
       def which(command)
