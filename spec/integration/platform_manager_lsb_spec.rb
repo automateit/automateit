@@ -11,7 +11,6 @@ else
       @m = AutomateIt::PlatformManager.new
     end
 
-    # TODO what if a non-Linux supports LSB!?
     it "should be linux" do
       `uname -s`.chomp.downcase.should == "linux"
       @m.query(:os).should == "linux"
