@@ -430,7 +430,6 @@ module AutomateIt #:main: AutomateIt
   end
 
   require 'open3'
-  # TODO expose open3
   class ShellManager < Plugin::Manager
     alias_methods :sh, :which, :ln, :ln_s, :ln_sF, :rm, :rm_r, :rm_rF, :rmdir, :cp, :cp_R, :mv, :touch, :chmod, :chmod_R, :chown, :chown_R, :own
 
