@@ -1,7 +1,7 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-describe "AutomateIt::TagManager" do
-  before(:each) do
+describe "AutomateIt::TagManager", :shared => true do
+  before do
     @a = AutomateIt.new
     @a.platform_manager.setup(
       :default => :struct,
@@ -13,19 +13,6 @@ describe "AutomateIt::TagManager" do
       }
     )
     @m = @a.tag_manager
-    @m.setup(
-      :hostname_aliases => ["kurou", "kurou.foo"],
-      :default => :struct,
-      :struct => {
-        "apache_servers" => [
-          "kurou",
-          "shirou",
-        ],
-        "proxy_servers" => [
-          "akane.foo",
-        ],
-      }
-    )
   end
 
   it "should have tags" do
@@ -139,5 +126,24 @@ describe "AutomateIt::TagManager" do
 
   # FIXME add tests for @group and !negation
 =end
+end
 
+describe "AutomateIt::TagManager::Struct" do
+  it_should_behave_like "AutomateIt::TagManager"
+
+  before do
+    @m.setup(
+      :hostname_aliases => ["kurou", "kurou.foo"],
+      :default => :struct,
+      :struct => {
+        "apache_servers" => [
+          "kurou",
+          "shirou",
+        ],
+        "proxy_servers" => [
+          "akane.foo",
+        ],
+      }
+    )
+  end
 end
