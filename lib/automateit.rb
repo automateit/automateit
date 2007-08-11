@@ -15,6 +15,9 @@ require 'automateit/common'
 require 'automateit/interpreter'
 require 'automateit/plugin'
 
+# Helpers
+require 'automateit/cli'
+
 # Plugins
 require 'automateit/address_manager'
 require 'automateit/field_manager'

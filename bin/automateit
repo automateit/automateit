@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+# TODO parse arguments
+# TODO only run IRB if asked
+# TODO create an automateitsh wrapper
+
+libdir = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$LOAD_PATH.unshift(libdir) if File.directory?(libdir) and File.exists?(File.join(libdir, "automateit.rb"))
+
+require "automateit"
+
+AutomateIt::CLI.new
