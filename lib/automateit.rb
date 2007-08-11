@@ -150,6 +150,9 @@ module AutomateIt #:main: AutomateIt
       end
     end
 
+    def eval(string=nil, &block)
+      return string ? self.instance_eval(string) : self.instance_eval(&block)
+    end
   end
 
   class Plugin
@@ -434,7 +437,7 @@ module AutomateIt #:main: AutomateIt
   class ShellManager < Plugin::Manager
     alias_methods :sh, :which, :ln, :ln_s, :ln_sF, :rm, :rm_r, :rm_rF, :rmdir, :cp, :cp_R, :mv, :touch, :chmod, :chmod_R, :chown, :chown_R, :own
 
-    def sh(*args) dispatch(command) end
+    def sh(*args) dispatch(*args) end
 
     def which(command) dispatch(command) end
 
@@ -583,3 +586,5 @@ module AutomateIt #:main: AutomateIt
   end
 
 end
+
+require 'automateit/address_manager'

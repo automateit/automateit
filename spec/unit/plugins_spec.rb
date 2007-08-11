@@ -201,22 +201,4 @@ describe AutomateIt::Interpreter do
   it "should inject itself into drivers" do
     @a.my_manager[:my_first_driver].interpreter.should equal?(@a)
   end
-
-  it "should have a logger" do
-    @a.logger.is_a?(Logger)
-  end
-
-  it "should have noop (dryrun) detection" do
-    @a.noop = true
-    @a.noop?.should be_true
-    @a.noop?{9}.should eql?(9)
-    @a.writing?.should be_false
-    @a.writing?{9}.should be_false
-
-    @a.writing(true)
-    @a.noop?.should be_false
-    @a.noop?{9}.should be_false
-    @a.writing?.should be_true
-    @a.writing?{9}.should eql?(9)
-  end
 end
