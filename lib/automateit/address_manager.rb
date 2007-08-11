@@ -25,6 +25,7 @@ module AutomateIt
       end
 
       def add(opts)
+        return false if has?(opts)
         raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
         ipcmd = "ip address add #{opts[:address]}"
         ipcmd += "/#{opts[:mask]}" if opts[:mask]
@@ -40,6 +41,7 @@ module AutomateIt
       end
 
       def remove(opts)
+        return false unless has?(opts)
         raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
         ipcmd = "ip address del #{opts[:address]}"
         ipcmd += "/#{opts[:mask]}" if opts[:mask]

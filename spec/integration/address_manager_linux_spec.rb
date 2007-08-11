@@ -16,11 +16,15 @@ elsif not interpreter.address_manager[:linux].suitability(:add, ADDRESS_PROPERTI
 else
   describe "AutomateIt::AddressManager::Linux" do
     before do
-      @a = AutomateIt.new(:logger_level => Logger::WARN)
+      @a = AutomateIt.new(
+        :logger_level => Logger::WARN
+      )
       @m = @a.address_manager
-      if @m.has?(ADDRESS_PROPERTIES)
-        @m.remove(ADDRESS_PROPERTIES)
-      end
+      @m.remove(ADDRESS_PROPERTIES) if @m.has?(ADDRESS_PROPERTIES)
+    end
+
+    after do
+      @m.remove(ADDRESS_PROPERTIES) if @m.has?(ADDRESS_PROPERTIES)
     end
 
     it "should be able to add, remove and check ownership of addresses" do
@@ -31,6 +35,15 @@ else
       @m.has?(:device => ADDRESS_PROPERTIES[:device], :label => ADDRESS_PROPERTIES[:label]).should be_true
       @m.remove(ADDRESS_PROPERTIES).should be_true
       @m.has?(ADDRESS_PROPERTIES).should be_false
+    end
+
+    it "should not remove a non-existant address" do
+      @m.remove(ADDRESS_PROPERTIES).should be_false
+    end
+
+    it "should not re-add an existing address" do
+      @m.add(ADDRESS_PROPERTIES).should be_true
+      @m.add(ADDRESS_PROPERTIES).should be_false
     end
   end
 end
