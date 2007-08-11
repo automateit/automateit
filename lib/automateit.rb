@@ -55,9 +55,7 @@ module AutomateIt #:main: AutomateIt
       end
 
       if opts[:noop].nil?
-        unless defined?(@noop)
-          @noop = false
-        end
+        @noop = false unless defined?(@noop)
       else
         @noop = opts[:noop]
       end
@@ -309,16 +307,17 @@ module AutomateIt #:main: AutomateIt
     def lookup(search) dispatch(search) end
 
     class Struct < Plugin::Driver
-      attr_accessor :struct
-
       def suitability(method, *args)
         return 1
       end
 
       def setup(opts={})
         super(opts)
+
         if opts[:struct]
-          @struct = opts[:struct]
+          @struct = opts[:struct] 
+        else
+          @struct = {}
         end
       end
 
@@ -340,8 +339,11 @@ module AutomateIt #:main: AutomateIt
 
       def setup(opts={})
         super(opts)
+
         if opts[:file]
           @struct = ::YAML::load(ERB.new(File.read(opts[:file]), nil, '-').result)
+        else
+          @struct ||= {}
         end
       end
 
@@ -354,8 +356,6 @@ module AutomateIt #:main: AutomateIt
 
     require 'stringio'
     class Struct < Plugin::Driver
-      attr_accessor :struct
-
       # Hash mapping of keys that have many common names, e.g. "relase" and "version"
       attr_accessor :key_aliases
 
@@ -365,8 +365,12 @@ module AutomateIt #:main: AutomateIt
 
       def setup(opts={})
         super(opts)
-        @struct ||= {}
-        @struct = opts[:struct] if opts[:struct]
+
+        if opts[:struct]
+          @struct = opts[:struct] 
+        else
+          @struct ||= {}
+        end
 
         # Generate bi-directional map
         @key_aliases ||= {
@@ -396,8 +400,6 @@ module AutomateIt #:main: AutomateIt
     require 'open3'
     require 'yaml'
     class LSB < Struct
-      cattr_accessor :struct_cache
-
       def suitability(method, *args)
         # Depend on +setup+ to populate this
         @struct.empty? ? -1 : 5
@@ -410,7 +412,7 @@ module AutomateIt #:main: AutomateIt
 
       def populate
         return unless @struct.empty?
-        unless struct_cache
+        unless defined?(@@struct_cache) and @@struct_cache
           @@struct_cache = {}
           Open3.popen3("lsb_release -a") do |sin, sout, serr|
             next if (rawdata = sout.read).empty?
@@ -481,7 +483,7 @@ module AutomateIt #:main: AutomateIt
     def hostname_aliases_for(hostname) dispatch(hostname) end
 
     class Struct < Plugin::Driver
-      attr_accessor :hostname_aliases, :struct, :tags
+      attr_accessor :hostname_aliases, :tags
 
       def suitability(method, *args)
         return 1
