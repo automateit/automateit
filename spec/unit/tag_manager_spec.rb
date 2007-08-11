@@ -131,6 +131,12 @@ describe "AutomateIt::TagManager" do
   end
 
 =begin
+  it "should find using negative queries" do
+    # TODO fails because single word queries aren't tokenized
+    @a.tagged?("akane").should be_false
+    @a.tagged?("!akane").should be_true
+  end
+
   # FIXME add tests for @group and !negation
 =end
 
