@@ -3,6 +3,8 @@ require 'automateit'
 # XXX RDoc about AutomateIt
 module AutomateIt #:main: AutomateIt
 
+  VERSION=0.0
+
   # Instantiate an +Interpreter+.
   def self.new(*a)
     Interpreter.new(*a)
