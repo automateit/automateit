@@ -1,6 +1,11 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
 describe "AutomateIt::FieldManager", :shared => true do
+  before do
+    @a = AutomateIt.new
+    @m = @a.field_manager
+  end
+
   it "should lookup keys by string" do
     @m.lookup("key").should eql("value")
   end
@@ -32,8 +37,6 @@ describe AutomateIt::FieldManager::Struct do
   it_should_behave_like "AutomateIt::FieldManager"
 
   before do
-    @a = AutomateIt.new
-    @m = @a.field_manager
     @m.setup(:default => :struct, :struct => {
       "key" => "value",
       "hash" => {
@@ -50,8 +53,6 @@ describe AutomateIt::FieldManager::YAML do
   it_should_behave_like "AutomateIt::FieldManager"
 
   before do
-    @a = AutomateIt.new
-    @m = @a.field_manager
     @m[:yaml].should_receive(:_read).and_return(<<-EOB)
       <%="key"%>: value
       hash:
