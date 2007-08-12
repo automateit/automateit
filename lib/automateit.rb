@@ -5,10 +5,12 @@
 # TODO add logic to guess project path
 # TODO add Environment
 
+# Dependencies
 require 'rubygems'
 require 'active_support'
 require 'set'
 require 'logger'
+require 'fileutils'
 
 # Core
 require 'automateit/common'
@@ -22,5 +24,6 @@ require 'automateit/cli'
 require 'automateit/address_manager'
 require 'automateit/field_manager'
 require 'automateit/platform_manager'
+require 'automateit/service_manager'
 require 'automateit/shell_manager'
 require 'automateit/tag_manager'
