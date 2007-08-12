@@ -10,7 +10,7 @@ module AutomateIt
 
     class POSIX < Plugin::Driver
       def suitability(method, *args)
-        return 3 # TODO how do I know if this has posix?
+        @suitability ||= which("which").nil? ? 0 : 1
       end
 
       def sh(*args)
@@ -20,7 +20,7 @@ module AutomateIt
 
       def which(command)
         data = nil
-        rv = Open4.popen4("which", command) do |pid, sin, sout, serr|
+        Open3.popen3("which", command) do |sin, sout, serr|
           data = sout.read.chomp
         end
         return File.exists?(data.to_s) ? data : nil
