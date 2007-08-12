@@ -1,19 +1,13 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-VERSION_FILE="/proc/version"
-interpreter = AutomateIt.new
 
-unless interpreter.which("uname") and File.exists?(VERSION_FILE) and File.read(VERSION_FILE).match(/linux/i)
-  puts "NOTE: This platform can't check #{__FILE__}"
-else
-  describe "AutomateIt::PlatformManager::LSB" do
-    before do
-      @m = AutomateIt::PlatformManager.new
-    end
+begin
+  raise IndexError unless AutomateIt.new.platform_manager.query("os").is_a?(String)
 
-    it "should be linux" do
-      `uname -s`.chomp.downcase.should == "linux"
-      @m.query(:os).should == "linux"
+  describe "AutomateIt::PlatformManager" do
+    before(:all) do
+      @a = AutomateIt.new
+      @m = @a.platform_manager
     end
 
     it "should have values for query" do
@@ -24,7 +18,8 @@ else
         element.size.should > 0
         element.is_a?(String)
       end
+    end
   end
-
-  end
+rescue ArgumentError, IndexError
+  puts "NOTE: This platform can't check #{__FILE__}"
 end
