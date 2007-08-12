@@ -47,12 +47,10 @@ module AutomateIt
       end
     end
 
-    require 'open3'
-    require 'yaml'
     class LSB < Struct
       def suitability(method, *args)
-        # Depend on +setup+ to populate this
-        @struct.empty? ? -1 : 5
+        # Don't accept queries if +populate+ couldn't put data into @struct.
+        return @struct.empty? ? -1 : 5
       end
 
       def setup(opts={})
@@ -64,7 +62,7 @@ module AutomateIt
         return unless @struct.empty?
         unless defined?(@@struct_cache) and @@struct_cache
           @@struct_cache = {}
-          Open4.popen4("lsb_release", "-a") do |pid, sin, sout, serr|
+          Open3.popen3("lsb_release", "-a") do |sin, sout, serr|
             next if (rawdata = sout.read).empty?
             yamldata = YAML::load(rawdata.gsub(/\t/, " "))
             @@struct_cache[:distro] = yamldata["Distributor ID"].to_s.downcase
