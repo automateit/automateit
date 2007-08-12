@@ -31,48 +31,56 @@ module AutomateIt
       def query(search)
         result = ""
         for key in search.to_s.split(/#/)
-          key = key.to_sym
           result << "_" unless result.empty?
-          unless @struct.has_key?(key)
-            key_alias = key_aliases[key]
-            if @struct.has_key?(key_alias)
-              key = key_alias
-            else
-              raise IndexError.new("platform doesn't provide key: #{key}")
-            end
-          end
-          result << @struct[key]
+          result << query_key(key)
         end
         result
       end
+
+      def query_key(key)
+        key = key.to_sym
+        unless @struct.has_key?(key)
+          key_alias = key_aliases[key]
+          if @struct.has_key?(key_alias)
+            key = key_alias
+          else
+            raise IndexError.new("platform doesn't provide key: #{key}")
+          end
+        end
+        return @struct[key]
+      end
     end
 
-    class LSB < Struct
+    class Uname < Struct
       def suitability(method, *args)
-        # Don't accept queries if +populate+ couldn't put data into @struct.
-        return @struct.empty? ? -1 : 5
+        return @suitable ||= (interpreter.which("uname").nil? ? 0 : 1)
       end
 
       def setup(opts={})
         super(opts)
-        populate
+        @@struct_cache ||= {}
+        @struct[:os] ||= @@struct_cache[:os] ||= `uname -s`.chomp.downcase
+        @struct[:arch] ||= @@struct_cache[:arch] ||= `uname -m`.chomp.downcase
+      end
+    end
+
+    class LSB < Uname
+      def suitability(method, *args)
+        return @suitable ||= (interpreter.which("lsb_release").nil? ? 0 : 2)
       end
 
-      def populate
-        return unless @struct.empty?
-        unless defined?(@@struct_cache) and @@struct_cache
-          @@struct_cache = {}
+      def setup(opts={})
+        super(opts)
+        @struct[:distro] ||= @@struct_cache[:distro]
+        @struct[:release] ||= @@struct_cache[:release]
+        unless @struct[:distro] and @struct[:release]
           Open3.popen3("lsb_release", "-a") do |sin, sout, serr|
             next if (rawdata = sout.read).empty?
             yamldata = YAML::load(rawdata.gsub(/\t/, " "))
-            @@struct_cache[:distro] = yamldata["Distributor ID"].to_s.downcase
-            @@struct_cache[:release] = yamldata["Release"].to_s.downcase
-
-            @@struct_cache[:os] = `uname -s`.chomp.downcase
-            @@struct_cache[:arch] = `uname -m`.chomp.downcase
+            @struct[:distro] = @@struct_cache[:distro] = yamldata["Distributor ID"].to_s.downcase
+            @struct[:release] = @@struct_cache[:release] = yamldata["Release"].to_s.downcase
           end
         end
-        @struct = @@struct_cache
       end
     end
   end
