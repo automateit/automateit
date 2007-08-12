@@ -49,8 +49,7 @@ module AutomateIt
     # TODO implement
     class Sysvconfig < SYSV
       def suitability(method, *args)
-        @suitable ||= ! interpreter.which("sysvconfig").nil?
-        return @suitable ? 2 : 0
+        return @suitable ||= (interpreter.which("sysvconfig").nil? ? 0 : 2)
       end
 
       def enabled?(service)
@@ -69,8 +68,7 @@ module AutomateIt
     # TODO implement
     class RC_Update < SYSV
       def suitability(method, *args)
-        @suitable ||= ! interpreter.which("rc-update").nil?
-        return @suitable ? 2 : 0
+        return @suitable ||= (interpreter.which("rc-update").nil? ? 0 : 2)
       end
 
       def enabled?(service)
@@ -95,8 +93,7 @@ module AutomateIt
     # TODO implement
     class Chkconfig < SYSV
       def suitability(method, *args)
-        @suitable ||= ! interpreter.which("chkconfig").nil?
-        return @suitable ? 2 : 0
+        return @suitable ||= (interpreter.which("chkconfig").nil? ? 0 : 2)
       end
 
       def enabled?(service)
