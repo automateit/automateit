@@ -64,7 +64,7 @@ module AutomateIt
         return unless @struct.empty?
         unless defined?(@@struct_cache) and @@struct_cache
           @@struct_cache = {}
-          Open3.popen3("lsb_release -a") do |sin, sout, serr|
+          Open4.popen4("lsb_release", "-a") do |pid, sin, sout, serr|
             next if (rawdata = sout.read).empty?
             yamldata = YAML::load(rawdata.gsub(/\t/, " "))
             @@struct_cache[:distro] = yamldata["Distributor ID"].to_s.downcase

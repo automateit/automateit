@@ -1,5 +1,4 @@
 require 'automateit'
-require 'open3'
 
 module AutomateIt
   class ShellManager < Plugin::Manager
@@ -20,7 +19,7 @@ module AutomateIt
       end
 
       def which(command)
-        return Open3.popen3("which", command) do |sin, sout, serr|
+        return Open4.popen4("which", command) do |pid, sin, sout, serr|
           data = sout.read.chomp
           data if File.exists?(data)
         end

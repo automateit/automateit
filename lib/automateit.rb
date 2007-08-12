@@ -11,6 +11,7 @@ require 'active_support'
 require 'set'
 require 'logger'
 require 'fileutils'
+require 'open4'
 
 # Core
 require 'automateit/common'

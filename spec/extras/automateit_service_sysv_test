@@ -1,0 +1,50 @@
+#!/bin/bash -e
+set -e
+
+### BEGIN INIT INFO
+# Provides:          automateit_service_test
+# Default-Start:     5
+# Default-Stop:      6
+# Short-Description: automateit_service_test
+# Description:       automateit_service_test
+### END INIT INFO
+
+STATE="/tmp/automateit_service_test.state"
+status() {
+    test -f $STATE;
+}
+case $1 in
+    start)
+        if status; then
+            echo "ERROR: already running"
+            exit 1
+        else
+            echo "started"
+            touch $STATE
+            exit 0
+        fi
+    ;;
+    stop)
+        if status; then
+            echo "stopping"
+            rm $STATE
+            exit 0
+        else
+            echo "ERROR: not running"
+            exit 1
+        fi
+    ;;
+    status)
+        if status; then
+            echo "running"
+            exit 0
+        else
+            echo "not running"
+            exit 1
+        fi
+    ;;
+    *)
+        echo "ERROR: unknown command"
+        exit 1
+    ;;
+esac
