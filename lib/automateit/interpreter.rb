@@ -118,6 +118,10 @@ module AutomateIt
       end
     end
 
+    def superuser?
+      Process.euid.zero?
+    end
+
     def eval(string=nil, &block)
       return string ? self.instance_eval(string) : self.instance_eval(&block)
     end
