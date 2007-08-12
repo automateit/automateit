@@ -15,7 +15,7 @@ else
     begin
       AutomateIt.new.service_manager.driver_for(:enabled?, SERVICE_NAME)
       @has_enable = true
-    rescue ArgumentError
+    rescue NotImplementedError
       @has_enable = false
       puts "NOTE: This platform lacks driver for +enabled?+ in #{__FILE__}"
     end

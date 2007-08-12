@@ -134,7 +134,7 @@ module AutomateIt
         if driver and level > 0
           return @drivers[driver]
         else
-          raise ArgumentError.new("can't find driver for method '#{method}' with arguments: #{args.inspect}")
+          raise NotImplementedError.new("can't find driver for method '#{method}' with arguments: #{args.inspect}")
         end
       end
     end

@@ -142,7 +142,7 @@ describe "MyManager drivers" do
   end
 
   it "should not choose driver if none match" do
-    lambda { MyManager.new.driver_for(:mymethod, :one => 9) }.should raise_error(ArgumentError)
+    lambda { MyManager.new.driver_for(:mymethod, :one => 9) }.should raise_error(NotImplementedError)
   end
 
   it "should dispatch_to suitable driver" do
@@ -153,8 +153,8 @@ describe "MyManager drivers" do
 
   it "should fail dispatch_to if no suitable driver is found" do
     m = MyManager.new
-    lambda { m.dispatch_to(:mymethod, :one => 9) }.should raise_error(ArgumentError)
-    lambda { m.mymethod(:one => 9) }.should raise_error(ArgumentError)
+    lambda { m.dispatch_to(:mymethod, :one => 9) }.should raise_error(NotImplementedError)
+    lambda { m.mymethod(:one => 9) }.should raise_error(NotImplementedError)
   end
 
   it "should dispatch_to to default driver regardless of suitability" do

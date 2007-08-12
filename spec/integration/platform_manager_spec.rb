@@ -20,6 +20,6 @@ begin
       end
     end
   end
-rescue ArgumentError, IndexError
+rescue NotImplementedError, IndexError
   puts "NOTE: This platform can't check #{__FILE__}"
 end
