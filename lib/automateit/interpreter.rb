@@ -36,11 +36,14 @@ module AutomateIt
 
     def instantiate_plugins
       @plugins ||= {}
-      # XXX cleanup
       if defined?(@parent) and @parent and @parent.is_a?(Plugin::Manager)
         plugins[@parent.class.token] = @parent
       end
-      AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}.each do |plugin_class|
+      # XXX How to elegantly initialize ShellManager first?
+      plugin_classes = AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}.to_a
+      shell_manager_plugin_class = plugin_classes.delete(AutomateIt::ShellManager)
+      plugin_classes.unshift(shell_manager_plugin_class) if shell_manager_plugin_class
+      plugin_classes.each do |plugin_class|
         plugin_token = plugin_class.token
 
         if plugin = @plugins[plugin_token]
