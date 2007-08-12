@@ -1,13 +1,14 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-interpreter = AutomateIt.new
-
 ADDRESS_PROPERTIES = {
   :device => "eth0",
   :label => "xxxx",
   :address => "10.0.0.249",
-  :netmask => "24"
+  :netmask => "24",
+  :announcements => 1,
 }
+
+interpreter = AutomateIt.new
 
 if not Process.euid.zero?
   puts "NOTE: Must be root to check #{__FILE__}"
@@ -15,11 +16,14 @@ elsif not interpreter.address_manager[:linux].suitability(:add, ADDRESS_PROPERTI
   puts "NOTE: This platform can't check #{__FILE__}"
 else
   describe "AutomateIt::AddressManager::Linux" do
-    before do
+    before(:all) do
       @a = AutomateIt.new(
-        :logger_level => Logger::WARN
+        :verbosity => Logger::WARN
       )
       @m = @a.address_manager
+    end
+
+    before(:each) do
       @m.remove(ADDRESS_PROPERTIES) if @m.has?(ADDRESS_PROPERTIES)
     end
 
