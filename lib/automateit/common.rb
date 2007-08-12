@@ -21,8 +21,22 @@ module AutomateIt #:main: AutomateIt
       @interpreter = opts[:interpreter] if opts[:interpreter]
     end
 
+    def log
+      @interpreter.log
+    end
+
     def omfg(*args)
       "omfg"
     end
+  end
+end
+
+# Lists methods unique to a class
+class Object
+  def unique_methods
+    self.class.unique_methods
+  end
+  def self.unique_methods
+    (self.methods - Object.methods).sort
   end
 end
