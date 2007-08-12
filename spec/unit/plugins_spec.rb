@@ -63,7 +63,7 @@ end
 #===[ rspec ]===========================================================
 
 describe AutomateIt::Plugin::Manager do
-  before do
+  before(:all) do
     @x = AutomateIt::Plugin::Manager
   end
 
@@ -175,7 +175,7 @@ describe "MyManager drivers" do
 end
 
 describe AutomateIt::Interpreter do
-  before do
+  before(:all) do
     @a = AutomateIt::Interpreter.new
   end
 

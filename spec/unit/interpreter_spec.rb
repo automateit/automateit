@@ -1,7 +1,7 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
 describe AutomateIt::Interpreter do
-  before do
+  before(:all) do
     @a = AutomateIt::Interpreter.new
   end
 
