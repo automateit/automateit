@@ -11,15 +11,15 @@ module AutomateIt
         @parent = opts[:parent]
       end
 
-      if opts[:logger]
-        @logger = opts[:logger]
-      elsif not defined?(@logger) or @logger.nil?
-          @logger = Logger.new(STDOUT)
-          @logger.level = Logger::INFO
+      if opts[:log]
+        @log = opts[:log]
+      elsif not defined?(@log) or @log.nil?
+          @log = Logger.new(STDOUT)
+          @log.level = Logger::INFO
       end
 
-      unless opts[:logger_level].nil?
-        @logger.level = opts[:logger_level]
+      if opts[:verbosity]
+        @log.level = opts[:verbosity]
       end
 
       if opts[:noop].nil?
@@ -80,12 +80,12 @@ module AutomateIt
       expose_plugin_methods
     end
 
-    attr_writer :logger
-    def logger(value=nil)
+    attr_writer :log
+    def log(value=nil)
       if value.nil?
-        return defined?(@logger) ? @logger : nil
+        return defined?(@log) ? @log : nil
       else
-        @logger = value
+        @log = value
       end
     end
 
