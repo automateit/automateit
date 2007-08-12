@@ -20,11 +20,11 @@ module AutomateIt
         command_text = command.is_a?(String) ? command : command.join(' ')
         log.send((opts[:quiet] || opts[:checking]) ? :debug : :info,
           "$$$ #{command_text}")
-        Open4.popen4(*command) do |pid, sin, sout, serr|
+        rv = Open4.popen4(*command) do |pid, sin, sout, serr|
           print serr.read rescue IOError unless opts[:checking]
           print sout.read rescue IOError unless opts[:quiet] or opts[:checking]
         end
-        return $?.exitstatus.zero?
+        return rv.exitstatus.zero?
       end
 
       def _run_service(service, action, opts={})

@@ -19,10 +19,11 @@ module AutomateIt
       end
 
       def which(command)
-        return Open4.popen4("which", command) do |pid, sin, sout, serr|
+        data = nil
+        rv = Open4.popen4("which", command) do |pid, sin, sout, serr|
           data = sout.read.chomp
-          data if File.exists?(data)
         end
+        return File.exists?(data.to_s) ? data : nil
       end
     end
   end
