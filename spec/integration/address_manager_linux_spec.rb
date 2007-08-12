@@ -4,7 +4,7 @@ ADDRESS_PROPERTIES = {
   :device => "eth0",
   :label => "xxxx",
   :address => "10.0.0.249",
-  :netmask => "24",
+  :mask => "24",
   :announcements => 1,
 }
 
