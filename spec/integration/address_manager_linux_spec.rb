@@ -10,7 +10,7 @@ ADDRESS_PROPERTIES = {
 
 interpreter = AutomateIt.new
 
-if not Process.euid.zero?
+if not interpreter.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
 elsif not interpreter.address_manager[:linux].suitability(:add, ADDRESS_PROPERTIES)
   puts "NOTE: This platform can't check #{__FILE__}"
