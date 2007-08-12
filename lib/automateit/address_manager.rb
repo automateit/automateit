@@ -27,14 +27,26 @@ module AutomateIt
     # (e.g. "10.0.0.10"), and an optional :label (e.g. "foo") and :mask (e.g.
     # "24"). 
     #
+    # An optional number of ARP :announcements may be specified, defaulting to
+    # AutomateIt::AddressManager::DEFAULT_ANNOUNCEMENTS. Drivers that handle
+    # announcements will block an extra second while making each announcement.
+    #
     # Example:
-    #   add(:address => "10.0.0.10", :mask => 24, :device => "eth0", :label => "foo")
+    #   add(:address => "10.0.0.10", :mask => 24, :device => "eth0", 
+    #     :label => "foo", :announcements => 3)
     def add(opts) dispatch(opts) end
+    DEFAULT_ANNOUNCEMENTS = 3
 
     # Remove address from host if it has it. Requires root-level access.
     # Returns +true+ if action was taken and succeeded.
     #
-    # Arguments hash is identical to that used by #add. 
+    # Arguments hash must include either a :device (e.g. "eth0") or :address
+    # (e.g. "10.0.0.10"), and an optional :label (e.g. "foo") and :mask (e.g.
+    # "24"). 
+    #
+    # Example:
+    #   remove(:address => "10.0.0.10", :mask => 24, :device => "eth0", 
+    #     :label => "foo")
     def remove(opts) dispatch(opts) end
 
     # Array of addresses for this host. Example:
@@ -63,9 +75,10 @@ module AutomateIt
       end
 
       def add(opts)
-        return false if has?(opts)
+        announcements = opts[:announcements].to_i || AutomateIt::AddressManager::DEFAULT_ANNOUNCEMENTS
         raise SecurityEror.new("you must be root") unless Process.euid.zero?
         raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
+        return false if has?(opts)
         ipcmd = "ip address add #{opts[:address]}"
         ipcmd += "/#{opts[:mask]}" if opts[:mask]
         ipcmd += " brd + dev #{opts[:device]}"
@@ -73,7 +86,7 @@ module AutomateIt
         #run(%{ip address add #{ip}/#{mask} brd + dev #{device} label #{device}:#{label}})
         if interpreter.sh(ipcmd)
           #run(%{arping -q -c 3 -A -I #{device} #{ip} &})
-          return interpreter.sh("arping -q -c 3 -A -I #{opts[:device]} #{opts[:address]} &")
+          return interpreter.sh("arping -q -c #{announcements} -A -I #{opts[:device]} #{opts[:address]}")
         else
           return false
         end
