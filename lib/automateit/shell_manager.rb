@@ -15,7 +15,7 @@ module AutomateIt
       end
 
       def sh(*args)
-        interpreter.logger.info("$$$ #{args.join(' ')}")
+        log.info("$$$ #{args.join(' ')}")
         return system(*args) if interpreter.writing?
       end
 

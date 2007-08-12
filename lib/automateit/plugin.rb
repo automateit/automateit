@@ -143,7 +143,7 @@ module AutomateIt
       collect_registrations
 
       def suitability(method, *args, &block)
-        interpreter.logger.debug("driver #{self.class} doesn't implement the +suitability+ method")
+        log.debug("driver #{self.class} doesn't implement the +suitability+ method")
         return -1
       end
     end
