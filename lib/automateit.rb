@@ -12,7 +12,6 @@ require 'active_support'
 require 'fileutils'
 require 'logger'
 require 'open3'
-require 'open4'
 require 'set'
 require 'yaml'
 

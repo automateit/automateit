@@ -16,15 +16,21 @@ module AutomateIt
         return File.directory?(ETC_INITD) ? 1 : 0
       end
 
-      def _run_command(command, opts={})
-        command_text = command.is_a?(String) ? command : command.join(' ')
-        log.send((opts[:quiet] || opts[:checking]) ? :debug : :info,
-          "$$$ #{command_text}")
-        rv = Open4.popen4(*command) do |pid, sin, sout, serr|
-          print serr.read rescue IOError unless opts[:checking]
-          print sout.read rescue IOError unless opts[:quiet] or opts[:checking]
+      def _run_command(args, opts={})
+        cmd = args.is_a?(String) ? args : args.map{|t|'"%s"'%t}.join(' ')
+        if opts[:checking]
+          cmd += " > /dev/null 2>&1" # Discard STDOUT and STDERR
+        elsif opts[:quiet]
+          cmd += " > /dev/null" # Discard only STDOUT
         end
-        return rv.exitstatus.zero?
+
+        log.send((opts[:quiet] || opts[:checking]) ? :debug : :info, "$$$ #{cmd}")
+        if interpreter.writing?
+          system(cmd)
+          return $?.exitstatus.zero?
+        else
+          false
+        end
       end
 
       def _run_service(service, action, opts={})
