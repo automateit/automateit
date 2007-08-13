@@ -1,6 +1,6 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-#===[ stub classes ]====================================================
+#===[ stub classes ]====================================================# {{{
 
 class MyManager < AutomateIt::Plugin::Manager
   alias_methods :mymethod
@@ -59,10 +59,10 @@ end
 
 class MyManagerSubclassImplementation < MyManagerSubclass
 end
-
+# }}}
 #===[ rspec ]===========================================================
 
-describe AutomateIt::Plugin::Manager do
+describe "AutomateIt::Plugin::Manager" do
   before(:all) do
     @x = AutomateIt::Plugin::Manager
   end
@@ -80,43 +80,49 @@ describe AutomateIt::Plugin::Manager do
   end
 end
 
-describe MyManager do
+describe "MyManager" do
+  before(:all) do
+    @m = MyManager.new
+  end
+
   it "should have drivers" do
     for driver in [MyManager::MyUnsuitableDriver, MyManager::MyFirstDriver, MyManager::MySecondDriver]
-      MyManager.driver_classes.include?(driver)
+      @m.class.driver_classes.include?(driver)
     end
   end
 
   it "should inherit common instance mehtods" do
-    MyManager.new.should respond_to(:omfg)
+    @m.should respond_to(:omfg)
   end
 
   it "should access drivers by index keys" do
-    m = MyManager.new
-    m[:my_first_driver].is_a?(MyManager::MyFirstDriver).should be_true
-    m.drivers[:my_first_driver].is_a?(MyManager::MyFirstDriver).should be_true
+    @m[:my_first_driver].is_a?(MyManager::MyFirstDriver).should be_true
+    @m.drivers[:my_first_driver].is_a?(MyManager::MyFirstDriver).should be_true
   end
 
   it "should have aliased methods" do
-    MyManager.aliased_methods.include?(:mymethod).should be_true
+    @m.class.aliased_methods.include?(:mymethod).should be_true
   end
 
   it "should respond to aliased methods" do
-    MyManager.new.should respond_to(:mymethod)
+    @m.should respond_to(:mymethod)
   end
 
   it "should have an interpreter instance" do
-    MyManager.new.interpreter.is_a?(AutomateIt::Interpreter).should be_true
+    @m.interpreter.is_a?(AutomateIt::Interpreter).should be_true
   end
 
   # TODO Creating a Plugin before the Interpreter makes objects get different references
 #  it "should inject interpreter instance into drivers" do
-#    m = MyManager.new
-#    m.interpreter.object_id.should == m[:my_first_driver].interpreter.object_id
+#    @m.interpreter.object_id.should == m[:my_first_driver].interpreter.object_id
 #  end
 end
 
-describe "MyManager drivers" do
+describe "MyManager's drivers" do
+  before(:all) do
+    @m = MyManager.new
+  end
+
   it "should have a token" do
     MyManager::MyFirstDriver.token.should == :my_first_driver
   end
@@ -130,38 +136,34 @@ describe "MyManager drivers" do
   end
 
   it "should determine suitability levels" do
-    m = MyManager.new
-    rs = m.driver_suitability_levels_for(:mymethod, :one => 1)
+    rs = @m.driver_suitability_levels_for(:mymethod, :one => 1)
     rs[:my_first_driver].should eql?(10)
     rs[:my_second_driver].should eql?(5)
     rs[:my_unsuitable_driver].should be_nil
   end
 
   it "should choose suitable driver" do
-    MyManager.new.driver_for(:mymethod, :one => 1).is_a?(MyManager::MyFirstDriver).should be_true
+    @m.driver_for(:mymethod, :one => 1).is_a?(MyManager::MyFirstDriver).should be_true
   end
 
   it "should not choose driver if none match" do
-    lambda { MyManager.new.driver_for(:mymethod, :one => 9) }.should raise_error(NotImplementedError)
+    lambda { @m.driver_for(:mymethod, :one => 9) }.should raise_error(NotImplementedError)
   end
 
   it "should dispatch_to suitable driver" do
-    m = MyManager.new
-    m.dispatch_to(:mymethod, :one => 1).should eql?(1)
-    m.mymethod(:one => 1).should eql?(1)
+    @m.dispatch_to(:mymethod, :one => 1).should eql?(1)
+    @m.mymethod(:one => 1).should eql?(1)
   end
 
   it "should fail dispatch_to if no suitable driver is found" do
-    m = MyManager.new
-    lambda { m.dispatch_to(:mymethod, :one => 9) }.should raise_error(NotImplementedError)
-    lambda { m.mymethod(:one => 9) }.should raise_error(NotImplementedError)
+    lambda { @m.dispatch_to(:mymethod, :one => 9) }.should raise_error(NotImplementedError)
+    lambda { @m.mymethod(:one => 9) }.should raise_error(NotImplementedError)
   end
 
   it "should dispatch_to to default driver regardless of suitability" do
-    m = MyManager.new
-    m.default(:my_unimplemented_driver)
-    lambda { m.dispatch_to(:mymethod, :one => 1) }.should raise_error(NoMethodError)
-    lambda { m.mymethod(:one => 1) }.should raise_error(NoMethodError)
+    @m.default(:my_unimplemented_driver)
+    lambda { @m.dispatch_to(:mymethod, :one => 1) }.should raise_error(NoMethodError)
+    lambda { @m.mymethod(:one => 1) }.should raise_error(NoMethodError)
   end
 
   it "should have an interpreter instance" do
@@ -169,8 +171,7 @@ describe "MyManager drivers" do
   end
 
   it "should share object instances" do
-    m = MyManager.new
-    m[:my_first_driver].should eql?(m.interpreter.my_manager[:my_first_driver])
+    @m[:my_first_driver].should eql?(@m.interpreter.my_manager[:my_first_driver])
   end
 end
 

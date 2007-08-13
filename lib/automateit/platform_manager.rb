@@ -67,6 +67,7 @@ module AutomateIt
     end
 
     class LSB < Uname
+      # XXX lsb_release takes nearly a second to run, should it be cached somehow across runs?
       LSB_RELEASE = "lsb_release"
       def suitability(method, *args)
         # Level must be greater than Uname's
