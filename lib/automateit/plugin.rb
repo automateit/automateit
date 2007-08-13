@@ -6,7 +6,7 @@ module AutomateIt
     class Base < Common
       def setup(opts={})
         super(opts)
-        @interpreter = AutomateIt::Interpreter.new(:parent => self) unless @interpreter
+        @interpreter ||= opts[:interpreter] || AutomateIt::Interpreter.new(:parent => self)
       end
 
       def token
@@ -72,15 +72,9 @@ module AutomateIt
         self.class.driver_classes.each do |driver_class|
           driver_token = driver_class.token
           unless @drivers[driver_token]
-            @drivers[driver_token] = driver_class.new(
-              :interpreter => @interpreter, :instantiating => true)
+            @drivers[driver_token] = driver_class.new(:interpreter => @interpreter)
           end
         end
-      end
-
-      # Returns token for this +Manager+ as a symbol. E.g. the token for +TagManager+ is +:tag_manager+.
-      def token
-        return self.class.token
       end
 
       # Returns the +Driver+ with the specified token. E.g. +:apt+ will return the +APT+ driver.
