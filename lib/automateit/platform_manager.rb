@@ -16,6 +16,8 @@ module AutomateIt
       def setup(opts={})
         super(opts)
 
+        @@struct_cache ||= {}
+
         if opts[:struct]
           @struct = opts[:struct]
         else
@@ -23,7 +25,7 @@ module AutomateIt
         end
 
         # Generate bi-directional map
-        @key_aliases ||= {
+        @key_aliases ||= @@key_aliases ||= {
           :version => :release,
         }.inject({}){|s,v| s[v[0]] = v[1]; s[v[1]] = v[0]; s}
       end
@@ -53,20 +55,22 @@ module AutomateIt
 
     class Uname < Struct
       def suitability(method, *args)
-        return @suitable ||= (interpreter.which("uname").nil? ? 0 : 1)
+        # Level must be greater than Struct's
+        return @suitable ||= (interpreter.which("uname").nil? ? 0 : 2)
       end
 
       def setup(opts={})
         super(opts)
-        @@struct_cache ||= {}
         @struct[:os] ||= @@struct_cache[:os] ||= `uname -s`.chomp.downcase
         @struct[:arch] ||= @@struct_cache[:arch] ||= `uname -m`.chomp.downcase
       end
     end
 
     class LSB < Uname
+      LSB_RELEASE = "lsb_release"
       def suitability(method, *args)
-        return @suitable ||= (interpreter.which("lsb_release").nil? ? 0 : 2)
+        # Level must be greater than Uname's
+        return @suitable ||= (interpreter.which(LSB_RELEASE).nil? ? 0 : 3)
       end
 
       def setup(opts={})
@@ -74,7 +78,7 @@ module AutomateIt
         @struct[:distro] ||= @@struct_cache[:distro]
         @struct[:release] ||= @@struct_cache[:release]
         unless @struct[:distro] and @struct[:release]
-          Open3.popen3("lsb_release", "-a") do |sin, sout, serr|
+          Open3.popen3(LSB_RELEASE, "-a") do |sin, sout, serr|
             next if (rawdata = sout.read).empty?
             yamldata = YAML::load(rawdata.gsub(/\t/, " "))
             @struct[:distro] = @@struct_cache[:distro] = yamldata["Distributor ID"].to_s.downcase
