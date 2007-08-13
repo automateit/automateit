@@ -34,9 +34,9 @@ end
 # Lists methods unique to a class
 class Object
   def unique_methods
-    self.class.unique_methods
+    (public_methods - Object.methods).sort
   end
   def self.unique_methods
-    (self.methods - Object.methods).sort
+    (public_methods - Object.methods).sort
   end
 end
