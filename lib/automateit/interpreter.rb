@@ -29,7 +29,6 @@ module AutomateIt
       end
 
       instantiate_plugins
-      expose_plugins
     end
 
     attr_accessor :plugins
@@ -39,48 +38,44 @@ module AutomateIt
       if defined?(@parent) and @parent and @parent.is_a?(Plugin::Manager)
         plugins[@parent.class.token] = @parent
       end
-      # XXX How to elegantly initialize ShellManager first?
+      # XXX How to elegantly initialize certain plugins first?
       plugin_classes = AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}.to_a
-      shell_manager_plugin_class = plugin_classes.delete(AutomateIt::ShellManager)
-      plugin_classes.unshift(shell_manager_plugin_class) if shell_manager_plugin_class
-      plugin_classes.each do |plugin_class|
-        plugin_token = plugin_class.token
-
-        if plugin = @plugins[plugin_token]
-          plugin.instantiate_drivers
-        else
-          @plugins[plugin_token] = plugin_class.new(:interpreter => self,
-                                                    :instantiating => true)
-        end
+      for klass in [AutomateIt::PlatformManager, AutomateIt::ShellManager]
+        temp = plugin_classes.delete(klass)
+        plugin_classes.unshift(temp) if temp
+      end
+      for klass in plugin_classes
+        instantiate_plugin(klass)
       end
     end
 
-    def expose_plugin_instances
-      @plugins.each_pair do |token, plugin|
-        unless methods.include?(token.to_s)
-          self.class.send(:define_method, token) do
-            @plugins[token]
-          end
+    def instantiate_plugin(klass)
+      token = klass.token
+      return if @plugins[token]
+      plugin = @plugins[token] = klass.new(:interpreter => self)
+      #IK# puts "!!! ip #{token}"
+      unless methods.include?(token.to_s)
+        self.class.send(:define_method, token) do
+          @plugins[token]
         end
       end
+      expose_plugin_methods(plugin)
     end
 
-    def expose_plugin_methods
-      @plugins.values.each do |plugin|
-        next unless plugin.class.aliased_methods
-        plugin.class.aliased_methods.each do |method|
-          unless methods.include?(method.to_s)
-            self.class.send(:define_method, method) do |*args|
-              @plugins[plugin.class.token].send(method, *args)
+    def expose_plugin_methods(plugin)
+      return unless plugin.class.aliased_methods
+      plugin.class.aliased_methods.each do |method|
+        #IK# puts "!!! epm #{method}"
+        unless methods.include?(method.to_s)
+          # Must use instance_eval because methods created with define_method
+          # can't accept block as argument.
+          self.instance_eval <<-EOB
+            def #{method}(*args, &block)
+              @plugins[:#{plugin.class.token}].send(:#{method}, *args, &block)
             end
-          end
+          EOB
         end
       end
-    end
-
-    def expose_plugins
-      expose_plugin_instances
-      expose_plugin_methods
     end
 
     attr_writer :log
