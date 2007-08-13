@@ -53,8 +53,8 @@ module AutomateIt
       token = klass.token
       return if @plugins[token]
       plugin = @plugins[token] = klass.new(:interpreter => self)
-      #IK# puts "!!! ip #{token}"
-      unless methods.include?(token.to_s)
+      #puts "!!! ip #{token}"
+      unless respond_to?(token.to_sym)
         self.class.send(:define_method, token) do
           @plugins[token]
         end
@@ -65,8 +65,8 @@ module AutomateIt
     def expose_plugin_methods(plugin)
       return unless plugin.class.aliased_methods
       plugin.class.aliased_methods.each do |method|
-        #IK# puts "!!! epm #{method}"
-        unless methods.include?(method.to_s)
+        #puts "!!! epm #{method}"
+        unless respond_to?(method.to_sym)
           # Must use instance_eval because methods created with define_method
           # can't accept block as argument.
           self.instance_eval <<-EOB
