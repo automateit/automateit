@@ -41,3 +41,7 @@ end
 task :rdoc do
   sh "rdoc --main 'AutomateIt' --exclude 'spec/*'"
 end
+
+task :prof do
+  sh "ruby-prof -f prof.txt `which spec` spec/unit/*.rb"
+end
