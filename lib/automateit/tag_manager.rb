@@ -41,21 +41,19 @@ module AutomateIt
         # TODO generate hostname_aliases
 
         if opts[:struct]
-          # FIXME parse @group and !negation
+          # TODO parse @group and !negation
           @struct = opts[:struct]
           @tags.merge(tags_for(@hostname_aliases))
         else
           @struct ||= {}
         end
 
-        return if opts[:instantiating]
-
-        @tags.add(interpreter.platform_manager.query("os"))
-        @tags.add(interpreter.platform_manager.query("arch"))
-        @tags.add(interpreter.platform_manager.query("distro"))
-        @tags.add(interpreter.platform_manager.query("release"))
-        @tags.add(interpreter.platform_manager.query("os#arch"))
-        @tags.add(interpreter.platform_manager.query("distro#release"))
+        @tags.add(interpreter.platform_manager.query("os")) rescue IndexError
+        @tags.add(interpreter.platform_manager.query("arch")) rescue IndexError
+        @tags.add(interpreter.platform_manager.query("distro")) rescue IndexError
+        @tags.add(interpreter.platform_manager.query("release")) rescue IndexError
+        @tags.add(interpreter.platform_manager.query("os#arch")) rescue IndexError
+        @tags.add(interpreter.platform_manager.query("distro#release")) rescue IndexError
       end
 
       def hosts_tagged_with(query)
