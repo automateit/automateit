@@ -35,19 +35,16 @@ module AutomateIt
 
     def instantiate_plugins
       @plugins ||= {}
+      # If a parent is defined, use it to prep the list and avoid re-instantiating it.
       if defined?(@parent) and @parent and @parent.is_a?(Plugin::Manager)
-        plugins[@parent.class.token] = @parent
+        @plugins[@parent.class.token] = @parent
       end
-      # XXX How to elegantly initialize certain plugins first?
       plugin_classes = AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}.to_a
-      for klass in [AutomateIt::PlatformManager, AutomateIt::ShellManager]
-        temp = plugin_classes.delete(klass)
-        plugin_classes.unshift(temp) if temp
-      end
       for klass in plugin_classes
         instantiate_plugin(klass)
       end
     end
+    protected :instantiate_plugins
 
     def instantiate_plugin(klass)
       token = klass.token
@@ -61,6 +58,7 @@ module AutomateIt
       end
       expose_plugin_methods(plugin)
     end
+    protected :instantiate_plugin
 
     def expose_plugin_methods(plugin)
       return unless plugin.class.aliased_methods
@@ -77,6 +75,7 @@ module AutomateIt
         end
       end
     end
+    protected :expose_plugin_methods
 
     attr_writer :log
     def log(value=nil)

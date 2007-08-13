@@ -24,10 +24,12 @@ require 'automateit/plugin'
 # Helpers
 require 'automateit/cli'
 
-# Plugins
+# Plugins which must be loaded early
+require 'automateit/shell_manager'
+require 'automateit/platform_manager'
+require 'automateit/tag_manager'
+
+# Plugins which can be loaded later
 require 'automateit/address_manager'
 require 'automateit/field_manager'
-require 'automateit/platform_manager'
 require 'automateit/service_manager'
-require 'automateit/shell_manager'
-require 'automateit/tag_manager'
