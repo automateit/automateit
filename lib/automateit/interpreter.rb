@@ -18,8 +18,8 @@ module AutomateIt
           @log.level = Logger::INFO
       end
 
-      if opts[:verbosity]
-        @log.level = opts[:verbosity]
+      if opts[:log_level] or opts[:verbosity]
+        @log.level = opts[:log_level] || opts[:verbosity]
       end
 
       if opts[:noop].nil?
