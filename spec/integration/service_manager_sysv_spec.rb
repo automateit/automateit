@@ -30,12 +30,10 @@ else
 
     before(:each) do
       @m.stop(SERVICE_NAME, :quiet => true) if @m.running?(SERVICE_NAME)
-      @m.disable(SERVICE_NAME, :quiet => true) if @has_enable and @m.enabled?(SERVICE_NAME)
     end
 
     after(:all) do
       @m.stop(SERVICE_NAME, :quiet => true) if @m.running?(SERVICE_NAME)
-      @m.disable(SERVICE_NAME, :quiet => true) if @has_enable and @m.enabled?(SERVICE_NAME)
       FileUtils.rm(SERVICE_FILE) if File.exists?(SERVICE_FILE)
     end
 
@@ -67,13 +65,39 @@ else
     end
 
     if @has_enable
+      # It's more correct to disable the service using before/after, but the
+      # platform-specific scripts are ridiculously slow, so manually disabling
+      # the service only when necessary significantly speeds the test.
+      @disable_manually = true
+
+      before(:each) do
+        @m.disable(SERVICE_NAME, :quiet => true) if not @disable_manually
+      end
+
+      after(:all) do
+        @m.disable(SERVICE_NAME, :quiet => true) if not @disable_manually
+      end
+
       it "should enable a service" do
         @m.enable(SERVICE_NAME, :quiet => true).should be_true
+        # Tear down
+        @m.disable(SERVICE_NAME, :quiet => true).should be_true if @disable_manually
+      end
+
+      it "should not enable an enabled service" do
+        @m.enable(SERVICE_NAME, :quiet => true).should be_true
+        @m.enable(SERVICE_NAME, :quiet => true).should be_false
+        # Tear down
+        @m.disable(SERVICE_NAME, :quiet => true).should be_true if @disable_manually
       end
 
       it "should disable a service" do
         @m.enable(SERVICE_NAME, :quiet => true).should be_true
         @m.disable(SERVICE_NAME, :quiet => true).should be_true
+      end
+
+      it "should not disable a disabled service" do
+        @m.disable(SERVICE_NAME, :quiet => true).should be_false
       end
 
       it "should identify a disabled service" do
@@ -83,6 +107,8 @@ else
       it "should identify an enabled service" do
         @m.enable(SERVICE_NAME, :quiet => true).should be_true
         @m.enabled?(SERVICE_NAME).should be_true
+        # Tear down
+        @m.disable(SERVICE_NAME, :quiet => true).should be_true if @disable_manually
       end 
     end
   end
