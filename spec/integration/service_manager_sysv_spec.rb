@@ -21,12 +21,11 @@ else
     end
 
     before(:all) do
-      @a = AutomateIt.new
+      @a = AutomateIt.new(:verbosity => Logger::ERROR)
       @m = @a.service_manager
 
       FileUtils.cp(SOURCE_FILE, SERVICE_FILE)
       FileUtils.chmod(0755, SERVICE_FILE)
-
     end
 
     before(:each) do
@@ -40,17 +39,7 @@ else
       FileUtils.rm(SERVICE_FILE) if File.exists?(SERVICE_FILE)
     end
 
-#    it "should be able to start, stop and check the running status of services" do
-#      @m.running?(SERVICE_NAME).should be_false
-#      @m.start(SERVICE_NAME, :quiet => true).should be_true
-#      @m.start(SERVICE_NAME).should be_false
-#      @m.running?(SERVICE_NAME).should be_true
-#      @m.stop(SERVICE_NAME, :quiet => true).should be_true
-#      @m.stop(SERVICE_NAME).should be_false
-#      @m.running?(SERVICE_NAME).should be_false
-#    end
-
-    it "should be able to start a service" do
+    it "should start a service" do
       @m.start(SERVICE_NAME, :quiet => true).should be_true
     end
 
@@ -59,7 +48,7 @@ else
       @m.start(SERVICE_NAME).should be_false
     end
 
-    it "should be able to stop a service" do
+    it "should stop a service" do
       @m.start(SERVICE_NAME, :quiet => true).should be_true
       @m.stop(SERVICE_NAME, :quiet => true).should be_true
     end
@@ -68,23 +57,33 @@ else
       @m.stop(SERVICE_NAME).should be_false
     end
 
-    it "should be able to identify a non-running service" do
+    it "should identify a non-running service" do
       @m.running?(SERVICE_NAME).should be_false
     end
 
-    it "should be able to identify a running service" do
+    it "should identify a running service" do
       @m.start(SERVICE_NAME, :quiet => true).should be_true
       @m.running?(SERVICE_NAME).should be_true
     end
 
-    next unless @has_enable
-    # TODO implement distro-specific variants
-    #it "should be able to enable, disable and check the enabled status of services" do
-    #  @m.enabled?(SERVICE_NAME).should be_false
-    #  @m.enable(SERVICE_NAME, :quiet => true).should be_true
-    #  @m.enabled?(SERVICE_NAME).should be_true
-    #  @m.disable(SERVICE_NAME, :quiet => true).should be_true
-    #  @m.enabled?(SERVICE_NAME).should be_false
-    #end
+    if @has_enable
+      it "should enable a service" do
+        @m.enable(SERVICE_NAME, :quiet => true).should be_true
+      end
+
+      it "should disable a service" do
+        @m.enable(SERVICE_NAME, :quiet => true).should be_true
+        @m.disable(SERVICE_NAME, :quiet => true).should be_true
+      end
+
+      it "should identify a disabled service" do
+        @m.enabled?(SERVICE_NAME).should be_false
+      end
+
+      it "should identify an enabled service" do
+        @m.enable(SERVICE_NAME, :quiet => true).should be_true
+        @m.enabled?(SERVICE_NAME).should be_true
+      end 
+    end
   end
 end

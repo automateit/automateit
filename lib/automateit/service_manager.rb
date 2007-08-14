@@ -52,25 +52,37 @@ module AutomateIt
       end
     end
 
-    # TODO implement
+    # Sysvconfig implements the enable/disable/enabled? features of the
+    # ServiceManager on Debian-like systems.
     class Sysvconfig < SYSV
       def suitability(method, *args)
         return @suitable ||= (interpreter.which("sysvconfig").nil? ? 0 : 2)
       end
 
       def enabled?(service)
-        #! `</dev/null sysvconfig --listlinks| egrep "\\b#{service}\\b"`.chomp.match(/\bS\d+\b/).nil?
+        # "sysconfig --listlinks" output looks like this, note how there's no
+        # space between the name and run-level when displaying a long name:
+        #   nfs-kernel-server   K80 K80 S20 S20 S20 S20 K80
+        #   automateit_service_sysv_testK20 K20 S20 S20 S20 S20 K20
+        if matcher = `sysvconfig --listlinks` \
+            .match(/^(#{service})((\s|[KS]\d{2}\b).+?)$/)
+          return true if matcher[2].match(/\bS\d{2}\b/)
+        end
+        return false
       end
 
       def enable(service, opts={})
-        #system "</dev/null sysvconfig --enable #{service}"
+        interpreter.sh("sysvconfig --enable #{service} < /dev/null > /dev/null")
       end
 
       def disable(service, opts={})
-        #system "</dev/null sysvconfig --disable #{service}"
+        interpreter.sh("sysvconfig --disable #{service} < /dev/null > /dev/null")
       end
     end
 
+    # RC_Update implements the enable/disable/enabled? features of the
+    # ServiceManager on Gentoo-like systems.
+    #--
     # TODO implement
     class RC_Update < SYSV
       def suitability(method, *args)
@@ -96,23 +108,30 @@ module AutomateIt
       end
     end
 
-    # TODO implement
+    # Chkconfig implements the enable/disable/enabled? features of the
+    # ServiceManager on RedHat-like systems.
     class Chkconfig < SYSV
       def suitability(method, *args)
         return @suitable ||= (interpreter.which("chkconfig").nil? ? 0 : 2)
       end
 
       def enabled?(service)
-        # chkconfig --list service
+        # "chkconfig --list service" may produce output like the below:
+        # service httpd supports chkconfig, but is not referenced in any runlevel (run 'chkconfig --add automateit_service_sysv_test')
         # => httpd           0:off   1:off   2:off   3:off   4:off   5:off   6:off
+        if matcher = `chkconfig --list #{service} < /dev/null 2>&1` \
+            .match(/^(#{service}).+?(\d+:(on|off).+?)$/)
+          return true if matcher[2].match(/\b\d+:on\b/)
+        end
+        return false
       end
 
       def enable(service, opts={})
-        # chkconfig --add service
+        interpreter.sh("chkconfig --add #{service}")
       end
 
       def disable(service, opts={})
-        # chkconfig --del service
+        interpreter.sh("chkconfig --del #{service}")
       end
     end
   end
