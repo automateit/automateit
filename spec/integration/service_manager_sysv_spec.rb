@@ -21,7 +21,7 @@ else
     end
 
     before(:all) do
-      @a = AutomateIt.new(:verbosity => Logger::ERROR)
+      @a = AutomateIt.new(:verbosity => Logger::WARN)
       @m = @a.service_manager
 
       FileUtils.cp(SOURCE_FILE, SERVICE_FILE)
