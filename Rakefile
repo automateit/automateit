@@ -35,7 +35,27 @@ task "rcov:all" do
 end
 
 task :loc do
-  sh "find lib spec | egrep -v '.hg|.svn/|/CVS|CVS/|(.sw.?|.pyc)' | egrep '*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|rake|po)$$' | xargs wc"
+  require 'find'
+  lines = 0
+  bytes = 0
+  Find.find(*%w(lib spec)) do |path|
+    Find.prune if path.match(/.*(\b(.hg|.svn|CVS)\b|(.sw.?|.pyc)$)/)
+    if path.match(/.*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|erb|po)$/)
+      data = File.read(path)
+      bytes += data.size
+      lines += data.scan(/^.+$/).size
+    end
+  end
+  puts "Lines: "+lines.commify
+  puts "Bytes: "+bytes.commify
+end
+
+task :locdiff do
+  if File.directory?(".hg")
+    puts "Total lines added and removed through SCM operations: " + `hg log --no-merges --patch`.scan(/^[+-][^+-].+/).size.commify
+  else
+    raise NotImplementedError.new("Sorry, this only works for a Mercurial checkout")
+  end
 end
 
 task :rdoc do
@@ -44,4 +64,8 @@ end
 
 task :prof do
   sh "ruby-prof -f prof.txt `which spec` spec/unit/*.rb"
+end
+
+class Numeric
+  def commify() (s=self.to_s;x=s.length;s).rjust(x+(3-(x%3))).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/,'\1,').strip end
 end
