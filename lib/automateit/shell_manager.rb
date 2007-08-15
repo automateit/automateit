@@ -68,14 +68,14 @@ module AutomateIt
       def _fileutils_opts
         opts = {}
         opts[:verbose] = true if log.level >= ::Logger::INFO
-        opts[:noop] = true if interpreter.noop?
+        opts[:noop] = true if noop?
         return opts
       end
       private :_fileutils_opts
 
       def sh(*args)
         log.info("$$$ #{args.join(' ')}")
-        return system(*args) if interpreter.writing?
+        return system(*args) if writing?
       end
 
       def which(command)
@@ -86,7 +86,7 @@ module AutomateIt
         return File.exists?(data.to_s) ? data : nil
       end
 
-      def duplicate(sources, target)
+      def rbsync(sources, target)
         # TODO yuck
         # TODO generalize with cp, cp_r, install
         if File.exists?(target)

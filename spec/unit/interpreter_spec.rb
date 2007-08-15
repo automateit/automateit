@@ -25,7 +25,10 @@ describe AutomateIt::Interpreter do
 
   it "should eval commands in context" do
     @a.noop = true
-    @a.eval{noop?}.should be_true
-    @a.eval{self}.should == @a
+    @a.instance_eval{noop?}.should be_true
+    @a.instance_eval do 
+      self
+    end.should == @a
+    @a.instance_eval("noop?").should be_true
   end
 end

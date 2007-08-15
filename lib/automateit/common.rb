@@ -21,12 +21,22 @@ module AutomateIt #:main: AutomateIt
       @interpreter = opts[:interpreter] if opts[:interpreter]
     end
 
-    def log
-      @interpreter.log
-    end
+    def omfg(*args) "omfg" end
 
-    def omfg(*args)
-      "omfg"
+    #---[ Interpreter aliases ]---------------------------------------------
+
+    unless defined?(AutomateIt::Interpreter) and self.is_a?(AutomateIt::Interpreter)
+      def log() @interpreter.log end
+
+      def noop=(value) @interpreter.noop=(value) end
+      def noop(value) @interpreter.noop(value) end
+      def noop?(&block) @interpreter.noop?(&block) end
+      
+      def writing=(value) @interpreter.writing=(value) end
+      def writing(value) @interpreter.writing(value) end
+      def writing?(message=nil, &block) @interpreter.writing?(message, &block) end
+
+      def superuser?() @interpreter.superuser? end
     end
   end
 end

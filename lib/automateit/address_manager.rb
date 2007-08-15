@@ -61,7 +61,9 @@ module AutomateIt
 
     class Linux < Plugin::Driver
       def suitability(method, *args)
-        @suitable ||= interpreter.eval{which("ifconfig") and which("ip") and which("arping")}
+        @suitable ||= interpreter.instance_eval do
+          which("ifconfig") and which("ip") and which("arping")
+        end
         return @suitable ? 1 : -1
       end
 

@@ -49,7 +49,7 @@ module AutomateIt
         end
 
         log.send((opts[:quiet] || opts[:checking]) ? :debug : :info, "$$$ #{cmd}")
-        if interpreter.writing?
+        if writing?
           system(cmd)
           return $?.exitstatus.zero?
         else
