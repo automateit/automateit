@@ -109,7 +109,7 @@ else
         @m.enabled?(SERVICE_NAME).should be_true
         # Tear down
         @m.disable(SERVICE_NAME, :quiet => true).should be_true if @disable_manually
-      end 
+      end
     end
   end
 end
