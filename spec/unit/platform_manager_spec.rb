@@ -1,9 +1,11 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
 describe "AutomateIt::PlatformManager" do
-  before do
-    @m = AutomateIt::PlatformManager.new(:default => :struct, :struct => {
-      :os => "mizrahi", 
+  before(:all) do
+    @a = AutomateIt.new
+    @m = @a.platform_manager
+    @m.setup(:default => :struct, :struct => {
+      :os => "mizrahi",
       :arch => "realian",
       :distro => "momo",
       :version => "s100",
@@ -39,5 +41,4 @@ describe "AutomateIt::PlatformManager" do
   it "should fail on invalid subkeys" do
     lambda { @m.query("os#asdf") }.should raise_error(IndexError)
   end
-
 end

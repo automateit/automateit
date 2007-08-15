@@ -20,14 +20,14 @@ module AutomateIt
       def self.collect_registrations
         cattr_accessor :classes
 
-        self.classes = Set.new
+        self.classes = []
 
         def self.inherited(subclass)
-          classes.add(subclass)
+          classes << subclass unless classes.include?(subclass)
         end
 
         def self.abstract_plugin
-          classes.delete(self)
+          classes.delete(self) if classes.include?(self)
         end
       end
     end

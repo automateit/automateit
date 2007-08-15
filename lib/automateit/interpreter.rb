@@ -39,7 +39,7 @@ module AutomateIt
       if defined?(@parent) and @parent and @parent.is_a?(Plugin::Manager)
         @plugins[@parent.class.token] = @parent
       end
-      plugin_classes = AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}.to_a
+      plugin_classes = AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}
       for klass in plugin_classes
         _instantiate_plugin(klass)
       end
