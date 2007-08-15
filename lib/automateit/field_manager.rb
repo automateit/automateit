@@ -47,6 +47,7 @@ module AutomateIt
       def _read(filename)
         return File.read(filename)
       end
+      private :_read
 
     end
 

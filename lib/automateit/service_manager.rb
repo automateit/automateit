@@ -56,12 +56,12 @@ module AutomateIt
           false
         end
       end
-      protected :_run_command
+      private :_run_command
 
       def _run_service(service, action, opts={})
         return _run_command(["#{ETC_INITD}/#{service}", action.to_s], opts)
       end
-      protected :_run_service
+      private :_run_service
 
       def running?(service)
         return _run_service(service, :status, :checking => true)

@@ -100,8 +100,6 @@ module AutomateIt
         return _write(target_filename, output)
       end
 
-      protected
-
       # Return an Array of +dependencies+ newer than +filename+. Will be empty if +filename+ is newer than all of the +dependencies+.
       def _newer(filename, *dependencies)
         updated = []
@@ -111,26 +109,31 @@ module AutomateIt
         end
         return updated
       end
+      private :_newer
 
       # Does +filename+ exist?
       def _exists?(filename)
         return File.exists?(filename)
       end
+      private :_exists?
 
       # Return the contents of +filename+.
       def _read(filename)
         return File.read(filename)
       end
+      private :_read
 
       # Write +contents+ to +filename+.
       def _write(filename, contents)
         return true if File.open(filename, "w+"){|writer| writer.write(contents)}
       end
+      private :_write
 
       # Return the modification date for +filename+.
       def _mtime(filename)
         return File.mtime(filename)
       end
+      private :_mtime
     end
   end
 end

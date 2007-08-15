@@ -118,6 +118,7 @@ module AutomateIt
         ipcmd += " label #{opts[:device]}:#{opts[:label]}" if opts[:label]
         return ipcmd
       end
+      private :_add_or_remove_command
 
       def interfaces()
         return `ifconfig`.scan(/^(\w+?(?::\w+)?)\b\s+Link/).flatten

@@ -28,12 +28,12 @@ module AutomateIt
         @noop = opts[:noop]
       end
 
-      instantiate_plugins
+      _instantiate_plugins
     end
 
     attr_accessor :plugins
 
-    def instantiate_plugins
+    def _instantiate_plugins
       @plugins ||= {}
       # If a parent is defined, use it to prep the list and avoid re-instantiating it.
       if defined?(@parent) and @parent and @parent.is_a?(Plugin::Manager)
@@ -41,12 +41,12 @@ module AutomateIt
       end
       plugin_classes = AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}.to_a
       for klass in plugin_classes
-        instantiate_plugin(klass)
+        _instantiate_plugin(klass)
       end
     end
-    protected :instantiate_plugins
+    private :_instantiate_plugins
 
-    def instantiate_plugin(klass)
+    def _instantiate_plugin(klass)
       token = klass.token
       return if @plugins[token]
       plugin = @plugins[token] = klass.new(:interpreter => self)
@@ -56,17 +56,17 @@ module AutomateIt
           @plugins[token]
         end
       end
-      expose_plugin_methods(plugin)
+      _expose_plugin_methods(plugin)
     end
-    protected :instantiate_plugin
+    private :_instantiate_plugin
 
-    def expose_plugin_methods(plugin)
+    def _expose_plugin_methods(plugin)
       return unless plugin.class.aliased_methods
       plugin.class.aliased_methods.each do |method|
         #puts "!!! epm #{method}"
         unless respond_to?(method.to_sym)
           # Must use instance_eval because methods created with define_method
-          # can't accept block as argument.
+          # can't accept block as argument. This is a known Ruby 1.8 bug.
           self.instance_eval <<-EOB
             def #{method}(*args, &block)
               @plugins[:#{plugin.class.token}].send(:#{method}, *args, &block)
@@ -75,7 +75,7 @@ module AutomateIt
         end
       end
     end
-    protected :expose_plugin_methods
+    private :_expose_plugin_methods
 
     attr_writer :log
     def log(value=nil)
