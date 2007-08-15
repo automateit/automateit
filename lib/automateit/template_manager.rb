@@ -26,7 +26,8 @@ module AutomateIt
 
       # Render +source+ filename to +target+ filename.
       #
-      # Options hash may have a :check argument that determines when to render the target, otherwise it uses the value specified in #default_check:
+      # Options hash may have a :check argument that determines when to render
+      # the target, otherwise it uses the value specified in #default_check:
       # * +compare+: Only render if rendered template is different than the target's contents or if the target doesn't exist.
       # * +timestamp+: Only render if the target is older than the template and dependencies.
       # * +exists+: Only render if the target doesn't exist.
