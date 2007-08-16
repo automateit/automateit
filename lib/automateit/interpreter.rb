@@ -118,5 +118,22 @@ module AutomateIt
     def superuser?
       Process.euid.zero?
     end
+
+    def run_nonblocking(command, callback)
+      data = ""
+      IO.popen(command) do |handle|
+        begin
+          while true
+            sleep 0.1
+            latest = handle.readpartial(4048)
+            data << latest
+            callback.call(latest)
+          end
+        rescue EOFError
+          # Expected error that indicates there's nothing to read
+        end
+      end
+      return data
+    end
   end
 end
