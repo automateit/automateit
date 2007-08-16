@@ -52,7 +52,7 @@ end
 
 task :locdiff do
   if File.directory?(".hg")
-    puts "Total lines added and removed through SCM operations: " + `hg log --no-merges --patch`.scan(/^[+-][^+-].+/).size.commify
+    puts "%s lines added and removed through SCM operations" % `hg log --no-merges --patch`.scan(/^[+-][^+-].+/).size.commify
   else
     raise NotImplementedError.new("Sorry, this only works for a Mercurial checkout")
   end
