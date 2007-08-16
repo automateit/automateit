@@ -38,9 +38,10 @@ task :loc do
   require 'find'
   lines = 0
   bytes = 0
-  Find.find(*%w(lib spec)) do |path|
+  Find.find(*%w(bin lib spec)) do |path|
     Find.prune if path.match(/.*(\b(.hg|.svn|CVS)\b|(.sw.?|.pyc)$)/)
-    if path.match(/.*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|erb|po)$/)
+    next if File.directory?(path)
+    if path.match(/(\bbin\b|.*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|erb|po)$)/)
       data = File.read(path)
       bytes += data.size
       lines += data.scan(/^.+$/).size
