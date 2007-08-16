@@ -17,8 +17,7 @@ else
         # Find a small package with few dependencies, no dependants, no daemons
         # and little chance of it being in-use during the test.
         @package = @a.instance_eval do
-          #IK# if tagged?("ubuntu || debian || fedora || redhat || centos")
-          if tagged?("ubuntu || debian")
+          if tagged?("ubuntu || debian || fedora || redhat || centos")
             # Package for extracting ARC files from the early 80's
             "nomarch"
           else
