@@ -1,8 +1,45 @@
 module AutomateIt
   class PackageManager < Plugin::Manager
+    # Are these packages installed?
+    #
+    # Arguments array:
+    # * +packages+ - Array of packages to check.
+    # * +opts+ - Hash of options.
+    #
+    # Returns +true+ if all +packages+ are installed, or a array of installed
+    # packages when called with +opts+ :list => true
     def installed?(*args) dispatch(*args) end
+
+    # Are these packages not installed?
+    #
+    # Arguments array:
+    # * +packages+ - Array of packages to check.
+    # * +opts+ - Hash of options.
+    #
+    # Returns +true+ if all +packages+ are not installed, or a array of not
+    # installed packages when called with +opts+ :list => true
     def not_installed?(*args) dispatch(*args) end
+
+    # Install these packages.
+    #
+    # Arguments array:
+    # * +packages+ - Array of packages to install.
+    # * +opts+ - Hash of options.
+    #
+    # Returns boolean from callback indicating a successful installation. If
+    # all packages are already installed, will return false without taking any
+    # action.
     def install(*args) dispatch(*args) end
+
+    # Uninstall these packages.
+    #
+    # Arguments array:
+    # * +packages+ - Array of packages to uninstall.
+    # * +opts+ - Hash of options.
+    #
+    # Returns boolean from callback indicating a successful uninstall. If none
+    # of the packages are installed, will return false without taking any
+    # action.
     def uninstall(*args) dispatch(*args) end
 
     #-----------------------------------------------------------------------
@@ -11,41 +48,36 @@ module AutomateIt
     # it can't install packages itself, its helper methods make it easier for
     # other drivers to do this by providing them with a bunch of common
     # functionality that would otherwise have to be duplicated in each driver.
-    # These helpers are written in a very generic way and should provide value
-    # for all sorts of PackageManager driver implementations. Read the APT
-    # driver for a good usage examples.
+    # These helpers are written to be generic enough to be useful for all sorts
+    # of PackageManager driver implementations. Read the APT driver for a good
+    # usage examples.
     module Base
       protected
 
-      # Are these packages installed? Arguments array:
-      # * +callback+ - Proc that accepts an array of +packages+ and hash of
-      #   +opts+, and returns an array of packages that are installed.
-      # * +packages+ - Array of packages to check.
-      # * +opts+ - Hash of options.
+      # Are these packages installed? Works just like PackageManager#installed?
+      # but calls a block that actually checks whether the packages are
+      # installed and returns an array of packages installed.
       #
-      # Returns +true+ if all +packages+ are installed, or a list of installed
-      # packages when called with +opts+ :list => true
-      def _installed_helper?(*a)
-        args, opts = args_and_opts(*a)
-        callback, packages = args
+      # For example:
+      #   _installed_helper?("package1", "package2", :list => true) do |packages, opts|
+      #     # Dummy code which reports that these packages are installed:
+      #     ["package1]
+      #   end
+      def _installed_helper?(*a, &block) # :yields: packages, opts
+        packages, opts = args_and_opts(*a)
         packages = [packages].flatten
-        available = callback.call(packages, opts)
+        available = block.call(packages, opts)
         result = opts[:list] ? available : (packages - available).empty?
         log.debug("installed? result %s / packages %s / available %s" % [result.inspect, packages.inspect, available.inspect])
         return result
       end
 
-      # Are these packages not installed? Arguments array:
-      # * +callback+ - Proc that accepts an array of +packages+ and hash of
-      #   +opts+, and returns an array of packages that are not installed.
-      # * +packages+ - Array of packages to check.
-      # * +opts+ - Hash of options.
-      #
-      # Returns +true+ if all +packages+ are not installed, or a list of not
-      # installed packages when called with +opts+ :list => true
+      # Are these packages not installed? Works just like
+      # PackageManager#not_installed? but requires that your
+      # PackageManager#installed? method is implemented.
       def _not_installed_helper?(*a)
         packages, opts = args_and_opts(*a)
-        packages.flatten!
+        packages = [packages].flatten
         available = [installed?(packages, :list => true)].flatten
         missing = packages - available
 
@@ -54,38 +86,42 @@ module AutomateIt
         return result
       end
 
-      # Install these packages. Arguments array:
-      # * +callback+ - Proc that accepts an array of +packages+ and hash of
-      #   +opts+ and installs them.
-      # * +packages+ - Array of packages to install.
-      # * +opts+ - Hash of optsions.
+      # Install these packages. Works just like PackageManager#install but
+      # calls a block that actually installs the packages and returns a boolean
+      # success value. The block is guaranteed to get only packages that aren't
+      # already installed.
       #
-      # Returns boolean from callback indicating a successful installation.
-      def _install_helper(*a)
-        args, opts = args_and_opts(*a)
-        callback, packages = args
+      # For example:
+      #   _install_helper("package1", "package2", :quiet => true) do |packages, opts|
+      #     # Dummy code that installs packages here, e.g:
+      #     system("apt-get", "install", "-y", packages)
+      #   end
+      def _install_helper(*a, &block)
+        packages, opts = args_and_opts(*a)
         packages = [packages].flatten
 
         missing = not_installed?(packages, :list => true)
         return false if ! missing || (missing.is_a?(Array) && missing.empty?)
-        return callback.call(missing, opts)
+        return block.call(missing, opts)
       end
 
-      # Uninstall these packages. Arguments array:
-      # * +callback+ - Proc that accepts an array of +packages+ and hash of
-      #   +opts+ and uninstalls them.
-      # * +packages+ - Array of packages to uninstall.
-      # * +opts+ - Hash of optsions.
+      # Uninstall these packages. Works just like PackageManager#uninstall but
+      # calls a block that actually installs the packages and returns a boolean
+      # success value. The block is guaranteed to get only packages that are
+      # installed.
       #
-      # Returns boolean from callback indicating a successful uninstall.
-      def _uninstall_helper(*a)
-        args, opts = args_and_opts(*a)
-        callback, packages = args
+      # For example:
+      #   _uninstall_helper("package1", "package2", :quiet => true) do |packages, opts|
+      #     # Dummy code that removes packages here, e.g:
+      #     system("apt-get", "remove", "-y", packages)
+      #   end
+      def _uninstall_helper(*a, &block)
+        packages, opts = args_and_opts(*a)
         packages = [packages].flatten
 
         present = installed?(packages, :list => true)
         return false if ! present || (present.is_a?(Array) && present.empty?)
-        return callback.call(present, opts)
+        return block.call(present, opts)
       end
     end
 
@@ -98,8 +134,9 @@ module AutomateIt
         return @suitability ||= interpreter.which("apt-get").nil? ? 0 : 1
       end
 
+      # See AutomateIt::PackageManager#installed?
       def installed?(*a)
-        callback = lambda do |packages, opts|
+        return _installed_helper?(*a) do |packages, opts|
           ### data = `dpkg --status nomarch apache2 not_a_real_package 2>&1`
           cmd = "dpkg --status"
           packages.each{|package| cmd << " "+package}
@@ -116,15 +153,16 @@ module AutomateIt
 
           available
         end
-        return _installed_helper?(callback, *a)
       end
 
+      # See AutomateIt::PackageManager#not_installed?
       def not_installed?(*a)
         return _not_installed_helper?(*a)
       end
 
+      # See AutomateIt::PackageManager#install
       def install(*a)
-        callback = lambda do |packages, opts|
+        return _install_helper(*a) do |packages, opts|
           # apt-get options:
           # -y : yes to all queries
           # -q : no interactive progress bars
@@ -136,11 +174,11 @@ module AutomateIt
 
           interpreter.sh(cmd)
         end
-        return _install_helper(callback, *a)
       end
 
+      # See AutomateIt::PackageManager#uninstall
       def uninstall(*a)
-        callback = lambda do |packages, opts|
+        return _uninstall_helper(*a) do |packages, opts|
           # apt-get options:
           # -y : yes to all queries
           # -q : no interactive progress bars
@@ -152,7 +190,6 @@ module AutomateIt
 
           interpreter.sh(cmd)
         end
-        return _uninstall_helper(callback, *a)
       end
     end
   end
