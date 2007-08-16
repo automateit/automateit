@@ -11,13 +11,14 @@ else
 
     describe "AutomateIt::PackageManager" do
       before(:all) do
+        #@a = AutomateIt.new(:verbosity => Logger::DEBUG)
         @a = AutomateIt.new(:verbosity => Logger::WARN)
         @m = @a.package_manager
 
         # Find a small package with few dependencies, no dependants, no daemons
         # and little chance of it being in-use during the test.
         @package = @a.instance_eval do
-          if tagged?("ubuntu || debian || fedora || redhat || centos")
+          if tagged?("ubuntu || debian || fedoracore || redhat || centos")
             # Package for extracting ARC files from the early 80's
             "nomarch"
           else
@@ -27,7 +28,9 @@ else
         # A package we don't expect to find.
         @fake_package = "not_a_real_package"
 
-        @m.uninstall(@package, :quiet => true)
+        if @m.installed?(@package, :quiet => true)
+          raise "ERROR: Found the '#{@package}' installed! You're probably not using this obscure package and should remove it so the test can run. In the unlikely event that you actually rely on this package, change the spec to test another unused package."
+        end
       end
 
       after(:all) do

@@ -127,11 +127,13 @@ module AutomateIt
 
     #-----------------------------------------------------------------------
 
+    # The APT driver for the PackageManager provides a way to install software
+    # on Debian-like systems using "apt-get" and "dpkg".
     class APT < Plugin::Driver
       include Base
 
       def suitability(method, *args)
-        return @suitability ||= interpreter.which("apt-get").nil? ? 0 : 1
+        return @suitability ||= interpreter.instance_eval{which("apt-get") && which("dpkg")} ? 1 : 0
       end
 
       # See AutomateIt::PackageManager#installed?
@@ -183,6 +185,76 @@ module AutomateIt
           # -y : yes to all queries
           # -q : no interactive progress bars
           cmd = "apt-get remove -y -q"
+          packages.each{|package| cmd << " "+package}
+          cmd << " < /dev/null"
+          cmd << " > /dev/null" if opts[:quiet]
+          cmd << " 2>&1"
+
+          interpreter.sh(cmd)
+        end
+      end
+    end
+
+    #-----------------------------------------------------------------------
+
+    # The YUM driver for the PackageManager provides a way to install software
+    # on RedHat-like systems using "yum" and "rpm".
+    class YUM < Plugin::Driver
+      include Base
+
+      def suitability(method, *args)
+        return @suitability ||= interpreter.instance_eval{which("yum") && which("rpm")} ? 1 : 0
+      end
+
+      # See AutomateIt::PackageManager#installed?
+      def installed?(*a)
+        return _installed_helper?(*a) do |packages, opts|
+          ### rpm -q --nosignature --nodigest --qf "%{NAME} # %{VERSION} # %{RELEASE}\n" httpd nomarch foo
+          cmd = 'rpm -q --nosignature --nodigest --qf "%{NAME} # %{VERSION} # %{RELEASE}\n"'
+          packages.each{|package| cmd << " "+package}
+          cmd << " 2>&1" # missing packages are listed on STDERR
+          log.debug("$$$ "+cmd)
+          data = `#{cmd}`
+
+          matches = data.scan(/^(.+) # (.+) # .+$/)
+          available = matches.inject([]) do |sum, match|
+            package, status = match
+            sum << package
+            sum
+          end
+
+          log.debug("### installed?(%s) => %s" % [packages.inspect, available.inspect])
+          available
+        end
+      end
+
+      # See AutomateIt::PackageManager#not_installed?
+      def not_installed?(*a)
+        _not_installed_helper?(*a)
+      end
+
+      # See AutomateIt::PackageManager#install
+      def install(*a)
+        return _install_helper(*a) do |packages, opts|
+          # yum options:
+          # -y : yes to queries
+          # -d 0 : no debugging info
+          # -e 0 : show only fatal errors
+          # -C : don't download headers
+          cmd = "yum -y -d 0 -e 0 -C install"
+          packages.each{|package| cmd << " "+package}
+          cmd << " < /dev/null"
+          cmd << " > /dev/null" if opts[:quiet]
+          cmd << " 2>&1"
+
+          interpreter.sh(cmd)
+        end
+      end
+
+      # See AutomateIt::PackageManager#uninstall
+      def uninstall(*a)
+        return _uninstall_helper(*a) do |packages, opts|
+          cmd = "rpm --erase --quiet"
           packages.each{|package| cmd << " "+package}
           cmd << " < /dev/null"
           cmd << " > /dev/null" if opts[:quiet]
