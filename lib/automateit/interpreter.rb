@@ -108,8 +108,9 @@ module AutomateIt
     end
 
     def writing?(message=nil, &block)
-      if !@noop and block
-        block.call
+      if block
+        log.info("### #{message}") if message and @noop
+        !@noop ? block.call : !@noop
       else
         !@noop
       end
