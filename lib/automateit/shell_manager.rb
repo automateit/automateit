@@ -73,7 +73,8 @@ module AutomateIt
       end
       private :_fileutils_opts
 
-      def sh(*args)
+      def sh(*a)
+        args, opts = args_and_opts(*a)
         log.info("$$$ #{args.join(' ')}")
         return system(*args) if writing?
       end
