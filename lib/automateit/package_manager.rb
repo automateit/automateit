@@ -101,7 +101,7 @@ module AutomateIt
         packages = [packages].flatten
 
         missing = not_installed?(packages, :list => true)
-        return false if ! missing || (missing.is_a?(Array) && missing.empty?)
+        return false if missing.blank?
         return block.call(missing, opts)
       end
 
@@ -120,7 +120,7 @@ module AutomateIt
         packages = [packages].flatten
 
         present = installed?(packages, :list => true)
-        return false if ! present || (present.is_a?(Array) && present.empty?)
+        return false if present.blank?
         return block.call(present, opts)
       end
     end

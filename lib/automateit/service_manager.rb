@@ -41,7 +41,7 @@ module AutomateIt
       end
 
       def _run_command(args, opts={})
-        cmd = args.is_a?(String) ? args : args.map{|t|'"%s"'%t}.join(' ')
+        cmd = String === args ? args : args.map{|t|'"%s"'%t}.join(' ')
         if opts[:checking]
           cmd += " > /dev/null 2>&1" # Discard STDOUT and STDERR
         elsif opts[:quiet]
@@ -91,7 +91,7 @@ module AutomateIt
     # on the SYSV driver's simpler but much faster implementation.
     class Sysvconfig < SYSV
       def suitability(method, *args)
-        return @suitable ||= (interpreter.which("sysvconfig").nil? ? 0 : 2)
+        return @suitable ||= interpreter.which("sysvconfig").nil? ? 0 : 2
       end
 
 =begin
@@ -127,7 +127,7 @@ module AutomateIt
     # for handling the methods #running?, #start and #stop.
     class Chkconfig < SYSV
       def suitability(method, *args)
-        return @suitable ||= (interpreter.which("chkconfig").nil? ? 0 : 2)
+        return @suitable ||= interpreter.which("chkconfig").nil? ? 0 : 2
       end
 
       def enabled?(service)

@@ -6,7 +6,7 @@ describe AutomateIt::Interpreter do
   end
 
   it "should have a logger" do
-    @a.log.is_a?(Logger)
+    Logger.should === @a.log
   end
 
   it "should have noop (dryrun) detection" do

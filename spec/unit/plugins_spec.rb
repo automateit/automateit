@@ -96,8 +96,8 @@ describe "MyManager" do
   end
 
   it "should access drivers by index keys" do
-    @m[:my_first_driver].is_a?(MyManager::MyFirstDriver).should be_true
-    @m.drivers[:my_first_driver].is_a?(MyManager::MyFirstDriver).should be_true
+    MyManager::MyFirstDriver.should === @m[:my_first_driver]
+    MyManager::MyFirstDriver.should === @m.drivers[:my_first_driver]
   end
 
   it "should have aliased methods" do
@@ -109,7 +109,7 @@ describe "MyManager" do
   end
 
   it "should have an interpreter instance" do
-    @m.interpreter.is_a?(AutomateIt::Interpreter).should be_true
+    AutomateIt::Interpreter.should === @m.interpreter
   end
 
   # TODO Creating a Plugin before the Interpreter makes objects get different references
@@ -143,7 +143,7 @@ describe "MyManager's drivers" do
   end
 
   it "should choose suitable driver" do
-    @m.driver_for(:mymethod, :one => 1).is_a?(MyManager::MyFirstDriver).should be_true
+    MyManager::MyFirstDriver.should === @m.driver_for(:mymethod, :one => 1)
   end
 
   it "should not choose driver if none match" do
@@ -167,7 +167,7 @@ describe "MyManager's drivers" do
   end
 
   it "should have an interpreter instance" do
-    MyManager::MyFirstDriver.new.interpreter.is_a?(AutomateIt::Interpreter).should be_true
+    AutomateIt::Interpreter.should === MyManager::MyFirstDriver.new.interpreter
   end
 
   it "should share object instances" do

@@ -36,7 +36,7 @@ module AutomateIt
     def _instantiate_plugins
       @plugins ||= {}
       # If a parent is defined, use it to prep the list and avoid re-instantiating it.
-      if defined?(@parent) and @parent and @parent.is_a?(Plugin::Manager)
+      if defined?(@parent) and @parent and Plugin::Manager === @parent
         @plugins[@parent.class.token] = @parent
       end
       plugin_classes = AutomateIt::Plugin::Manager.classes.reject{|t| t == @parent if @parent}

@@ -56,7 +56,7 @@ module AutomateIt
     class Uname < Struct
       def suitability(method, *args)
         # Level must be greater than Struct's
-        return @suitable ||= (interpreter.which("uname").nil? ? 0 : 2)
+        return @suitable ||= interpreter.which("uname").nil? ? 0 : 2
       end
 
       def setup(opts={})
@@ -71,7 +71,7 @@ module AutomateIt
       LSB_RELEASE = "lsb_release"
       def suitability(method, *args)
         # Level must be greater than Uname's
-        return @suitable ||= (interpreter.which(LSB_RELEASE).nil? ? 0 : 3)
+        return @suitable ||= interpreter.which(LSB_RELEASE).nil? ? 0 : 3
       end
 
       def setup(opts={})

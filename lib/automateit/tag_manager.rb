@@ -82,7 +82,7 @@ module AutomateIt
       end
 
       def tags_for(hostname)
-        hostnames = hostname.is_a?(String) ? hostname_aliases_for(hostname) : hostname.to_a
+        hostnames = String === hostname ? hostname_aliases_for(hostname) : hostname.to_a
         return @struct.inject(Set.new) do |sum, value|
           role, members = value
           members_aliases = members.inject(Set.new) do |aliases, member|

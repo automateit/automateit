@@ -16,7 +16,7 @@ describe "AutomateIt::TagManager", :shared => true do
   end
 
   it "should have tags" do
-    @a.tags.is_a?(Enumerable).should be_true
+    Enumerable.should === @a.tags
   end
 
   it "should have tags that include tag for hostname" do

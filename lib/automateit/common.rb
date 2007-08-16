@@ -25,7 +25,7 @@ module AutomateIt #:main: AutomateIt
 
     #---[ Interpreter aliases ]---------------------------------------------
 
-    unless defined?(AutomateIt::Interpreter) and self.is_a?(AutomateIt::Interpreter)
+    unless defined?(AutomateIt::Interpreter) and AutomateIt::Interpreter === self
       def log() @interpreter.log end
 
       def noop=(value) @interpreter.noop=(value) end
