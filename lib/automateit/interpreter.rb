@@ -135,5 +135,11 @@ module AutomateIt
       end
       return data
     end
+
+    def invoke(recipe)
+      # TODO lookup partial names
+      data = File.read(recipe)
+      eval data
+    end
   end
 end

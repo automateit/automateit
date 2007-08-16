@@ -9,4 +9,17 @@ $LOAD_PATH.unshift(libdir) if File.directory?(libdir) and File.exists?(File.join
 
 require "automateit"
 
-AutomateIt::CLI.new
+# We want an options array
+opts = {}
+
+# Are we interactive or are we running a recipe?
+# FIXME replace
+if ARGV.size > 0
+  opts[:recipe] = ARGV.first
+end
+
+# We don't want our arguments passed to IRB
+opts[:argv] = ARGV.clone
+ARGV.clear
+
+AutomateIt::CLI.new(opts)
