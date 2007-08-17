@@ -20,7 +20,7 @@ module AutomateIt
 
     #---[ FileUtils wrappers ]-----------------------------------------------
 
-    def cd(dir, &block) dispatch(dir, block) end
+    def cd(dir, opts={}, &block) dispatch(dir, opts, &block) end
     def pwd() dispatch() end
     def mkdir(dirs) dispatch(dirs) end
     def mkdir_p(dirs) dispatch(dirs) end
@@ -105,8 +105,8 @@ module AutomateIt
 
       #...[ FileUtils wrappers ]...............................................
 
-      def cd(dir, &block)
-        FileUtils.cd(dir, _fileutils_opts, &block)
+      def cd(dir, opts={}, &block)
+        FileUtils.cd(dir, _fileutils_opts.merge(opts), &block)
       end
 
       def pwd()
