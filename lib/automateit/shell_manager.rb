@@ -10,7 +10,7 @@ module AutomateIt
 
     #---[ Custom commands ]-------------------------------------------------
 
-    def sh(*args) dispatch(*args) end
+    def sh(*commands) dispatch(*commands) end
 
     def which(command) dispatch(command) end
 
@@ -73,8 +73,8 @@ module AutomateIt
       end
       private :_fileutils_opts
 
-      def sh(*a)
-        args, opts = args_and_opts(*a)
+      def sh(*commands)
+        args, opts = args_and_opts(*commands)
         log.info("$$$ #{args.join(' ')}")
         return system(*args) if writing?
       end
@@ -108,7 +108,7 @@ module AutomateIt
         FileUtils.cd(dir, _fileutils_opts, &block)
       end
 
-      def pwd() 
+      def pwd()
         FileUtils.pwd()
       end
 
@@ -206,11 +206,11 @@ module AutomateIt
       def install(source, target, mode)
         # TODO needs more sophisticated algorithm, maybe combine with copy
         source_stat = File.stat(source)
-        target_file = (File.directory?(target) || File.stat(target).symlink?) ? 
+        target_file = (File.directory?(target) || File.stat(target).symlink?) ?
           File.join(target, File.basename(source)) : target
         target_stat = File.exists?(target_file) ? File.stat(target) : nil
         unless target_stat and FileUtils.identical?(source, target_file)
-          FileUtils.install(source, target, mode, 
+          FileUtils.install(source, target, mode,
                             {:preserve => true}.merge(_fileutils_opts))
         end
       end

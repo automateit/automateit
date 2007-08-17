@@ -38,12 +38,12 @@ module AutomateIt
       class_inheritable_accessor :aliased_methods
 
       # Methods to alias into +Interpreter+, specified as an array of symbols.
-      def self.alias_methods(*args)
-        if args.empty?
+      def self.alias_methods(*methods)
+        if methods.empty?
           self.aliased_methods
         else
           self.aliased_methods ||= Set.new
-          self.aliased_methods.merge(args.flatten)
+          self.aliased_methods.merge(methods.flatten)
         end
       end
 

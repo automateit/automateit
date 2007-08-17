@@ -6,19 +6,19 @@ module AutomateIt #:main: AutomateIt
   VERSION=0.0
 
   # Instantiate an +Interpreter+.
-  def self.new(*a)
-    Interpreter.new(*a)
+  def self.new(*options)
+    Interpreter.new(*options)
   end
 
   class Common
     attr_accessor :interpreter
 
-    def initialize(opts={})
-      setup(opts)
+    def initialize(options={})
+      setup(options)
     end
 
-    def setup(opts={})
-      @interpreter = opts[:interpreter] if opts[:interpreter]
+    def setup(options={})
+      @interpreter = options[:interpreter] if options[:interpreter]
     end
 
     def omfg(*args) "omfg" end
@@ -31,7 +31,7 @@ module AutomateIt #:main: AutomateIt
       def noop=(value) @interpreter.noop=(value) end
       def noop(value) @interpreter.noop(value) end
       def noop?(&block) @interpreter.noop?(&block) end
-      
+
       def writing=(value) @interpreter.writing=(value) end
       def writing(value) @interpreter.writing(value) end
       def writing?(message=nil, &block) @interpreter.writing?(message, &block) end
