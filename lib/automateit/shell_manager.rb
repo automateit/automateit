@@ -1,10 +1,12 @@
 require 'automateit'
 
 module AutomateIt
-  # Provides UNIX-like shell commands for the Interpreter.
-  #
-  # See documentation in ShellManager::POSIX
+  # Provides UNIX-like shell commands for the Interpreter. See documentation in
+  # ShellManager::POSIX
   class ShellManager < Plugin::Manager
+    # FIXME noop calls to FileUtils must return true to indicate that an action would have been taken, rather than returning nil to indicate that nothing was actually done
+    # FIXME write specs for all these commands
+    # TODO write docs for all these commands
     alias_methods :sh, :which
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :touch
 
@@ -48,21 +50,23 @@ module AutomateIt
 
     def touch(targets) dispatch(targets) end
 
+    #-----------------------------------------------------------------------
+
     class POSIX < Plugin::Driver
       def suitability(method, *args)
-        # XXX Interogate individual methods for fine-grained control? E.g. Windows lacks "which" but can run most commands.
+        # XXX Interrogate individual methods for fine-grained control? E.g. Windows can run almost all of these pure ruby commands, so it should run them rather than failing just because a few aren't there.
         @suitability ||= which("which").nil? ? 0 : 1
       end
 
       def setup(opts={})
         super(opts)
 
-        # XXX Should I intercept fu_output_message calls and redirect them to this interpreter instance's log instead?
+        # XXX Intercept fu_output_message and use Interpreter#log.info instead?
         ::FileUtils.instance_variable_set(:@fileutils_output, $stdout)
         ::FileUtils.instance_variable_set(:@fileutils_label, "$$$ ")
       end
 
-      #---[ Custom commands ]-------------------------------------------------
+      #...[ Custom commands ].................................................
 
       # Returns hash of verbosity and noop settings for FileUtils commands.
       def _fileutils_opts
@@ -76,19 +80,16 @@ module AutomateIt
       def sh(*commands)
         args, opts = args_and_opts(*commands)
         log.info("$$$ #{args.join(' ')}")
-        return system(*args) if writing?
+        return writing? ? system(*args) : true
       end
 
       def which(command)
-        data = nil
-        Open3.popen3("which", command) do |sin, sout, serr|
-          data = sout.read.chomp
-        end
-        return File.exists?(data.to_s) ? data : nil
+        data = `which "#{command}" 2>&1`.chomp
+        return File.exists?(data) ? data : nil
       end
 
       def rbsync(sources, target)
-        # TODO yuck
+        # FIXME replace with new version
         # TODO generalize with cp, cp_r, install
         if File.exists?(target)
           cmd = "diff -qr"
@@ -102,7 +103,7 @@ module AutomateIt
         cp(sources, target, _fileutils_opts)
       end
 
-      #---[ FileUtils wrappers ]-----------------------------------------------
+      #...[ FileUtils wrappers ]...............................................
 
       def cd(dir, &block)
         FileUtils.cd(dir, _fileutils_opts, &block)
