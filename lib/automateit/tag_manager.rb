@@ -37,13 +37,14 @@ module AutomateIt
         end
 
         @tags ||= Set.new
-        @tags.merge(@hostname_aliases) unless @hostname_aliases.empty?
-        # TODO generate hostname_aliases
+        hostnames = [@hostname_aliases.to_a \
+          + interpreter.address_manager.hostnames.to_a].flatten.uniq
+        @tags.merge(hostnames)
 
         if opts[:struct]
           # TODO parse @group and !negation
           @struct = opts[:struct]
-          @tags.merge(tags_for(@hostname_aliases))
+          @tags.merge(tags_for(hostnames))
         else
           @struct ||= {}
         end
