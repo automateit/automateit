@@ -43,6 +43,10 @@ else
       # slower and take over a minute. Although this approach is problematic,
       # the performance boost is worth it.
 
+      it "should not install an invalid package" do
+        lambda{ @m.install(@fake_package, :quiet => true) }.should raise_error(ArgumentError)
+      end
+
       it "should install a package" do
         @m.install(@package, :quiet => true).should be_true
         # Leaves behind an installed package

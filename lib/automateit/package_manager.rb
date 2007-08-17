@@ -77,7 +77,16 @@ module AutomateIt
 
         missing = not_installed?(packages, :list => true)
         return false if missing.blank?
-        return block.call(missing, opts)
+        return true if noop?
+
+        # XXX Ignore return value?
+        block.call(missing, opts)
+        unless (failed = not_installed?(missing, :list => true)).empty?
+          # FIXME spec failure
+          raise ArgumentError.new("couldn't install: #{failed.join(' ')}")
+        else
+          return true
+        end
       end
 
       # Uninstall these +packages+. Works like PackageManager#uninstall but calls a
@@ -97,7 +106,16 @@ module AutomateIt
 
         present = installed?(packages, :list => true)
         return false if present.blank?
-        return block.call(present, opts)
+        return true if noop?
+
+        # XXX Ignore return value?
+        block.call(present, opts)
+        unless (failed = installed?(present, :list => true)).empty?
+          # FIXME spec failure
+          raise ArgumentError.new("couldn't uninstall: #{failed.join(' ')}")
+        else
+          return true
+        end
       end
     end
 
