@@ -35,13 +35,13 @@ module AutomateIt
         @project = opts[:project]
         log.debug("### Loading project from path: #{@project}")
 
-        tag_file = File.join(@project, "config", "tags.yaml")
+        tag_file = File.join(@project, "config", "tags.yml")
         if File.exists?(tag_file)
           log.debug("### Loading project tags: #{tag_file}")
           tag_manager[:yaml].setup(:file => tag_file)
         end
 
-        field_file = File.join(@project, "config", "fields.yaml")
+        field_file = File.join(@project, "config", "fields.yml")
         if File.exists?(field_file)
           log.debug("### Loading project fields: #{field_file}")
           field_manager[:yaml].setup(:file => field_file)

@@ -33,10 +33,14 @@ module AutomateIt
         path = opts.delete(:create)
         interpreter = AutomateIt.new(opts)
         interpreter.instance_eval do
-          mkdir_p(path)
-          mkdir(File.join(path, "config"))
+          if mkdir_p(path)
+            puts "### Creating AutomateIt project at: #{path}"
+          else
+            puts "### Updating AutomateIt project at: #{path}"
+          end
+          mkdir(path+"/config")
 
-          render(:string => <<-EOB, :to => File.join(path, "config", "tags.yml"), :check => :exists)
+          render(:string => <<-EOB, :to => path+"/config/tags.yml", :check => :exists)
 # This is an AutomateIt tags file, used by AutomateIt::TagManager::YAML
 #
 # Use this file to assign tags to hosts using YAML. For example, to assign the
@@ -61,9 +65,10 @@ module AutomateIt
 # You may use ERB statements within this file.
 #
 #-----------------------------------------------------------------------
+
           EOB
 
-          render(:string => <<-EOB, :to => "config/fields.yml", :check => :exists)
+          render(:string => <<-EOB, :to => path+"/config/fields.yml", :check => :exists)
 # This is an AutomateIt fields file, used by AutomateIt::FieldManager::YAML
 #
 # Use this file to create a multi-level hash of key value pairs with YAML. This
@@ -85,12 +90,13 @@ module AutomateIt
 # after the tags, you can use ERB to provide specific fields for specific
 # groups of hosts, e.g.:
 #
-#   magical: <%= tagged?("magical_hosts") ? true : false %>
+#   magical: <%#= tagged?("magical_hosts") ? true : false %>
 #
 #-----------------------------------------------------------------------
+
           EOB
 
-          render(:string => <<-EOB, :to => "config/automateit_env.rb", :check => :exists)
+          render(:string => <<-EOB, :to => path+"/config/automateit_env.rb", :check => :exists)
 # This is an environment file for AutomateIt. It's loaded by the
 # AutomateIt::Interpreter immediately after loading the default tags, fields
 # and the contents of your "lib" directory. This file is loaded every time you
@@ -106,10 +112,11 @@ module AutomateIt
 # configuration management.
 #
 #-----------------------------------------------------------------------
+
           EOB
 
-          mkdir("lib")
-          render(:string => <<-EOB, :to => "lib/README.txt", :check => :exists)
+          mkdir(path+"/lib")
+          render(:string => <<-EOB, :to => path+"/lib/README.txt", :check => :exists)
 # This is your AutomateIt project's "lib" directory. You can put custom plugins
 # and convenience methods into this directory. For example, you'd put your
 # custom PackageManager plugin here or a file that contains a method definition
@@ -122,13 +129,13 @@ module AutomateIt
 # are loaded quickly and don't cause unintended side-effects.
           EOB
 
-          mkdir("recipes")
-          render(:string => <<-EOB, :to => "recipes/README.txt", :check => :exists)
+          mkdir(path+"/recipes")
+          render(:string => <<-EOB, :to => path+"/recipes/README.txt", :check => :exists)
 # This is your AutomateIt project's "recipes" directory. You should put recipes
 # into this directory. You can then execute them by running:
 #     automateit your_project_path/recipes/your_recipe.rb
           EOB
-        end
+        end # of interpreter.instance_eval
         puts "### DONE!"
     end
   end
