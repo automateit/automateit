@@ -25,14 +25,14 @@ module AutomateIt
     #
     # Arguments hash must include either a :device (e.g. "eth0") or :address
     # (e.g. "10.0.0.10"), and an optional :label (e.g. "foo") and :mask (e.g.
-    # "24"). 
+    # "24").
     #
     # An optional number of ARP :announcements may be specified, defaulting to
     # AutomateIt::AddressManager::DEFAULT_ANNOUNCEMENTS. Drivers that handle
     # announcements will block an extra second while making each announcement.
     #
     # Example:
-    #   add(:address => "10.0.0.10", :mask => 24, :device => "eth0", 
+    #   add(:address => "10.0.0.10", :mask => 24, :device => "eth0",
     #     :label => "foo", :announcements => 3)
     def add(opts) dispatch(opts) end
     DEFAULT_ANNOUNCEMENTS = 3
@@ -42,10 +42,10 @@ module AutomateIt
     #
     # Arguments hash must include either a :device (e.g. "eth0") or :address
     # (e.g. "10.0.0.10"), and an optional :label (e.g. "foo") and :mask (e.g.
-    # "24"). 
+    # "24").
     #
     # Example:
-    #   remove(:address => "10.0.0.10", :mask => 24, :device => "eth0", 
+    #   remove(:address => "10.0.0.10", :mask => 24, :device => "eth0",
     #     :label => "foo")
     def remove(opts) dispatch(opts) end
 

@@ -17,10 +17,14 @@ elsif not interpreter.address_manager[:linux].suitability(:add, ADDRESS_PROPERTI
 else
   describe "AutomateIt::AddressManager::Linux" do
     before(:all) do
-      @a = AutomateIt.new(
-        :verbosity => Logger::WARN
-      )
+      @a = AutomateIt.new(:verbosity => Logger::WARN)
       @m = @a.address_manager
+      @device_and_label = ADDRESS_PROPERTIES[:device]+":"+ADDRESS_PROPERTIES[:label]
+
+      if @m.interfaces.include?(@device_and_label) \
+          or @m.addresses.include?(ADDRESS_PROPERTIES[:address])
+        raise "ERROR: This computer already has the device/address used for testing! Either disable #{@device_and_label} and #{ADDRESS_PROPERTIES[:address]}, or change the spec to test using different properties."
+      end
     end
 
     before(:each) do
@@ -31,21 +35,22 @@ else
       @m.remove(ADDRESS_PROPERTIES) if @m.has?(ADDRESS_PROPERTIES)
     end
 
+    # TODO Split this block up into multiple, inter-dependant specs?
     it "should be able to add and remove addresses, check their ownership and presence" do
       @m.interfaces.include?(ADDRESS_PROPERTIES[:device]).should be_true
-      @m.interfaces.include?(ADDRESS_PROPERTIES[:device]+":"+ADDRESS_PROPERTIES[:label]).should be_false
+      @m.interfaces.include?(@device_and_label).should be_false
       @m.addresses.include?(ADDRESS_PROPERTIES[:address]).should be_false
       @m.has?(ADDRESS_PROPERTIES).should be_false
 
       @m.add(ADDRESS_PROPERTIES).should be_true
-      @m.interfaces.include?(ADDRESS_PROPERTIES[:device]+":"+ADDRESS_PROPERTIES[:label]).should be_true
+      @m.interfaces.include?(@device_and_label).should be_true
       @m.addresses.include?(ADDRESS_PROPERTIES[:address]).should be_true
       @m.has?(ADDRESS_PROPERTIES).should be_true
       @m.has?(:address => ADDRESS_PROPERTIES[:address]).should be_true
       @m.has?(:device => ADDRESS_PROPERTIES[:device], :label => ADDRESS_PROPERTIES[:label]).should be_true
 
       @m.remove(ADDRESS_PROPERTIES).should be_true
-      @m.interfaces.include?(ADDRESS_PROPERTIES[:device]+":"+ADDRESS_PROPERTIES[:label]).should be_false
+      @m.interfaces.include?(@device_and_label).should be_false
       @m.addresses.include?(ADDRESS_PROPERTIES[:address]).should be_false
       @m.has?(ADDRESS_PROPERTIES).should be_false
     end
