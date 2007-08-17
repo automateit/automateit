@@ -28,8 +28,43 @@ module AutomateIt
         @noop = opts[:noop]
       end
 
+      # Instantiate core plugins so they're available to the project
       _instantiate_plugins
+
+      if opts[:project]
+        @project = opts[:project]
+        log.debug("### Loading project from path: #{@project}")
+
+        tag_file = File.join(@project, "config", "tags.yaml")
+        if File.exists?(tag_file)
+          log.debug("### Loading project tags: #{tag_file}")
+          tag_manager[:yaml].setup(:file => tag_file)
+        end
+
+        field_file = File.join(@project, "config", "fields.yaml")
+        if File.exists?(field_file)
+          log.debug("### Loading project fields: #{field_file}")
+          field_manager[:yaml].setup(:file => field_file)
+        end
+
+        lib_files = Dir[File.join(@project, "lib", "*.rb")] + Dir[File.join(@project, "lib", "**", "init.rb")]
+        lib_files.each do |lib|
+          log.debug("### Loading project library: #{lib}")
+          invoke(lib)
+        end
+
+        # Instantiate project's plugins so they're available to the environment
+        _instantiate_plugins
+
+        env_file = File.join(@project, "config", "automateit_env.rb")
+        if File.exists?(env_file)
+          log.debug("### Loading project env: #{env_file}")
+          invoke(env_file)
+        end
+      end
     end
+
+    attr_accessor :project
 
     attr_accessor :plugins
 
