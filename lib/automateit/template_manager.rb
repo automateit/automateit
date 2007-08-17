@@ -6,7 +6,7 @@ module AutomateIt
     alias_methods :render
 
     # See documentation for TemplateManager::ERB#render
-    def render(source, target, opts={}) dispatch(source, target, opts) end
+    def render(*options) dispatch(*options) end
 
     # Renders ERB templates for TemplateManager.
     class ERB < Plugin::Driver
@@ -45,7 +45,13 @@ module AutomateIt
       #
       # And this should create a <tt>/tmp/out</tt> file with:
       #   Hello world!
-      def render(source_filename, target_filename, opts={})
+      def render(*options)
+        args, opts = args_and_opts(*options)
+        source_filename = args[0] || opts[:file]
+        target_filename = args[1] || opts[:to]
+        source_contents = opts[:string]
+
+        # source_filename, target_filename, opts={}
         opts[:check] ||= @default_check
         target_exists = _exists?(target_filename)
         updates = []
@@ -56,6 +62,8 @@ module AutomateIt
             if target_exists
               log.debug("### Rendering for '#{target_filename}' skipped because it already exists")
               return false
+            else
+              log.info("### Rendering '#{target_filename}' because of it doesn't exist")
             end
           when :timestamp
             if target_exists
@@ -70,7 +78,7 @@ module AutomateIt
         end
 
         target_contents = target_exists ? _read(target_filename) : ""
-        source_contents = _read(source_filename)
+        source_contents ||= _read(source_filename)
         binder = nil
         if opts[:locals]
           # Create a binding that the template can get variables from without
