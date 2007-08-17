@@ -39,7 +39,9 @@ module AutomateIt
 
       def setup(opts={})
         if filename = opts.delete(:file)
-          opts[:struct] = ::YAML::load(::ERB.new(_read(filename), nil, '-').result)
+          opts[:struct] = ::YAML::load(
+            ::ERB.new(_read(filename), nil, '-') \
+            .result(interpreter.send(:binding)))
         end
         super(opts)
       end
@@ -48,8 +50,6 @@ module AutomateIt
         return File.read(filename)
       end
       private :_read
-
     end
-
   end
 end

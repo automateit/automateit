@@ -1,8 +1,9 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
 describe "AutomateIt::FieldManager", :shared => true do
-  before do
+  before(:all) do
     @a = AutomateIt.new
+    @a.tags << "magical_hosts"
     @m = @a.field_manager
   end
 
@@ -36,7 +37,7 @@ end
 describe AutomateIt::FieldManager::Struct do
   it_should_behave_like "AutomateIt::FieldManager"
 
-  before do
+  before(:all) do
     @m.setup(:default => :struct, :struct => {
       "key" => "value",
       "hash" => {
@@ -52,14 +53,19 @@ end
 describe AutomateIt::FieldManager::YAML do
   it_should_behave_like "AutomateIt::FieldManager"
 
-  before do
+  before(:all) do
     @m[:yaml].should_receive(:_read).with("demo.yml").and_return(<<-EOB)
       <%="key"%>: value
       hash:
         leafkey: leafvalue
         branchkey:
           deepleafkey: deepleafvalue
+      magical: <%= tagged?("magical_hosts") ? true : false %>
     EOB
     @m.setup(:default => :yaml, :file => "demo.yml")
+  end
+
+  it "should expose the interpreter to ERB statements" do
+    @a.lookup("magical").should be_true
   end
 end
