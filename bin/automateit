@@ -28,27 +28,34 @@ Examples:
 
   # Preview what a recipe does using noop mode
   #{PROG} -n myrecipe.rb
-  
+
   # Eval a string
   #{PROG} -e "puts tags.to_a.inspect"
 
 Options:
 EOB
+  parser.on("-c", "--create PATH", "Create project at path") do |v|
+    opts[:create] = v
+  end
 
-  parser.on("-e", "--eval STRING", "Evaluate string") do |v|
-    opts[:eval] = v
+  parser.on("-p", "--project PATH", "Set project path") do |v|
+    opts[:project] = v
   end
 
   parser.on("-n", "--noop", "Preview without executing commands") do |v|
     opts[:noop] = v
   end
 
-  parser.on("-d", "--debug", "Print debugging information") do |v|
-    opts[:verbosity] = Logger::DEBUG
+  parser.on("-e", "--eval STRING", "Evaluate string") do |v|
+    opts[:eval] = v
   end
 
   parser.on("-q", "--quiet", "Print only errors") do |v|
     opts[:verbosity] = Logger::ERROR
+  end
+
+  parser.on("-d", "--debug", "Print debugging information") do |v|
+    opts[:verbosity] = Logger::DEBUG
   end
 
   args = parser.parse!.dup
