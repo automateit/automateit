@@ -28,11 +28,11 @@ else
     end
 
     before(:each) do
-      @m.remove(ADDRESS_PROPERTIES) if @m.has?(ADDRESS_PROPERTIES)
+      @m.remove(ADDRESS_PROPERTIES)
     end
 
     after do
-      @m.remove(ADDRESS_PROPERTIES) if @m.has?(ADDRESS_PROPERTIES)
+      @m.remove(ADDRESS_PROPERTIES)
     end
 
     # TODO Split this block up into multiple, inter-dependant specs?
@@ -62,6 +62,15 @@ else
     it "should not re-add an existing address" do
       @m.add(ADDRESS_PROPERTIES).should be_true
       @m.add(ADDRESS_PROPERTIES).should be_false
+    end
+
+    it "should have hostnames" do
+      @m.addresses.size.should >= 1
+    end
+
+    it "should be able to infer hostname variants" do
+      @m.hostname_variants_for("kagami.lucky-channel").should == ["kagami", "kagami.lucky-channel"]
+      @m.hostname_variants_for("kagami").should == ["kagami"]
     end
   end
 end

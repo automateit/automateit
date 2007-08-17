@@ -59,7 +59,50 @@ module AutomateIt
     #   => ["eth0", "lo"]
     def interfaces() dispatch() end
 
+    # Array of hostnames for this host, including variants by trying to resolve
+    # names for all addresses owned by this host. Example:
+    #   hostnames
+    #   => ["kagami", "kagami.lucky-channel", "kagami.lucky-channel.jp"]
+    def hostnames() dispatch() end
+
+    # Array of hostname variants for this +hostname+. This method performs no
+    # name resolution and simply infers a less qualified name from a more
+    # qualified hostname argument. Example:
+    #   hostname_variants_for("kagami.lucky-channel")
+    #   => ["kagami", "kagami.lucky-channel"]
+    #   hostname_variants_for("kagami")
+    #   => ["kagami"]
+    def hostname_variants_for(hostname) dispatch(hostname) end
+
+    #-----------------------------------------------------------------------
+
+    module ResolvHelpers
+      require 'resolv'
+
+      def hostnames()
+        names = addresses.inject(Set.new) do |sum, address|
+          # Some addresses can't be resolved, bummer.
+          sum.merge(Resolv.getnames(address)) rescue Resolv::ResolvError; sum
+        end
+        names.each{|name| names.merge(hostname_variants_for(name))}
+        return names.to_a.sort
+      end
+
+      def hostname_variants_for(hostname)
+        results = []
+        elements = hostname.split(".")
+        for i in 1..elements.size
+          results << elements[0..i-1].join(".")
+        end
+        return results.to_a.sort
+      end
+    end
+
+    #-----------------------------------------------------------------------
+
     class Linux < Plugin::Driver
+      include ResolvHelpers
+
       def suitability(method, *args)
         @suitable ||= interpreter.instance_eval do
           which("ifconfig") and which("ip") and which("arping")
