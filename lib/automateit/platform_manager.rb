@@ -61,7 +61,7 @@ module AutomateIt
 
       def setup(opts={})
         super(opts)
-        @struct[:os] ||= @@struct_cache[:os] ||= `uname -s`.chomp.downcase
+        @struct[:os]   ||= @@struct_cache[:os]   ||= `uname -s`.chomp.downcase
         @struct[:arch] ||= @@struct_cache[:arch] ||= `uname -m`.chomp.downcase
       end
     end
@@ -75,17 +75,25 @@ module AutomateIt
       end
 
       def setup(opts={})
-        super(opts)
-        @struct[:distro] ||= @@struct_cache[:distro]
+        super(opts) # Rely on Uname to set :os and :arch
+        @struct[:distro]  ||= @@struct_cache[:distro]
         @struct[:release] ||= @@struct_cache[:release]
         unless @struct[:distro] and @struct[:release]
-          Open3.popen3(LSB_RELEASE, "-a") do |sin, sout, serr|
-            next if (rawdata = sout.read).empty?
-            yamldata = YAML::load(rawdata.gsub(/\t/, " "))
-            @struct[:distro] = @@struct_cache[:distro] = yamldata["Distributor ID"].to_s.downcase
-            @struct[:release] = @@struct_cache[:release] = yamldata["Release"].to_s.downcase
+          data = _read_lsb_release_output
+          begin
+            yaml = YAML::load(data)
+            @struct[:distro]  ||= @@struct_cache[:distro]  ||= yaml["Distributor ID"].to_s.downcase
+            @struct[:release] ||= @@struct_cache[:release] ||= yaml["Release"].to_s.downcase
+          rescue NoMethodError, IndexError, ArgumentError => e
+            raise ArgumentError.new("invalid YAML output from '#{LSB_RELEASE}': #{data.inspect}")
           end
         end
+      end
+
+      def _read_lsb_release_output
+        # Discard STDERR because "lsb_release" spews warnings like "No LSB
+        # modules are available." that we don't care about.
+        return `"#{LSB_RELEASE}" -a 2>/dev/null`.gsub(/\t/, " ")
       end
     end
   end

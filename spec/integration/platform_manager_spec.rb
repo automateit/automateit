@@ -34,6 +34,17 @@ begin
         String.should === @m.query(:release)
       end
 
+      it "should fail on invalid LSB output" do
+        if AutomateIt::PlatformManager::LSB === @m.driver_for(:query, :release)
+          # XXX mocking a shared variable breaks it because the mock doesn't go away
+          m = AutomateIt.new.platform_manager
+          m[:lsb].send(:instance_eval, "@struct.delete(:release)")
+          m[:lsb].class.send(:class_eval, "@@struct_cache.delete(:release)")
+          m[:lsb].should_receive(:_read_lsb_release_output).and_return("not : valid : yaml")
+          lambda{ m[:lsb].setup; m[:lsb].query(:release) }.should raise_error(ArgumentError, /invalid YAML/)
+        end
+      end
+
       it "should query combination of os, arch, distro and release" do
         result = @m.query("os#arch#distro#release")
         String.should === result
