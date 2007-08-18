@@ -52,7 +52,7 @@ module AutomateIt
         query = query.to_s
         tags = hostname ? tags_for(hostname) : @tags
         # XXX This tokenization process discards unknown characters, which may hide errors in the query
-        tokens = query.scan(%r{\(|\)|\&+|\|+|!?[\.\w]+})
+        tokens = query.scan(%r{\!|\(|\)|\&+|\|+|!?[\.\w]+})
         if tokens.size > 1
           booleans = tokens.map do |token|
             if matches = token.match(/^(!?)([\.\w]+)$/)
