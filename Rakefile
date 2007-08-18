@@ -2,36 +2,43 @@ require 'spec/rake/spectask'
 
 task :default => :spec
 
-task :spec do
-  Spec::Rake::SpecTask.new(:raw_spec) do |t|
+#---[ run specs ]-------------------------------------------------------
+
+def specify(*files)
+  Spec::Rake::SpecTask.new(:spec_internal) do |t|
     t.rcov = @rcov
     t.rcov_opts = ['--exclude', 'spec']
-    t.spec_files = FileList['spec/unit/**/*_spec.rb']
+    t.spec_files = FileList[*files]
   end
-  Rake::Task[:raw_spec].invoke
+  Rake::Task[:spec_internal].invoke
+end
+
+task "spec" do
+  specify('spec/unit/**/*_spec.rb')
+end
+
+task "rcov" do
+  @rcov = true
+  Rake::Task["spec"].invoke
 end
 
 task "spec:all" do
-  Spec::Rake::SpecTask.new(:raw_spec_all) do |t|
-    t.rcov = @rcov
-    t.rcov_opts = ['--exclude', 'spec']
-    t.spec_files = FileList[
-      'spec/unit/**/*_spec.rb',
-      'spec/functional/**/*_spec.rb',
-      'spec/integration/**/*_spec.rb'
-    ]
-  end
-  Rake::Task[:raw_spec_all].invoke
+  specify('spec/unit/**/*_spec.rb', 'spec/functional/**/*_spec.rb', 'spec/integration/**/*_spec.rb')
 end
 
-task :rcov do
-  @rcov = true
-  Rake::Task[:spec].invoke
-end
-
-task "rcov:all" do
+task "spec:rcov" do
   @rcov = true
   Rake::Task["spec:all"].invoke
+end
+
+task "verbose" do
+  ENV["SPEC_OPTS"] = "-fs"
+end
+
+#---[ calculate LOC ]---------------------------------------------------
+
+class Numeric
+  def commify() (s=self.to_s;x=s.length;s).rjust(x+(3-(x%3))).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/,'\1,').strip end
 end
 
 task :loc => [:loclines, :locdiff] do
@@ -62,6 +69,8 @@ task :locdiff do
   end
 end
 
+#---[ misc ]------------------------------------------------------------
+
 task :rdoc do
   sh "rdoc --main 'AutomateIt' --exclude 'spec/*'"
 end
@@ -70,6 +79,4 @@ task :prof do
   sh "ruby-prof -f prof.txt `which spec` spec/unit/*.rb"
 end
 
-class Numeric
-  def commify() (s=self.to_s;x=s.length;s).rjust(x+(3-(x%3))).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/,'\1,').strip end
-end
+#===[ fin ]=============================================================
