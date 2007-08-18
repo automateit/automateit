@@ -3,6 +3,7 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 describe "AutomateIt::TagManager", :shared => true do
   before(:all) do
     @a = AutomateIt.new
+    @a.address_manager.should_receive(:hostnames).and_return(["kurou", "kurou.foo"])
     @a.platform_manager.setup(
       :default => :struct,
       :struct => {
@@ -124,8 +125,7 @@ end
 describe "AutomateIt::TagManager::Struct" do
   it_should_behave_like "AutomateIt::TagManager"
 
-  before do
-    @a.address_manager.should_receive(:hostnames).and_return(["kurou", "kurou.foo"])
+  before(:all) do
     @m.setup(
       :default => :struct,
       :struct => {
@@ -144,8 +144,7 @@ end
 describe "AutomateIt::TagManager::YAML" do
   it_should_behave_like "AutomateIt::TagManager"
 
-  before do
-    @a.address_manager.should_receive(:hostnames).and_return(["kurou", "kurou.foo"])
+  before(:all) do
     @m[:yaml].should_receive(:_read).with("demo.yml").and_return(<<-EOB)
       <%="apache_servers"%>:
         - kurou
