@@ -95,13 +95,6 @@ describe "AutomateIt::TagManager", :shared => true do
     @a.tagged?("magic").should be_true
   end
 
-  it "should find hostname aliases" do
-    hostnames = @a.hostname_aliases_for("kurou.foo.bar")
-    hostnames.include?("kurou.foo.bar").should be_true
-    hostnames.include?("kurou.foo").should be_true
-    hostnames.include?("kurou").should be_true
-  end
-
   it "should find tags for a host using an array" do
     @a.tags_for(["kurou"]).include?("apache_servers").should be_true
   end
@@ -132,8 +125,8 @@ describe "AutomateIt::TagManager::Struct" do
   it_should_behave_like "AutomateIt::TagManager"
 
   before do
+    @a.address_manager.should_receive(:hostnames).and_return(["kurou", "kurou.foo"])
     @m.setup(
-      :hostname_aliases => ["kurou", "kurou.foo"],
       :default => :struct,
       :struct => {
         "apache_servers" => [
@@ -152,6 +145,7 @@ describe "AutomateIt::TagManager::YAML" do
   it_should_behave_like "AutomateIt::TagManager"
 
   before do
+    @a.address_manager.should_receive(:hostnames).and_return(["kurou", "kurou.foo"])
     @m[:yaml].should_receive(:_read).with("demo.yml").and_return(<<-EOB)
       <%="apache_servers"%>:
         - kurou
@@ -160,7 +154,6 @@ describe "AutomateIt::TagManager::YAML" do
         akane.foo
     EOB
     @m.setup(
-      :hostname_aliases => ["kurou", "kurou.foo"],
       :default => :yaml,
       :file => "demo.yml"
     )

@@ -69,8 +69,8 @@ else
     end
 
     it "should be able to infer hostname variants" do
-      @m.hostname_variants_for("kagami.lucky-channel").should == ["kagami", "kagami.lucky-channel"]
-      @m.hostname_variants_for("kagami").should == ["kagami"]
+      @m.hostnames_for("kagami.lucky-channel").should == ["kagami", "kagami.lucky-channel"]
+      @m.hostnames_for("kagami").should == ["kagami"]
     end
   end
 end

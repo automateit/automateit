@@ -68,11 +68,11 @@ module AutomateIt
     # Array of hostname variants for this +hostname+. This method performs no
     # name resolution and simply infers a less qualified name from a more
     # qualified hostname argument. Example:
-    #   hostname_variants_for("kagami.lucky-channel")
+    #   hostnames_for("kagami.lucky-channel")
     #   => ["kagami", "kagami.lucky-channel"]
-    #   hostname_variants_for("kagami")
+    #   hostnames_for("kagami")
     #   => ["kagami"]
-    def hostname_variants_for(hostname) dispatch(hostname) end
+    def hostnames_for(hostname) dispatch(hostname) end
 
     #-----------------------------------------------------------------------
 
@@ -84,11 +84,11 @@ module AutomateIt
           # Some addresses can't be resolved, bummer.
           sum.merge(Resolv.getnames(address)) rescue Resolv::ResolvError; sum
         end
-        names.each{|name| names.merge(hostname_variants_for(name))}
+        names.each{|name| names.merge(hostnames_for(name))}
         return names.to_a.sort
       end
 
-      def hostname_variants_for(hostname)
+      def hostnames_for(hostname)
         results = []
         elements = hostname.split(".")
         for i in 1..elements.size

@@ -2,7 +2,7 @@ require 'automateit'
 
 module AutomateIt
   class TagManager < Plugin::Manager
-    alias_methods :hosts_tagged_with, :hostname_aliases_for, :tags, :tags=, :tagged?, :tags_for
+    alias_methods :hosts_tagged_with, :tags, :tags=, :tagged?, :tags_for
 
     def hosts_tagged_with(query) dispatch(query) end
 
@@ -14,14 +14,10 @@ module AutomateIt
 
     def tags_for(hostname) dispatch(hostname) end
 
-    def hostname_aliases() dispatch() end
-
-    def hostname_aliases=(aliases) dispatch(aliases) end
-
-    def hostname_aliases_for(hostname) dispatch(hostname) end
+    #-----------------------------------------------------------------------
 
     class Struct < Plugin::Driver
-      attr_accessor :hostname_aliases, :tags
+      attr_accessor :tags
 
       def suitability(method, *args)
         return 1
@@ -30,24 +26,14 @@ module AutomateIt
       def setup(opts={})
         super(opts)
 
-        if opts[:hostname_aliases]
-          @hostname_aliases = Set.new(opts[:hostname_aliases])
-        else
-          @hostname_aliases ||= Set.new
-        end
+        @struct ||= {}
+        @struct = opts[:struct] if opts[:struct]
+        # TODO parse @group and !negation
 
         @tags ||= Set.new
-        hostnames = [@hostname_aliases.to_a \
-          + interpreter.address_manager.hostnames.to_a].flatten.uniq
+        hostnames = interpreter.address_manager.hostnames.to_a
         @tags.merge(hostnames)
-
-        if opts[:struct]
-          # TODO parse @group and !negation
-          @struct = opts[:struct]
-          @tags.merge(tags_for(hostnames))
-        else
-          @struct ||= {}
-        end
+        @tags.merge(tags_for(hostnames))
 
         @tags.add(interpreter.platform_manager.query("os")) rescue IndexError
         @tags.add(interpreter.platform_manager.query("arch")) rescue IndexError
@@ -82,26 +68,27 @@ module AutomateIt
         end
       end
 
-      def tags_for(hostname)
-        hostnames = String === hostname ? hostname_aliases_for(hostname) : hostname.to_a
-        return @struct.inject(Set.new) do |sum, value|
-          role, members = value
+      def tags_for(hostnames)
+        hostnames = \
+          case hostnames
+          when String
+            interpreter.address_manager.hostnames_for(hostnames)
+          when Array, Set
+            hostnames.inject(Set.new) do |sum, hostname|
+              sum.merge(interpreter.address_manager.hostnames_for(hostname)); sum
+            end
+          else
+            raise TypeError.new("invalid hostnames argument type: #{hostnames.class}")
+          end
+        return @struct.inject(Set.new) do |sum, role_and_members|
+          role, members = role_and_members
           members_aliases = members.inject(Set.new) do |aliases, member|
-            aliases.merge(hostname_aliases_for(member)); aliases
+            aliases.merge(interpreter.address_manager.hostnames_for(member)); aliases
           end.to_a
           sum.add(role) unless (hostnames & members_aliases).empty?
           sum
         end
       end
-
-      def hostname_aliases_for(hostname)
-        # Progressively strip a hostname of its domain elements
-        tokens = hostname.split(/\./)
-        return (1..tokens.size).inject([]) do |aliases, i|
-          aliases << tokens[0,i].join('.');aliases
-        end
-      end
-
     end
 
     require 'erb'
