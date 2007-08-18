@@ -34,7 +34,10 @@ task "rcov:all" do
   Rake::Task["spec:all"].invoke
 end
 
-task :loc do
+task :loc => [:loclines, :locdiff] do
+end
+
+task :loclines do
   require 'find'
   lines = 0
   bytes = 0
