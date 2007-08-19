@@ -16,6 +16,9 @@ rescue LoadError
   require 'erb'
 end
 
+# Patches
+require 'patches/object.rb'
+
 # Core
 require 'automateit/common'
 require 'automateit/interpreter'
