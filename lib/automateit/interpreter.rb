@@ -32,7 +32,7 @@ module AutomateIt
       _instantiate_plugins
 
       if opts[:project]
-        @project = opts[:project]
+        @project = File.expand_path(opts[:project])
         log.debug("### Loading project from path: #{@project}")
 
         tag_file = File.join(@project, "config", "tags.yml")
