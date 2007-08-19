@@ -1,14 +1,20 @@
 # Standard libraries
-require 'erb'
+require 'expect'
 require 'fileutils'
 require 'logger'
 require 'open3'
+require 'pty'
 require 'set'
 require 'yaml'
 
 # Gems
 require 'rubygems'
 require 'active_support'
+begin 
+  require 'eruby'
+rescue LoadError
+  require 'erb'
+end
 
 # Core
 require 'automateit/common'

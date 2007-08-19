@@ -14,7 +14,7 @@ module AutomateIt
       if opts[:log]
         @log = opts[:log]
       elsif not defined?(@log) or @log.nil?
-        @log = Logger.new(STDOUT)
+        @log = Logger.new($stdout)
         @log.level = Logger::INFO
       end
 

@@ -42,8 +42,9 @@ module AutomateIt
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
         available = block.call(packages, opts)
-        result = opts[:list] ? available : (packages - available).empty?
-        log.debug("installed? result %s / packages %s / available %s" % [result.inspect, packages.inspect, available.inspect])
+        truth = (packages - available).empty?
+        result = opts[:list] ? available : truth
+        log.debug("### installed?(#{packages.inspect}) => #{truth}: #{available.inspect}")
         return result
       end
 
@@ -54,9 +55,9 @@ module AutomateIt
         packages = [packages].flatten
         available = [installed?(packages, :list => true)].flatten
         missing = packages - available
-
-        result = opts[:list] ? missing : (packages - missing).empty?
-        log.debug("not_installed? result %s / packages %s / missing %s" % [result.inspect, packages.inspect, missing.inspect])
+        truth = (packages - missing).empty?
+        result = opts[:list] ? missing : truth
+        log.debug("### not_installed?(#{packages.inspect}) => #{truth}: #{missing.inspect}")
         return result
       end
 
@@ -128,7 +129,7 @@ module AutomateIt
 
       def available?
         return _cache_available do
-          interpreter.instance_eval{which("apt-get") && which("dpkg")}
+          ! interpreter.instance_eval{which("apt-get") && which("dpkg")}.nil?
         end
       end
 
@@ -140,12 +141,10 @@ module AutomateIt
       def installed?(*packages)
         return _installed_helper?(*packages) do |list, opts|
           ### data = `dpkg --status nomarch apache2 not_a_real_package 2>&1`
-          cmd = "dpkg --status"
-          list.each{|package| cmd << " "+package}
-          cmd << " 2>&1" # missing packages are listed on STDERR
+          cmd = "dpkg --status "+list.join(" ")+" 2>&1"
+
           log.debug("$$$ "+cmd)
           data = `#{cmd}`
-
           matches = data.scan(/^Package: (.+)$\s*^Status: (.+)$/)
           available = matches.inject([]) do |sum, match|
             package, status = match
@@ -168,9 +167,7 @@ module AutomateIt
           # apt-get options:
           # -y : yes to all queries
           # -q : no interactive progress bars
-          cmd = "apt-get install -y -q"
-          list.each{|package| cmd << " "+package}
-          cmd << " < /dev/null"
+          cmd = "apt-get install -y -q "+list.join(" ")+" < /dev/null"
           cmd << " > /dev/null" if opts[:quiet]
           cmd << " 2>&1"
 
@@ -184,9 +181,7 @@ module AutomateIt
           # apt-get options:
           # -y : yes to all queries
           # -q : no interactive progress bars
-          cmd = "apt-get remove -y -q"
-          list.each{|package| cmd << " "+package}
-          cmd << " < /dev/null"
+          cmd = "apt-get remove -y -q "+list.join(" ")+" < /dev/null"
           cmd << " > /dev/null" if opts[:quiet]
           cmd << " 2>&1"
 
@@ -198,13 +193,13 @@ module AutomateIt
     #-----------------------------------------------------------------------
 
     # The YUM driver for the PackageManager provides a way to manage software
-    # packages on Red Hat-style systems using +yum= and +rpm+.
+    # packages on Red Hat-style systems using +yum+ and +rpm+.
     class YUM < Plugin::Driver
       include Base
 
       def available?
          return _cache_available do
-           interpreter.instance_eval{which("yum") && which("rpm")}
+           ! interpreter.instance_eval{which("yum") && which("rpm")}.nil?
          end
       end
 
@@ -219,17 +214,15 @@ module AutomateIt
           cmd = 'rpm -q --nosignature --nodigest --qf "%{NAME} # %{VERSION} # %{RELEASE}\n"'
           list.each{|package| cmd << " "+package}
           cmd << " 2>&1" # missing packages are listed on STDERR
+
           log.debug("$$$ "+cmd)
           data = `#{cmd}`
-
           matches = data.scan(/^(.+) # (.+) # .+$/)
           available = matches.inject([]) do |sum, match|
             package, status = match
             sum << package
             sum
           end
-
-          log.debug("### installed?(%s) => %s" % [list.inspect, available.inspect])
           available
         end
       end
@@ -247,9 +240,7 @@ module AutomateIt
           # -d 0 : no debugging info
           # -e 0 : show only fatal errors
           # -C : don't download headers
-          cmd = "yum -y -d 0 -e 0 -C install"
-          list.each{|package| cmd << " "+package}
-          cmd << " < /dev/null"
+          cmd = "yum -y -d 0 -e 0 -C install "+list.join(" ")+" < /dev/null"
           cmd << " > /dev/null" if opts[:quiet]
           cmd << " 2>&1"
 
@@ -260,7 +251,130 @@ module AutomateIt
       # See AutomateIt::PackageManager#uninstall
       def uninstall(*packages)
         return _uninstall_helper(*packages) do |list, opts|
-          cmd = "rpm --erase --quiet"
+          cmd = "rpm --erase --quiet "+list.join(" ")+" < /dev/null"
+          cmd << " > /dev/null" if opts[:quiet]
+          cmd << " 2>&1"
+
+          interpreter.sh(cmd)
+        end
+      end
+    end
+
+    #-----------------------------------------------------------------------
+
+    # The GEM driver for the PackageManager provides a way to manage software
+    # packages for RubyGems using the +gem+ command.
+    class Gem < Plugin::Driver
+      include Base
+
+      def available?
+        return _cache_available do
+          ! interpreter.which("gem").nil?
+        end
+      end
+
+      def suitability(method, *args)
+        # Never select GEM as the default driver
+        return 0
+      end
+
+      def installed?(*packages)
+        return _installed_helper?(*packages) do |list, opts|
+          # Sample session:
+          #   No match found for s33r (> 0)
+          #   Gem activesupport-1.4.2
+          #
+          #   Gem net-ssh-1.1.2
+          #     needle (>= 1.2.0)
+          cmd = "gem dependency "+list.join(" ")+" 2>&1"
+
+          log.debug("$$$ "+cmd)
+          data = `#{cmd}`
+          available = data.scan(/^Gem (.+)-.+?$/).flatten
+        end
+      end
+
+      def not_installed?(*packages)
+        _not_installed_helper?(*packages)
+      end
+
+      def install(*packages)
+        return _install_helper(*packages) do |list, opts|
+          # Why is the "gem" utility such a steaming pile of offal? Problems include:
+          # - Requires interactive input to install a package
+          # - Repeatedly updates indexes even when there's no reason to and can't be told to stop
+          # - Doesn't cache packages, insists on downloading them again
+          # - Installs broken packages, often without giving any indication of failure
+          # - Installs broken packages and leaves you to deal with the jagged pieces
+          # - Sometimes fails through exit status, sometimes through output, but not consistently
+          # - Lacks a proper "is this package installed?" feature
+          # - A nightmare to deal with if you want to install your own GEMHOME/GEMPATH
+
+          # Example of an invalid gem that'll cause the failure I'm trying to avoid below:
+          #   package_manager.install("sys-cpu", :with => :gem)
+
+          # gem options:
+          # -y : Include dependencies,
+          # -E : use /usr/bin/env for installed executables; but only with >= 0.9.4
+          cmd = "gem install -y "+list.join(" ")+" 2>&1"
+
+          # XXX Try to warn the user that they won't see any output for a while
+          log.info("### Installing Gems (#{list.inspect}), this will take a while...") unless opts[:quiet]
+
+          uninstall_needed = false
+          log.debug("$$$ "+cmd)
+          begin
+            # Why is PTY/Expect such a steaming pile of offal? :(
+            PTY.spawn(cmd) do |sout, sin, pid|
+              $expect_verbose = opts[:quiet] ? false : true
+              #$expect_verbose = true
+
+              sout.expect(/Could not find.+in any repository|Successfully installed|Select which gem to install.+>/m) do |o|
+                o1 = o.first
+                if o1.match(/Select which gem to install/)
+                  choice = o1.match(/^ (\d+)\. .+?\(ruby\)\s+$/)[1]
+                  sin.puts(choice)
+                  sout.expect(/Successfully installed|Gem files will remain.+for inspection/) do |o|
+                    o2 = o.first
+                    if o2.match(/Gem files will remain.+for inspection/)
+                      uninstall_needed = true
+                    end
+                  end
+                end
+              end
+
+              # Gem doesn't always print a trailing newline
+              print "\n" if $expect_verbose
+
+              # PTY/Expect hack to throw ChildExited exception so we can read command's exit status
+              sout.read
+              sleep 5
+              raise "PTY/Expect hack to get exit status failed"
+            end
+          rescue Errno::EIO => e
+            log.error("!!! Gem install failed when session ended unexpectedly")
+            uninstall_needed = true
+          rescue PTY::ChildExited => e
+            unless e.status.exitstatus.zero?
+              log.error("!!! Gem install failed with non-zero exit value even though it may have claimed success")
+              uninstall_needed = true
+            end
+          end
+
+          if uninstall_needed
+            log.error("!!! Gem install failed, trying to uninstall broken pieces: #{list.inspect}")
+            uninstall(list, opts)
+
+            raise ArgumentError.new("Gem install failed, either it's invalid or missing a dependency: #{list.inspect}")
+          end
+        end
+      end
+
+      def uninstall(*packages)
+        return _uninstall_helper(*packages) do |list, opts|
+          # gem options:
+          # -x : remove installed executables
+          cmd = "gem uninstall -x"
           list.each{|package| cmd << " "+package}
           cmd << " < /dev/null"
           cmd << " > /dev/null" if opts[:quiet]

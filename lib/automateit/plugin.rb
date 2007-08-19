@@ -107,11 +107,16 @@ module AutomateIt
       end
 
       def dispatch_to(method, *args, &block)
-        if default
-          @drivers[default].send(method, *args, &block)
-        else
-          driver_for(method, *args, &block).send(method, *args, &block)
-        end
+        list, options = args_and_opts(*args)
+        driver = \
+          if options and options[:with]
+            @drivers[options[:with]]
+          elsif default
+            @drivers[default]
+          else
+            driver_for(method, *args, &block)
+          end
+        driver.send(method, *args, &block)
       end
 
       def driver_suitability_levels_for(method, *args, &block)
