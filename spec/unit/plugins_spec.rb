@@ -15,6 +15,10 @@ class MyManager::MyUnsuitableDriver < AutomateIt::Plugin::Driver
 end
 
 class MyManager::MyUnimplementedDriver < AutomateIt::Plugin::Driver
+  def available?
+    _cache_available{true}
+  end
+
   def suitability(method, *args)
     return 50
   end
@@ -24,6 +28,10 @@ end
 
 
 class MyManager::MyFirstDriver < AutomateIt::Plugin::Driver
+  def available?
+    _cache_available{true}
+  end
+
   def suitability(method, *args)
     case method
     when :mymethod
@@ -39,6 +47,10 @@ class MyManager::MyFirstDriver < AutomateIt::Plugin::Driver
 end
 
 class MyManager::MySecondDriver < AutomateIt::Plugin::Driver
+  def available?
+    _cache_available{true}
+  end
+
   def suitability(method, *args)
     case method
     when :mymethod
