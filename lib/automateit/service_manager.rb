@@ -46,6 +46,7 @@ module AutomateIt
       end
 
       def _run_command(args, opts={})
+        _raise_unless_available
         cmd = String === args ? args : args.map{|t|'"%s"'%t}.join(' ')
         if opts[:checking]
           cmd += " > /dev/null 2>&1" # Discard STDOUT and STDERR
@@ -112,6 +113,7 @@ module AutomateIt
         # space between the name and run-level when displaying a long name:
         #   nfs-kernel-server   K80 K80 S20 S20 S20 S20 K80
         #   automateit_service_sysv_testK20 K20 S20 S20 S20 S20 K20
+        _raise_unless_available
         if matcher = `sysvconfig --listlinks` \
             .match(/^(#{service})((\s|[KS]\d{2}\b).+?)$/)
           return true if matcher[2].match(/\bS\d{2}\b/)
@@ -121,11 +123,13 @@ module AutomateIt
 =end
 
       def enable(service, opts={})
+        _raise_unless_available
         return false if enabled?(service)
         interpreter.sh("sysvconfig --enable #{service} < /dev/null > /dev/null")
       end
 
       def disable(service, opts={})
+        _raise_unless_available
         return false unless enabled?(service)
         interpreter.sh("sysvconfig --disable #{service} < /dev/null > /dev/null")
       end
@@ -144,6 +148,7 @@ module AutomateIt
       end
 
       def enabled?(service)
+        _raise_unless_available
         # "chkconfig --list service" may produce output like the below:
         # service httpd supports chkconfig, but is not referenced in any runlevel (run 'chkconfig --add automateit_service_sysv_test')
         # => httpd           0:off   1:off   2:off   3:off   4:off   5:off   6:off
@@ -155,11 +160,13 @@ module AutomateIt
       end
 
       def enable(service, opts={})
+        _raise_unless_available
         return false if enabled?(service)
         interpreter.sh("chkconfig --add #{service}")
       end
 
       def disable(service, opts={})
+        _raise_unless_available
         return false unless enabled?(service)
         interpreter.sh("chkconfig --del #{service}")
       end
@@ -180,6 +187,7 @@ module AutomateIt
       end
 
       def enabled?(service)
+        _raise_unless_available
         # Do NOT use Gentoo's rc-update because the idiot that wrote that
         # utility truncates service names to look "prettier" and provides no
         # way to disable this annoyance for people that need to query services
@@ -190,10 +198,12 @@ module AutomateIt
       end
 
       def enable(service, opts={})
+        _raise_unless_available
         #system("rc-update add #{service} default")
       end
 
       def disable(service, opts={})
+        _raise_unless_available
         #system "rc-update del #{service} default"
       end
     end

@@ -140,6 +140,7 @@ module AutomateIt
       end
 
       def _add_or_remove_command(action, opts)
+        _raise_unless_available
         case action.to_sym
         when :add
           # Accept
@@ -165,10 +166,12 @@ module AutomateIt
       private :_add_or_remove_command
 
       def interfaces()
+        _raise_unless_available
         return `ifconfig`.scan(/^(\w+?(?::\w+)?)\b\s+Link/).flatten
       end
 
       def addresses()
+        _raise_unless_available
         return `ifconfig`.scan(/inet6? addr:\s*(.+?)\s+/).flatten
       end
     end
