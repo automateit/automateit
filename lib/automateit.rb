@@ -10,7 +10,7 @@ require 'yaml'
 # Gems
 require 'rubygems'
 require 'active_support'
-begin 
+begin
   require 'eruby'
 rescue LoadError
   require 'erb'
@@ -18,6 +18,7 @@ end
 
 # Patches
 require 'patches/object.rb'
+require 'patches/metaclass.rb'
 
 # Core
 require 'automateit/common'

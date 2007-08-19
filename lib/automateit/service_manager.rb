@@ -39,11 +39,7 @@ module AutomateIt
     class SYSV < Plugin::Driver
       ETC_INITD = "/etc/init.d"
 
-      def available?
-        return _cache_available do
-          File.directory?(ETC_INITD)
-        end
-      end
+      depends_on :directories => [ETC_INITD]
 
       def suitability(method, *args)
         return available? ? 1 : 0
@@ -101,11 +97,7 @@ module AutomateIt
     # underlying "sysvconfig" program is slow enough that it's better to rely
     # on the SYSV driver's simpler but much faster implementation.
     class Sysvconfig < SYSV
-      def available?
-        return _cache_available do
-          ! interpreter.which("sysvconfig").nil?
-        end
-      end
+      depends_on :programs => %w(sysvconfig)
 
       def suitability(method, *args)
         return available? ? 2 : 0
@@ -145,11 +137,7 @@ module AutomateIt
     # #enable and #disable on RedHat-like platforms. It uses the SYSV driver
     # for handling the methods #running?, #start and #stop.
     class Chkconfig < SYSV
-      def available?
-        return _cache_available do
-          ! interpreter.which("chkconfig").nil?
-        end
-      end
+      depends_on :programs => %w(chkconfig)
 
       def suitability(method, *args)
         return available? ? 2 : 0
@@ -185,11 +173,7 @@ module AutomateIt
     #--
     # TODO implement
     class RC_Update < SYSV
-      def available?
-        return _cache_available do
-          ! interpreter.which("rc-update").nil?
-        end
-      end
+      depends_on :programs => %w(rc-update)
 
       def suitability(method, *args)
         return available? ? 2 : 0

@@ -61,11 +61,7 @@ module AutomateIt
     #-----------------------------------------------------------------------
 
     class Uname < Struct
-      def available
-        return _cache_available do
-          ! interpreter.which("uname").nil?
-        end
-      end
+      depends_on :programs => %w(uname)
 
       def suitability(method, *args)
         # Level must be greater than Struct's
@@ -82,14 +78,9 @@ module AutomateIt
     #-----------------------------------------------------------------------
 
     class LSB < Uname
-      # XXX lsb_release takes nearly a second to run, should it be cached somehow across runs?
       LSB_RELEASE = "lsb_release"
 
-      def available?
-        return _cache_available do
-          ! interpreter.which(LSB_RELEASE).nil?
-        end
-      end
+      depends_on :programs => [LSB_RELEASE]
 
       def suitability(method, *args)
         # Level must be greater than Uname's

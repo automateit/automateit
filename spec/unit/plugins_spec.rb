@@ -13,9 +13,10 @@ end
 class MyManager::MyUnsuitableDriver < AutomateIt::Plugin::Driver
   # +suitability+ method deliberately not implemented to test errors
 
-  def available?
-    _cache_available("ka-boom"){false}
-  end
+  depends_on \
+    :files => ["non_existent_file"],
+    :directories => ["non_existent_directory"],
+    :programs => ["non_existent_program"]
 
   def unavailable_method
     _raise_unless_available
@@ -24,7 +25,7 @@ end
 
 class MyManager::MyUnimplementedDriver < AutomateIt::Plugin::Driver
   def available?
-    _cache_available{true}
+    true
   end
 
   def suitability(method, *args)
@@ -36,9 +37,7 @@ end
 
 
 class MyManager::MyFirstDriver < AutomateIt::Plugin::Driver
-  def available?
-    _cache_available{true}
-  end
+  depends_on :directories => ["/"]
 
   def suitability(method, *args)
     case method
@@ -56,7 +55,7 @@ end
 
 class MyManager::MySecondDriver < AutomateIt::Plugin::Driver
   def available?
-    _cache_available{true}
+    true
   end
 
   def suitability(method, *args)
@@ -149,7 +148,7 @@ describe "MyManager's drivers" do
 
   it "should fail on unavailable methods" do
     lambda{ MyManager::MyUnsuitableDriver.new.unavailable_method }.should \
-      raise_error(NotImplementedError, /ka-boom/)
+      raise_error(NotImplementedError, /non_existent/)
   end
 
   it "should have a token" do

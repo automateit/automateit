@@ -148,40 +148,79 @@ module AutomateIt
     class Driver < Base
       collect_registrations
 
-      attr_writer :available
-
-      # Is this driver available on this platform? For example, this method is
-      # used by the PackageManager driver for APT to determine if the "apt-get"
-      # program is installed.
+      # Defines what this driver depends on the system for. Options:
+      # * :files - Array of filenames that must exist.
+      # * :directories - Array of directories that must exist.
+      # * :programs - Array of programs, checked with +which+, that must exist.
       #
-      # The <tt>available?</tt> method is used to determine if the driver can
+      # Example:
+      #   class APT < Plugin::Driver
+      #     depends_on :programs => %w(apt-get dpkg)
+      #     # ...
+      #  end
+      def self.depends_on(opts)
+        meta_eval do
+          attr_accessor :_depends_on_opts, :_is_available, :_missing_dependencies
+        end
+        self._depends_on_opts = opts
+      end
+
+      # Is this driver available on this platform? Queries the dependencies set
+      # by +depends_on+ to make sure that they're all present, otherwise throws
+      # a NotImplementedError. If a driver author needs to do some other kind
+      # of check, it's reasonable to override this method.
+      #
+      # For example, this method is used by the PackageManager driver for APT
+      # to determine if the "apt-get" program is installed.
+      #
+      # The <tt>available?</tt> method is used to determine if the driver *can*
       # do the work, while the <tt>suitability</tt> method determines if the
-      # driver should be automatically selected.
+      # driver *should* be automatically selected.
       def available?
-        log.debug("driver #{self.class} doesn't implement the +available?+ method")
-        return false
+        is_available = self.class._is_available
+        opts = self.class._depends_on_opts
+        if is_available.nil? and opts.nil?
+          log.debug("don't know if driver #{self.class} is available, maybe it doesn't state what it +depends_on+")
+          return false
+        elsif is_available.nil?
+          all_present = true
+          missing = []
+          for kind in [:files, :directories, :programs]
+            next unless opts[kind]
+            for item in opts[kind]
+              present = \
+                case kind
+                when :files
+                  File.exists?(item)
+                when :directories
+                  File.directory?(item)
+                when :programs
+                  # FIXME How do +which+ when interpreter queries availability, which causes an infinite loop? Temporary hack is to bypass the check.
+                  ### when :programs: ! interpreter.which(item).nil?
+                  ! interpreter.shell_manager[:posix].which(item).nil?
+                else
+                  raise "unknown kind: #{kind}"
+                end
+              unless present
+                all_present = false
+                missing << item
+              end
+            end
+          end
+          self.class._missing_dependencies = missing
+          return self.class._is_available = all_present
+        else
+          return is_available
+        end
       end
-
-      # Provides caching for the <tt>available?</tt> method. The +message+
-      # tells the user why this is unavailable. Example:
-      #
-      #   def available?
-      #     return _cache_available("dependency") do
-      #       # Put your expensive detection logic here, it'll only be run once
-      #       # and the result cached.
-      #       true
-      #     end
-      #   end
-      def _cache_available(message=nil, &block)
-        @available_message ||= message if message
-        return defined?(@available) ? @available : @available = block.call
-      end
-      protected :_cache_available
 
       # Raise a NotImplementedError if this driver is called but is not
       # +available?+.
       def _raise_unless_available
-        raise NotImplementedError.new("missing system dependency#{@available_message ? ": #{@available_message}" : ''}") unless available?
+        unless available?
+          raise NotImplementedError.new(
+            %{missing dependencies: #{self.class._missing_dependencies.join(", ")}})
+        end
       end
 
       # What is this driver's suitability for automatic detection? The Manager

@@ -53,12 +53,8 @@ module AutomateIt
     #-----------------------------------------------------------------------
 
     class POSIX < Plugin::Driver
-      def available?
-        return _cache_available do
-          # XXX Interrogate individual methods for fine-grained control? E.g. Windows can run almost all of these pure ruby commands, so it should run them rather than failing just because a few aren't there.
-          ! which("which").nil?
-        end
-      end
+      # XXX Interrogate individual methods for fine-grained control? E.g. Windows can run almost all of these pure ruby commands, so it should run them rather than failing just because a few aren't there.
+      depends_on :programs => %w(which)
 
       def suitability(method, *args)
         return available? ? 1 : 0

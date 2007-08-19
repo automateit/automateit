@@ -40,6 +40,7 @@ module AutomateIt
       #   end
       def _installed_helper?(*packages, &block) # :yields: filtered_packages, opts
         _raise_unless_available
+
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
         available = block.call(packages, opts)
@@ -51,6 +52,8 @@ module AutomateIt
 
       # Are these +packages+ not installed?
       def _not_installed_helper?(*packages)
+        _raise_unless_available
+
         # Requires that your PackageManager#installed? method is implemented.
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
@@ -74,6 +77,8 @@ module AutomateIt
       #     system("apt-get", "install", "-y", packages)
       #   end
       def _install_helper(*packages, &block) # :yields: filtered_packages, opts
+        _raise_unless_available
+
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
 
@@ -103,6 +108,8 @@ module AutomateIt
       #     system("apt-get", "remove", "-y", packages)
       #   end
       def _uninstall_helper(*packages, &block) # :yields: filtered_packages, opts
+        _raise_unless_available
+
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
 
@@ -128,11 +135,7 @@ module AutomateIt
     class APT < Plugin::Driver
       include Base
 
-      def available?
-        return _cache_available do
-          ! interpreter.instance_eval{which("apt-get") && which("dpkg")}.nil?
-        end
-      end
+      depends_on :programs => %w(apt-get dpkg)
 
       def suitability(method, *args)
         return available? ? 1 : 0
@@ -198,11 +201,7 @@ module AutomateIt
     class YUM < Plugin::Driver
       include Base
 
-      def available?
-         return _cache_available do
-           ! interpreter.instance_eval{which("yum") && which("rpm")}.nil?
-         end
-      end
+      depends_on :programs => %w(yum rpm)
 
       def suitability(method, *args)
         return available? ? 1 : 0
@@ -268,11 +267,7 @@ module AutomateIt
     class Gem < Plugin::Driver
       include Base
 
-      def available?
-        return _cache_available do
-          ! interpreter.which("gem").nil?
-        end
-      end
+      depends_on :programs => %w(gem)
 
       def suitability(method, *args)
         # Never select GEM as the default driver
