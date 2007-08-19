@@ -6,7 +6,13 @@ module AutomateIt
 
     def lookup(search) dispatch(search) end
 
+    #-----------------------------------------------------------------------
+
     class Struct < Plugin::Driver
+      def available?
+        return true
+      end
+
       def suitability(method, *args)
         return 1
       end
@@ -30,9 +36,13 @@ module AutomateIt
       end
     end
 
-    require 'erb'
-    require 'yaml'
+    #-----------------------------------------------------------------------
+
     class YAML < Struct
+      def available?
+        return true
+      end
+
       def suitability(method, *args)
         return 5
       end

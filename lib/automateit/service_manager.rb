@@ -23,6 +23,8 @@ module AutomateIt
     # if it's already enabled.
     def disable(service, opts={}) dispatch(service, opts) end
 
+    #-----------------------------------------------------------------------
+
     # The SYSV driver implements the ServiceManager methods for #running?,
     # #start and #stop on UNIX-like platforms that use the System V init
     # process using a <tt>/etc/init.d</tt> directory.
@@ -36,8 +38,15 @@ module AutomateIt
     # e.g. Chkconfig on RedHat-like platforms.
     class SYSV < Plugin::Driver
       ETC_INITD = "/etc/init.d"
+
+      def available?
+        return _cache_available do
+          File.directory?(ETC_INITD)
+        end
+      end
+
       def suitability(method, *args)
-        return File.directory?(ETC_INITD) ? 1 : 0
+        return available? ? 1 : 0
       end
 
       def _run_command(args, opts={})
@@ -82,6 +91,8 @@ module AutomateIt
       end
     end
 
+    #-----------------------------------------------------------------------
+
     # The Sysvconfig driver implements the ServiceManager methods for #enable
     # and #disable on Debian-like platforms. It uses the SYSV driver for
     # handling the methods #enabled?, #running?, #start and #stop.
@@ -90,8 +101,14 @@ module AutomateIt
     # underlying "sysvconfig" program is slow enough that it's better to rely
     # on the SYSV driver's simpler but much faster implementation.
     class Sysvconfig < SYSV
+      def available?
+        return _cache_available do
+          ! interpreter.which("sysvconfig").nil?
+        end
+      end
+
       def suitability(method, *args)
-        return @suitable ||= interpreter.which("sysvconfig").nil? ? 0 : 2
+        return available? ? 2 : 0
       end
 
 =begin
@@ -122,12 +139,20 @@ module AutomateIt
       end
     end
 
+    #-----------------------------------------------------------------------
+
     # The Chkconfig driver implements the ServiceManager methods for #enabled?,
     # #enable and #disable on RedHat-like platforms. It uses the SYSV driver
     # for handling the methods #running?, #start and #stop.
     class Chkconfig < SYSV
+      def available?
+        return _cache_available do
+          ! interpreter.which("chkconfig").nil?
+        end
+      end
+
       def suitability(method, *args)
-        return @suitable ||= interpreter.which("chkconfig").nil? ? 0 : 2
+        return available? ? 2 : 0
       end
 
       def enabled?(service)
@@ -153,13 +178,21 @@ module AutomateIt
     end
 
 =begin
+    #-----------------------------------------------------------------------
+
     # RC_Update implements the #enabled?, #enable and #disable features of the
     # ServiceManager on Gentoo-like systems.
     #--
     # TODO implement
     class RC_Update < SYSV
+      def available?
+        return _cache_available do
+          ! interpreter.which("rc-update").nil?
+        end
+      end
+
       def suitability(method, *args)
-        return @suitable ||= (interpreter.which("rc-update").nil? ? 0 : 2)
+        return available? ? 2 : 0
       end
 
       def enabled?(service)

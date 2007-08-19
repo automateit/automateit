@@ -4,6 +4,8 @@ module AutomateIt
   class Interpreter < Common
     attr_accessor :parent
 
+    attr_accessor :cache
+
     def setup(opts={})
       super(opts.merge(:interpreter => self))
 
@@ -14,18 +16,24 @@ module AutomateIt
       if opts[:log]
         @log = opts[:log]
       elsif not defined?(@log) or @log.nil?
-          @log = Logger.new(STDOUT)
-          @log.level = Logger::INFO
+        @log = Logger.new(STDOUT)
+        @log.level = Logger::INFO
       end
 
       if opts[:log_level] or opts[:verbosity]
         @log.level = opts[:log_level] || opts[:verbosity]
       end
 
-      if opts[:noop].nil?
+      if opts[:noop].nil? # can be false
         @noop = false unless defined?(@noop)
       else
         @noop = opts[:noop]
+      end
+
+      if opts[:cache]
+        @cache = opts[:cache]
+      else
+        @cache ||= HashCache.new
       end
 
       # Instantiate core plugins so they're available to the project

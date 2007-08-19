@@ -10,7 +10,7 @@ module AutomateIt
     alias_methods :sh, :which
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :touch
 
-    #---[ Custom commands ]-------------------------------------------------
+    #...[ Custom commands ].................................................
 
     def sh(*commands) dispatch(*commands) end
 
@@ -18,7 +18,7 @@ module AutomateIt
 
     # TODO write mktemp and mktempdir
 
-    #---[ FileUtils wrappers ]-----------------------------------------------
+    #...[ FileUtils wrappers ]...............................................
 
     def cd(dir, opts={}, &block) dispatch(dir, opts, &block) end
     def pwd() dispatch() end
@@ -53,9 +53,15 @@ module AutomateIt
     #-----------------------------------------------------------------------
 
     class POSIX < Plugin::Driver
+      def available?
+        return _cache_available do
+          # XXX Interrogate individual methods for fine-grained control? E.g. Windows can run almost all of these pure ruby commands, so it should run them rather than failing just because a few aren't there.
+          ! which("which").nil?
+        end
+      end
+
       def suitability(method, *args)
-        # XXX Interrogate individual methods for fine-grained control? E.g. Windows can run almost all of these pure ruby commands, so it should run them rather than failing just because a few aren't there.
-        @suitability ||= which("which").nil? ? 0 : 1
+        return available? ? 1 : 0
       end
 
       def setup(opts={})

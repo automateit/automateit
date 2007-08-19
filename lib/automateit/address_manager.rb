@@ -103,11 +103,16 @@ module AutomateIt
     class Linux < Plugin::Driver
       include ResolvHelpers
 
-      def suitability(method, *args)
-        @suitable ||= interpreter.instance_eval do
-          which("ifconfig") and which("ip") and which("arping")
+      def available?
+        return _cache_available do
+          interpreter.instance_eval do
+            which("ifconfig") and which("ip") and which("arping")
+          end
         end
-        return @suitable ? 1 : -1
+      end
+
+      def suitability(method, *args)
+        return available? ? 1 : 0
       end
 
       def has?(opts)

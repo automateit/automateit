@@ -32,6 +32,8 @@ module AutomateIt
       end
     end
 
+    #-----------------------------------------------------------------------
+
     class Manager < Base
       collect_registrations
 
@@ -136,9 +138,50 @@ module AutomateIt
       end
     end
 
+    #-----------------------------------------------------------------------
+
     class Driver < Base
       collect_registrations
 
+      attr_writer :available
+
+      # Is this driver available on this platform? For example, this method is
+      # used by the PackageManager driver for APT to determine if the "apt-get"
+      # program is installed.
+      #
+      # The <tt>available?</tt> method is used to determine if the driver can
+      # do the work, while the <tt>suitability</tt> method determines if the
+      # driver should be automatically selected.
+      def available?
+        log.debug("driver #{self.class} doesn't implement the +available?+ method")
+        return false
+      end
+
+      # Provides caching for the <tt>available?</tt> method. Example:
+      #   def available?
+      #     return _cache_available do
+      #       # Put your expensive detection logic here, it'll only be run once
+      #       # and the result cached.
+      #       true
+      #     end
+      #   end
+      def _cache_available(&block)
+        key = "available_#{token}"
+        return cache.fetch(key, &block)
+      end
+      protected :_cache_available
+
+      # What is this driver's suitability for automatic detection? The Manager
+      # queries its drivers when there isn't a driver specified with a
+      # <tt>:with</tt> or +default+ so it can choose a suitable driver for the
+      # +method+ and +args+. Any driver that returns an integer 1 or greater
+      # claims to be suitable. The Manager will then select the driver with the
+      # highest suitability level. Drivers that return an integer less than 1
+      # are excluded from automatic detection.
+      #
+      # The <tt>available?</tt> method is used to determine if the driver can
+      # do the work, while the <tt>suitability</tt> method determines if the
+      # driver should be automatically selected.
       def suitability(method, *args, &block)
         log.debug("driver #{self.class} doesn't implement the +suitability+ method")
         return -1

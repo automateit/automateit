@@ -8,6 +8,8 @@ module AutomateIt
     # See documentation for TemplateManager::ERB#render
     def render(*options) dispatch(*options) end
 
+    #-----------------------------------------------------------------------
+
     # Renders ERB templates for TemplateManager.
     class ERB < Plugin::Driver
       require 'erb'
@@ -18,6 +20,10 @@ module AutomateIt
       def setup(opts={})
         super(opts)
         @default_check = :compare
+      end
+
+      def available?
+        return true
       end
 
       def suitability(method, *args)

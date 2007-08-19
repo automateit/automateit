@@ -4,10 +4,15 @@ module AutomateIt
   class PlatformManager < Plugin::Manager
     def query(search) dispatch(search) end
 
-    require 'stringio'
+    #-----------------------------------------------------------------------
+
     class Struct < Plugin::Driver
-      # Hash mapping of keys that have many common names, e.g. "relase" and "version"
+      # Hash mapping of keys that have many common names, e.g. "release" and "version"
       attr_accessor :key_aliases
+
+      def available?
+        return true
+      end
 
       def suitability(method, *args)
         return 1
@@ -53,10 +58,18 @@ module AutomateIt
       end
     end
 
+    #-----------------------------------------------------------------------
+
     class Uname < Struct
+      def available
+        return _cache_available do
+          ! interpreter.which("uname").nil?
+        end
+      end
+
       def suitability(method, *args)
         # Level must be greater than Struct's
-        return @suitable ||= interpreter.which("uname").nil? ? 0 : 2
+        return available? ? 2 : 0
       end
 
       def setup(opts={})
@@ -66,12 +79,21 @@ module AutomateIt
       end
     end
 
+    #-----------------------------------------------------------------------
+
     class LSB < Uname
       # XXX lsb_release takes nearly a second to run, should it be cached somehow across runs?
       LSB_RELEASE = "lsb_release"
+
+      def available?
+        return _cache_available do
+          ! interpreter.which(LSB_RELEASE).nil?
+        end
+      end
+
       def suitability(method, *args)
         # Level must be greater than Uname's
-        return @suitable ||= interpreter.which(LSB_RELEASE).nil? ? 0 : 3
+        return available? ? 3 : 0
       end
 
       def setup(opts={})

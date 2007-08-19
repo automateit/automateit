@@ -126,8 +126,14 @@ module AutomateIt
     class APT < Plugin::Driver
       include Base
 
+      def available?
+        return _cache_available do
+          interpreter.instance_eval{which("apt-get") && which("dpkg")}
+        end
+      end
+
       def suitability(method, *args)
-        return @suitability ||= interpreter.instance_eval{which("apt-get") && which("dpkg")} ? 1 : 0
+        return available? ? 1 : 0
       end
 
       # See AutomateIt::PackageManager#installed?
@@ -196,8 +202,14 @@ module AutomateIt
     class YUM < Plugin::Driver
       include Base
 
+      def available?
+         return _cache_available do
+           interpreter.instance_eval{which("yum") && which("rpm")}
+         end
+      end
+
       def suitability(method, *args)
-        return @suitability ||= interpreter.instance_eval{which("yum") && which("rpm")} ? 1 : 0
+        return available? ? 1 : 0
       end
 
       # See AutomateIt::PackageManager#installed?

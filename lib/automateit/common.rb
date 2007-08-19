@@ -37,10 +37,13 @@ module AutomateIt #:main: AutomateIt
       def writing?(message=nil, &block) @interpreter.writing?(message, &block) end
 
       def superuser?() @interpreter.superuser? end
+
+      def cache() @interpreter.cache end
     end
   end
 end
 
+# TODO move to 'extensions/object.rb'
 class Object
   # Lists methods unique to an instance.
   def unique_methods

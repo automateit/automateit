@@ -1,17 +1,21 @@
-# Dependencies
-require 'rubygems'
-require 'active_support'
+# Standard libraries
+require 'erb'
 require 'fileutils'
 require 'logger'
 require 'open3'
 require 'set'
 require 'yaml'
 
+# Gems
+require 'rubygems'
+require 'active_support'
+
 # Core
 require 'automateit/common'
 require 'automateit/interpreter'
 require 'automateit/plugin'
 require 'automateit/cli'
+require 'hashcache'
 
 # Plugins which must be loaded early
 require 'automateit/shell_manager'
