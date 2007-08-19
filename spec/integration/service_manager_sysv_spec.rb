@@ -1,15 +1,13 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-interpreter = AutomateIt.new
-
-if not interpreter.superuser?
+if not INTERPRETER.superuser?
   puts "NOTE: Must be root to check in #{__FILE__}"
-elsif not interpreter.service_manager[:sysv].available?
+elsif not INTERPRETER.service_manager[:sysv].available?
   puts "NOTE: This platform can't check #{__FILE__}"
 else
   describe "AutomateIt::ServiceManager::SYSV" do
     begin
-      AutomateIt.new.service_manager.driver_for(:enabled?, @service_name)
+      INTERPRETER.service_manager.driver_for(:enabled?, @service_name)
       @has_enable = true
     rescue NotImplementedError
       @has_enable = false

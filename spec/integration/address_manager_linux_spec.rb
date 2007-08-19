@@ -1,10 +1,8 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-interpreter = AutomateIt.new
-
-if not interpreter.superuser?
+if not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
-elsif not interpreter.address_manager[:linux].available?
+elsif not INTERPRETER.address_manager[:linux].available?
   puts "NOTE: This platform can't check #{__FILE__}"
 else
   describe "AutomateIt::AddressManager::Linux" do

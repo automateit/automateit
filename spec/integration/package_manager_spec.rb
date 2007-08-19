@@ -1,13 +1,11 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-interpreter = AutomateIt.new
-
-if not interpreter.superuser?
+if not INTERPRETER.superuser?
   puts "NOTE: Must be root to check in #{__FILE__}"
 else
   begin
     # This line will trigger a NotImplementedError that's caught at the bottom
-    interpreter.package_manager.driver_for(:installed?, "foo")
+    INTERPRETER.package_manager.driver_for(:installed?, "foo")
 
     describe "AutomateIt::PackageManager" do
       before(:all) do
