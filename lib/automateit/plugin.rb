@@ -162,24 +162,26 @@ module AutomateIt
         return false
       end
 
-      # Provides caching for the <tt>available?</tt> method. Example:
+      # Provides caching for the <tt>available?</tt> method. The +message+
+      # tells the user why this is unavailable. Example:
+      #
       #   def available?
-      #     return _cache_available do
+      #     return _cache_available("dependency") do
       #       # Put your expensive detection logic here, it'll only be run once
       #       # and the result cached.
       #       true
       #     end
       #   end
-      def _cache_available(&block)
+      def _cache_available(message=nil, &block)
+        @available_message ||= message if message
         return defined?(@available) ? @available : @available = block.call
       end
-
       protected :_cache_available
 
       # Raise a NotImplementedError if this driver is called but is not
       # +available?+.
-      def _raise_unless_available(message=nil)
-        raise NotImplementedError.new("missing system dependency#{message ? ': '+message : ''}") unless available?
+      def _raise_unless_available
+        raise NotImplementedError.new("missing system dependency#{@available_message ? ": #{@available_message}" : ''}") unless available?
       end
 
       # What is this driver's suitability for automatic detection? The Manager

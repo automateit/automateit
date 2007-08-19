@@ -39,6 +39,7 @@ module AutomateIt
       #     ["package1]
       #   end
       def _installed_helper?(*packages, &block) # :yields: filtered_packages, opts
+        _raise_unless_available
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
         available = block.call(packages, opts)

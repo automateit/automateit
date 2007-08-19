@@ -14,11 +14,11 @@ class MyManager::MyUnsuitableDriver < AutomateIt::Plugin::Driver
   # +suitability+ method deliberately not implemented to test errors
 
   def available?
-    _cache_available{false}
+    _cache_available("ka-boom"){false}
   end
 
   def unavailable_method
-    _raise_unless_available("ka-boom")
+    _raise_unless_available
   end
 end
 
