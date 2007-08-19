@@ -208,10 +208,10 @@ module AutomateIt
             end
           end
           self.class._missing_dependencies = missing
-          return self.class._is_available = all_present
-        else
-          return is_available
+          self.class._is_available = all_present
+          log.debug("### Driver #{self.class} #{all_present ? "is" : "isn't"} available")
         end
+        return self.class._is_available
       end
 
       # Raise a NotImplementedError if this driver is called but is not
