@@ -4,8 +4,6 @@ module AutomateIt
   class Interpreter < Common
     attr_accessor :parent
 
-    attr_accessor :cache
-
     def setup(opts={})
       super(opts.merge(:interpreter => self))
 
@@ -28,12 +26,6 @@ module AutomateIt
         @noop = false unless defined?(@noop)
       else
         @noop = opts[:noop]
-      end
-
-      if opts[:cache]
-        @cache = opts[:cache]
-      else
-        @cache ||= HashCache.new
       end
 
       # Instantiate core plugins so they're available to the project

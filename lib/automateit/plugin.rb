@@ -166,8 +166,7 @@ module AutomateIt
       #     end
       #   end
       def _cache_available(&block)
-        key = "available_#{token}"
-        return cache.fetch(key, &block)
+        return defined?(@available) ? @available : @available = block.call
       end
       protected :_cache_available
 
