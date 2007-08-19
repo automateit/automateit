@@ -173,7 +173,14 @@ module AutomateIt
       def _cache_available(&block)
         return defined?(@available) ? @available : @available = block.call
       end
+
       protected :_cache_available
+
+      # Raise a NotImplementedError if this driver is called but is not
+      # +available?+.
+      def _raise_unless_available(message=nil)
+        raise NotImplementedError.new("missing system dependency#{message ? ': '+message : ''}") unless available?
+      end
 
       # What is this driver's suitability for automatic detection? The Manager
       # queries its drivers when there isn't a driver specified with a

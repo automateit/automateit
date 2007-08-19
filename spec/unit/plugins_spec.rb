@@ -12,6 +12,14 @@ end
 
 class MyManager::MyUnsuitableDriver < AutomateIt::Plugin::Driver
   # +suitability+ method deliberately not implemented to test errors
+
+  def available?
+    _cache_available{false}
+  end
+
+  def unavailable_method
+    _raise_unless_available("ka-boom")
+  end
 end
 
 class MyManager::MyUnimplementedDriver < AutomateIt::Plugin::Driver
@@ -133,6 +141,15 @@ end
 describe "MyManager's drivers" do
   before(:all) do
     @m = MyManager.new
+  end
+
+  it "should be available" do
+    MyManager::MyFirstDriver.new.available?.should be_true
+  end
+
+  it "should fail on unavailable methods" do
+    lambda{ MyManager::MyUnsuitableDriver.new.unavailable_method }.should \
+      raise_error(NotImplementedError, /ka-boom/)
   end
 
   it "should have a token" do
