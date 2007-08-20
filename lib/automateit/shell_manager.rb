@@ -7,7 +7,7 @@ module AutomateIt
     # FIXME noop calls to FileUtils must return true to indicate that an action would have been taken, rather than returning nil to indicate that nothing was actually done
     # FIXME write specs for all these commands
     # TODO write docs for all these commands
-    alias_methods :sh, :which
+    alias_methods :sh, :which, :raise_unless_which, :mktemp, :mktempdir, :mktempdircd
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :touch
 
     #...[ Custom commands ].................................................
@@ -16,7 +16,13 @@ module AutomateIt
 
     def which(command) dispatch(command) end
 
-    # TODO write mktemp and mktempdir
+    def raise_unless_which(command) dispatch(command) end
+
+    def mktemp(path=nil, &block) dispatch(path, &block) end
+
+    def mktempdir(path=nil, &block) dispatch(path, &block) end
+
+    def mktempdircd(path=nil, &block) dispatch(path, &block) end
 
     #...[ FileUtils wrappers ]...............................................
 
@@ -27,7 +33,7 @@ module AutomateIt
 
     def rmdir(dirs) dispatch(dirs) end
 
-    def ln(sources, target) dispatch(sources, target) end
+    def ln(source, target) dispatch(source, target) end
     def ln_s(sources, target) dispatch(sources, target) end
     def ln_sf(sources, target) dispatch(sources, target) end
 
@@ -73,7 +79,7 @@ module AutomateIt
       # Returns hash of verbosity and noop settings for FileUtils commands.
       def _fileutils_opts
         opts = {}
-        opts[:verbose] = true if log.level >= ::Logger::INFO
+        opts[:verbose] = true if log.level <= ::Logger::INFO
         opts[:noop] = true if noop?
         return opts
       end
@@ -88,6 +94,12 @@ module AutomateIt
       def which(command)
         data = `which "#{command}" 2>&1`.chomp
         return File.exists?(data) ? data : nil
+      end
+
+      def raise_unless_which(command)
+        if which(command).nil?
+          raise NotImplementedError.new("command not found: #{command}")
+        end
       end
 
       def rbsync(sources, target)
@@ -105,6 +117,40 @@ module AutomateIt
         cp(sources, target, _fileutils_opts)
       end
 
+      def _mktemp_helper(kind, name=nil, opts={}, &block)
+        # XXX Need pure-Ruby implementation of mktemp for directory. Unfortunately, the MkTemp gem is defective.
+        raise_unless_which("mktemp")
+        name ||= "automateit_mktemp.XXXXXXXXXX"
+        cmd = "mktemp -t #{name} #{kind == :directory ? "-d" : ""} 2>&1"
+        path = `#{cmd}`.chomp
+        log.info("$$$ #{cmd} # => #{path}")
+        raise ArgumentError.new("failed to create tempdir with: #{cmd}") unless File.exists?(path)
+        if block
+          if opts[:cd]
+            cd path do
+              block.call(path)
+            end
+          else
+            block.call(path)
+          end
+          rm_rf(path)
+        else
+          return path
+        end
+      end
+
+      def mktemp(name=nil, &block)
+        _mktemp_helper(:file, name, &block)
+      end
+
+      def mktempdir(name=nil, &block)
+        _mktemp_helper(:directory, name, &block)
+      end
+
+      def mktempdircd(name=nil, &block)
+        _mktemp_helper(:directory, name, :cd => true, &block)
+      end
+
       #...[ FileUtils wrappers ]...............................................
 
       def cd(dir, opts={}, &block)
@@ -118,7 +164,7 @@ module AutomateIt
       def _mkdir(dirs, kind)
         missing = [dirs].flatten.select{|dir| ! File.directory?(dir)}
         return false if missing.empty?
-        FileUtils.send(kind, missing, _fileutils_opts)
+        [FileUtils.send(kind, missing, _fileutils_opts)].flatten
       end
       private :_mkdir
 
@@ -146,23 +192,31 @@ module AutomateIt
             source_stat = File.stat(source)
             case kind
             when :ln
-              missing << peer if peer_stat.ino != source_stat.ino
+              missing << source if peer_stat.ino != source_stat.ino
             when :ln_s, :ln_sf
-              missing << peer if ! peer_lstat.symlink? || peer_stat.ino != source_stat.ino
-            else raise ArgumentError.new("unknown link kind: #{kind}")
+              missing << source if ! peer_lstat.symlink? || peer_stat.ino != source_stat.ino
+            else
+              raise ArgumentError.new("unknown link kind: #{kind}")
             end
-            missing << peer if ! peer_lstat.symlink? || peer_stat.ino != source_stat.ino
           rescue Errno::ENOENT
-            missing << peer
+            missing << source
           end
         end
         return false if missing.empty?
-        FileUtils.ln_s(missing, target, _fileutils_opts)
+        log.debug("### _ln(%s, %s, %s) # => %s" % [kind, sources.inspect, target.inspect, missing.inspect])
+        missing = missing.first if missing.size == 1
+        case kind
+        when :ln
+          FileUtils.ln(missing, target, _fileutils_opts) && missing
+        else
+          FileUtils.send(kind, missing, target, _fileutils_opts) && missing
+        end
       end
       private :_ln
 
-      def ln(sources, target)
-        _ln(:ln, sources, target)
+      def ln(source, target)
+        raise TypeError.new("source for hard link must be a String") unless String === source
+        _ln(:ln, source, target)
       end
 
       def ln_s(sources, target)
@@ -183,27 +237,29 @@ module AutomateIt
       end
 
       def mv(sources, target)
+        raise NotImplementedError # FIXME
         present = [dirs].flatten.select{|dir| File.directory?(dir)}
         return false if present.empty?
         FileUtils.mv(missing, target, _fileutils_opts)
       end
 
-      def rm(targets)
-        present = [dirs].flatten.select{|dir| File.directory?(dir)}
+      def _rm(kind, targets)
+        present = [targets].flatten.select{|entry| File.exists?(entry)}
         return false if present.empty?
-        FileUtils.rm(present, _fileutils_opts)
+        present = present.first if present.size == 0
+        FileUtils.send(kind, present, _fileutils_opts) && present
+      end
+
+      def rm(targets)
+        _rm(:rm_r, targets)
       end
 
       def rm_r(targets)
-        present = [dirs].flatten.select{|dir| File.directory?(dir)}
-        return false if present.empty?
-        FileUtils.rm_r(present, _fileutils_opts)
+        _rm(:rm_r, targets)
       end
 
       def rm_rf(targets)
-        present = [dirs].flatten.select{|dir| File.directory?(dir)}
-        return false if present.empty?
-        FileUtils.rm_rf(present, _fileutils_opts)
+        _rm(:rm_rf, targets)
       end
 
       def install(source, target, mode)
