@@ -4,6 +4,8 @@ module AutomateIt
   class Interpreter < Common
     attr_accessor :parent
 
+    attr_accessor :project
+
     def setup(opts={})
       super(opts.merge(:interpreter => self))
 
@@ -32,39 +34,40 @@ module AutomateIt
       _instantiate_plugins
 
       if opts[:project]
-        @project = File.expand_path(opts[:project])
-        log.debug(PNOTE+"Loading project from path: #{@project}")
-
-        tag_file = File.join(@project, "config", "tags.yml")
-        if File.exists?(tag_file)
-          log.debug(PNOTE+"Loading project tags: #{tag_file}")
-          tag_manager[:yaml].setup(:file => tag_file)
-        end
-
-        field_file = File.join(@project, "config", "fields.yml")
-        if File.exists?(field_file)
-          log.debug(PNOTE+"Loading project fields: #{field_file}")
-          field_manager[:yaml].setup(:file => field_file)
-        end
-
-        lib_files = Dir[File.join(@project, "lib", "*.rb")] + Dir[File.join(@project, "lib", "**", "init.rb")]
-        lib_files.each do |lib|
-          log.debug(PNOTE+"Loading project library: #{lib}")
-          invoke(lib)
-        end
-
-        # Instantiate project's plugins so they're available to the environment
-        _instantiate_plugins
-
-        env_file = File.join(@project, "config", "automateit_env.rb")
+        # Only load a project if we find its env file
+        env_file = File.join(opts[:project], "config", "automateit_env.rb")
         if File.exists?(env_file)
-          log.debug(PNOTE+"Loading project env: #{env_file}")
-          invoke(env_file)
+          @project = File.expand_path(opts[:project])
+          log.debug(PNOTE+"Loading project from path: #{@project}")
+
+          tag_file = File.join(@project, "config", "tags.yml")
+          if File.exists?(tag_file)
+            log.debug(PNOTE+"Loading project tags: #{tag_file}")
+            tag_manager[:yaml].setup(:file => tag_file)
+          end
+
+          field_file = File.join(@project, "config", "fields.yml")
+          if File.exists?(field_file)
+            log.debug(PNOTE+"Loading project fields: #{field_file}")
+            field_manager[:yaml].setup(:file => field_file)
+          end
+
+          lib_files = Dir[File.join(@project, "lib", "*.rb")] + Dir[File.join(@project, "lib", "**", "init.rb")]
+          lib_files.each do |lib|
+            log.debug(PNOTE+"Loading project library: #{lib}")
+            invoke(lib)
+          end
+
+          # Instantiate project's plugins so they're available to the environment
+          _instantiate_plugins
+
+          if File.exists?(env_file)
+            log.debug(PNOTE+"Loading project env: #{env_file}")
+            invoke(env_file)
+          end
         end
       end
     end
-
-    attr_accessor :project
 
     attr_accessor :plugins
 
