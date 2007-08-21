@@ -114,43 +114,23 @@ module AutomateIt
       end
 
       def _mktemp_helper(kind, name=nil, opts={}, &block)
-        # FIXME use Tempster
-        # XXX Need pure-Ruby implementation of mktemp for directory. Unfortunately, the MkTemp gem is defective.
-        raise_unless_which("mktemp")
-        name ||= "automateit_mktemp.XXXXXXXXXX"
-        cmd = "mktemp -t #{name} #{kind == :directory ? "-d" : ""} 2>&1"
-        path = `#{cmd}`.chomp
-        log.info(PEXEC+"#{cmd} # => #{path}")
-        raise ArgumentError.new("failed to create tempdir with: #{cmd}") unless File.exists?(path)
-        if block
-          if opts[:cd]
-            cd path do
-              block.call(path)
-            end
-          else
-            block.call(path)
-          end
-          rm_rf(path)
-        else
-          return path
-        end
+        opts = {:name => name}.merge(opts)
+        ::Tempster.send(kind, opts, &block)
       end
 
       def mktemp(name=nil, &block)
-        _mktemp_helper(:file, name, &block)
+        _mktemp_helper(:mktemp, name, &block)
       end
 
       def mktempdir(name=nil, &block)
-        _mktemp_helper(:directory, name, &block)
+        _mktemp_helper(:mktempdir, name, &block)
       end
 
       def mktempdircd(name=nil, &block)
-        _mktemp_helper(:directory, name, :cd => true, &block)
+        _mktemp_helper(:mktempdircd, name, &block)
       end
 
       #...[ FileUtils wrappers ]...............................................
-
-      # FIXME generate log messages for all wrapped content
 
       def cd(dir, opts={}, &block)
         if block

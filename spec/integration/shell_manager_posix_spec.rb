@@ -1,8 +1,6 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-if not INTERPRETER.superuser?
-  puts "NOTE: Must be root to check #{__FILE__}"
-elsif not INTERPRETER.address_manager[:linux].available?
+if not INTERPRETER.address_manager[:linux].available?
   puts "NOTE: This platform can't check #{__FILE__}"
 else
   describe "AutomateIt::ShellManager::POSIX" do
@@ -195,5 +193,10 @@ else
       end
     end
 
+    if INTERPRETER.superuser?
+      # TODO implement chown spec
+    else
+      puts "\nNOTE: Must be root to check 'chown' in #{__FILE__}"
+    end
   end
 end
