@@ -166,8 +166,6 @@ module AutomateIt
         FileUtils.pwd()
       end
 
-      # FIXME Write own log for EVERYTHING that FileUtils executes since it's not using my log.
-
       def _mkdir(dirs, kind, &block)
         missing = [dirs].flatten.select{|dir| ! File.directory?(dir)}
         result = false
@@ -203,6 +201,7 @@ module AutomateIt
       def rmdir(dirs)
         present = [dirs].flatten.select{|dir| File.directory?(dir)}
         return false if present.empty?
+        log.info(PEXEC+"rmdir #{String === dirs ? dirs : dirs.join(' ')}")
         FileUtils.rmdir(present, _fileutils_opts)
       end
 
@@ -231,8 +230,10 @@ module AutomateIt
         missing = missing.first if missing.size == 1
         case kind
         when :ln
+          log.info(PEXEC+"ln #{missing} #{target}")
           FileUtils.ln(missing, target, _fileutils_opts) && missing
         else
+          log.info(PEXEC+"#{kind} #{String === missing ? missing : missing.join(' ')} #{target}")
           FileUtils.send(kind, missing, target, _fileutils_opts) && missing
         end
       end
@@ -253,14 +254,18 @@ module AutomateIt
 
       def cp(sources, target)
         # TODO needs much more sophisticated algorithm
+        # TODO log
         FileUtils.cp(sources, target, _fileutils_opts)
       end
       def cp_r(sources, target)
+        # TODO log
         # TODO needs much more sophisticated algorithm
         FileUtils.cp_r(sources, target, _fileutils_opts)
       end
 
       def mv(sources, target)
+        # TODO implement
+        # TODO log
         raise NotImplementedError # FIXME
         present = [dirs].flatten.select{|dir| File.directory?(dir)}
         return false if present.empty?
@@ -271,6 +276,7 @@ module AutomateIt
         present = [targets].flatten.select{|entry| File.exists?(entry)}
         return false if present.empty?
         present = present.first if present.size == 0
+        log.info(PEXEC+"#{kind} #{String === present ? present : present.join(' ')}")
         FileUtils.send(kind, present, _fileutils_opts) && present
       end
 
@@ -288,6 +294,7 @@ module AutomateIt
 
       def install(source, target, mode)
         # TODO needs more sophisticated algorithm, maybe combine with copy
+        # TODO log
         source_stat = File.stat(source)
         target_file = (File.directory?(target) || File.stat(target).symlink?) ?
           File.join(target, File.basename(source)) : target
@@ -299,7 +306,8 @@ module AutomateIt
       end
 
       def chmod(mode, targets)
-        # TODO
+        # TODO implement
+        # TODO log
         # if target_stat && (target_stat.mode != source_stat.mode)
         #   chmod(source_stat.mode, target_file, _fileutils_opts)
         # end
@@ -307,21 +315,25 @@ module AutomateIt
       end
 
       def chmod_R(mode, targets)
-        # TODO
+        # TODO implement
+        # TODO log
         FileUtils.chmod_R(mode, targets, _fileutils_opts)
       end
 
       def chown(user, group, targets)
-        # TODO
+        # TODO implement
+        # TODO log
         FileUtils.chown(user, group, targets, _fileutils_opts)
       end
 
       def chown_R(user, group, targets)
-        # TODO
+        # TODO implement
+        # TODO log
         FileUtils.chown_R(user, group, targets, _fileutils_opts)
       end
 
       def touch(targets)
+        log.info(PEXEC+"touch #{String === targets ? targets : targets.join(' ')}")
         FileUtils.touch(targets, _fileutils_opts)
       end
     end
