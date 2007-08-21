@@ -8,6 +8,10 @@ module AutomateIt
     # See documentation for TemplateManager::ERB#render
     def render(*options) dispatch(*options) end
 
+    def default_check() dispatch() end
+
+    def default_check=(value) dispatch(value) end
+
     #-----------------------------------------------------------------------
 
     # Renders ERB templates for TemplateManager.
@@ -66,17 +70,17 @@ module AutomateIt
           case opts[:check]
           when :exists
             if target_exists
-              log.debug("### Rendering for '#{target_filename}' skipped because it already exists")
+              log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because it already exists")
               return false
             else
-              log.info("### Rendering '#{target_filename}' because of it doesn't exist")
+              log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
             end
           when :timestamp
             if target_exists
               updates = _newer(target_filename, \
                   *[source_filename, opts[:dependencies]].reject{|t| t.nil?}.flatten)
               if updates.empty?
-                log.debug("### Rendering for '#{target_filename}' skipped because dependencies haven't been updated")
+                log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because dependencies haven't been updated")
                 return false
               end
             end
@@ -103,13 +107,13 @@ module AutomateIt
         case opts[:check]
         when :compare
           if source_contents == target_contents
-            log.debug("### Rendering for '#{target_filename}' skipped because contents are the same")
+            log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because contents are the same")
             return false
           else
-            log.info("### Rendering '#{target_filename} because its contents changed")
+            log.info(PNOTE+"Rendering '#{target_filename} because its contents changed")
           end
         when :timestamp
-          log.info("### Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
+          log.info(PNOTE+"Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
         end
         return _write(target_filename, output)
       end

@@ -28,8 +28,8 @@ module AutomateIt
 
     def cd(dir, opts={}, &block) dispatch(dir, opts, &block) end
     def pwd() dispatch() end
-    def mkdir(dirs) dispatch(dirs) end
-    def mkdir_p(dirs) dispatch(dirs) end
+    def mkdir(dirs, &block) dispatch(dirs, &block) end
+    def mkdir_p(dirs, &block) dispatch(dirs, &block) end
 
     def rmdir(dirs) dispatch(dirs) end
 
@@ -68,10 +68,6 @@ module AutomateIt
 
       def setup(opts={})
         super(opts)
-
-        # XXX Intercept fu_output_message and use Interpreter#log.info instead?
-        ::FileUtils.instance_variable_set(:@fileutils_output, $stdout)
-        ::FileUtils.instance_variable_set(:@fileutils_label, "$$$ ")
       end
 
       #...[ Custom commands ].................................................
@@ -79,7 +75,7 @@ module AutomateIt
       # Returns hash of verbosity and noop settings for FileUtils commands.
       def _fileutils_opts
         opts = {}
-        opts[:verbose] = true if log.level <= ::Logger::INFO
+        opts[:verbose] = false # Generate our own log messages
         opts[:noop] = true if noop?
         return opts
       end
@@ -87,7 +83,7 @@ module AutomateIt
 
       def sh(*commands)
         args, opts = args_and_opts(*commands)
-        log.info("$$$ #{args.join(' ')}")
+        log.info(PEXEC+"#{args.join(' ')}")
         return writing? ? system(*args) : true
       end
 
@@ -111,19 +107,20 @@ module AutomateIt
             cmd << %{ "#{t}"}
           end
           cmd << " < /dev/null > /dev/null"
-          log.debug("$$$ #{cmd}")
+          log.debug(PEXEC+cmd)
           return false if system(cmd)
         end
         cp(sources, target, _fileutils_opts)
       end
 
       def _mktemp_helper(kind, name=nil, opts={}, &block)
+        # FIXME use Tempster
         # XXX Need pure-Ruby implementation of mktemp for directory. Unfortunately, the MkTemp gem is defective.
         raise_unless_which("mktemp")
         name ||= "automateit_mktemp.XXXXXXXXXX"
         cmd = "mktemp -t #{name} #{kind == :directory ? "-d" : ""} 2>&1"
         path = `#{cmd}`.chomp
-        log.info("$$$ #{cmd} # => #{path}")
+        log.info(PEXEC+"#{cmd} # => #{path}")
         raise ArgumentError.new("failed to create tempdir with: #{cmd}") unless File.exists?(path)
         if block
           if opts[:cd]
@@ -153,27 +150,54 @@ module AutomateIt
 
       #...[ FileUtils wrappers ]...............................................
 
+      # FIXME generate log messages for all wrapped content
+
       def cd(dir, opts={}, &block)
-        FileUtils.cd(dir, _fileutils_opts.merge(opts), &block)
+        if block
+          log.enqueue(:info, PEXEC+"cd #{dir}")
+          FileUtils.cd(dir, _fileutils_opts.merge(opts), &block)
+          log.dequeue(:info, PEXEC+"cd -")
+        else
+          FileUtils.cd(dir, _fileutils_opts.merge(opts))
+        end
       end
 
       def pwd()
         FileUtils.pwd()
       end
 
-      def _mkdir(dirs, kind)
+      # FIXME Write own log for EVERYTHING that FileUtils executes since it's not using my log.
+
+      def _mkdir(dirs, kind, &block)
         missing = [dirs].flatten.select{|dir| ! File.directory?(dir)}
-        return false if missing.empty?
-        [FileUtils.send(kind, missing, _fileutils_opts)].flatten
+        result = false
+        if missing.empty? and not block
+          return result
+        end
+        unless missing.empty?
+          log.info(PEXEC+"#{kind} #{missing.join(" ")}")
+          result = [FileUtils.send(kind, missing, _fileutils_opts)].flatten
+        end
+        if block
+          if missing.size > 1
+            raise ArgumentError.new(
+              "can only use a block if you mkdir a single directory")
+          end
+          dir = [dirs].flatten.first
+          cd(dir) do
+            block.call(result)
+          end
+        end
+        return result
       end
       private :_mkdir
 
-      def mkdir(dirs)
-        _mkdir(dirs, :mkdir)
+      def mkdir(dirs, &block)
+        _mkdir(dirs, :mkdir, &block)
       end
 
-      def mkdir_p(dirs)
-        _mkdir(dirs, :mkdir_p)
+      def mkdir_p(dirs, &block)
+        _mkdir(dirs, :mkdir_p, &block)
       end
 
       def rmdir(dirs)
@@ -203,7 +227,7 @@ module AutomateIt
           end
         end
         return false if missing.empty?
-        log.debug("### _ln(%s, %s, %s) # => %s" % [kind, sources.inspect, target.inspect, missing.inspect])
+        log.debug(PNOTE+"_ln(%s, %s, %s) # => %s" % [kind, sources.inspect, target.inspect, missing.inspect])
         missing = missing.first if missing.size == 1
         case kind
         when :ln

@@ -14,7 +14,7 @@ module AutomateIt
       if opts[:log]
         @log = opts[:log]
       elsif not defined?(@log) or @log.nil?
-        @log = Logger.new($stdout)
+        @log = QueuedLogger.new($stdout)
         @log.level = Logger::INFO
       end
 
@@ -33,23 +33,23 @@ module AutomateIt
 
       if opts[:project]
         @project = File.expand_path(opts[:project])
-        log.debug("### Loading project from path: #{@project}")
+        log.debug(PNOTE+"Loading project from path: #{@project}")
 
         tag_file = File.join(@project, "config", "tags.yml")
         if File.exists?(tag_file)
-          log.debug("### Loading project tags: #{tag_file}")
+          log.debug(PNOTE+"Loading project tags: #{tag_file}")
           tag_manager[:yaml].setup(:file => tag_file)
         end
 
         field_file = File.join(@project, "config", "fields.yml")
         if File.exists?(field_file)
-          log.debug("### Loading project fields: #{field_file}")
+          log.debug(PNOTE+"Loading project fields: #{field_file}")
           field_manager[:yaml].setup(:file => field_file)
         end
 
         lib_files = Dir[File.join(@project, "lib", "*.rb")] + Dir[File.join(@project, "lib", "**", "init.rb")]
         lib_files.each do |lib|
-          log.debug("### Loading project library: #{lib}")
+          log.debug(PNOTE+"Loading project library: #{lib}")
           invoke(lib)
         end
 
@@ -58,7 +58,7 @@ module AutomateIt
 
         env_file = File.join(@project, "config", "automateit_env.rb")
         if File.exists?(env_file)
-          log.debug("### Loading project env: #{env_file}")
+          log.debug(PNOTE+"Loading project env: #{env_file}")
           invoke(env_file)
         end
       end
@@ -144,7 +144,7 @@ module AutomateIt
 
     def writing?(message=nil, &block)
       if block
-        log.info("### #{message}") if message and @noop
+        log.info(PNOTE+"#{message}") if message and @noop
         !@noop ? block.call : !@noop
       else
         !@noop

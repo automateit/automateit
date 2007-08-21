@@ -209,7 +209,7 @@ module AutomateIt
           end
           self.class._missing_dependencies = missing
           self.class._is_available = all_present
-          log.debug("### Driver #{self.class} #{all_present ? "is" : "isn't"} available")
+          log.debug(PNOTE+"Driver #{self.class} #{all_present ? "is" : "isn't"} available")
         end
         return self.class._is_available
       end

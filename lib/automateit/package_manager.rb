@@ -46,7 +46,7 @@ module AutomateIt
         available = block.call(packages, opts)
         truth = (packages - available).empty?
         result = opts[:list] ? available : truth
-        log.debug("### installed?(#{packages.inspect}) => #{truth}: #{available.inspect}")
+        log.debug(PNOTE+"installed?(#{packages.inspect}) => #{truth}: #{available.inspect}")
         return result
       end
 
@@ -61,7 +61,7 @@ module AutomateIt
         missing = packages - available
         truth = (packages - missing).empty?
         result = opts[:list] ? missing : truth
-        log.debug("### not_installed?(#{packages.inspect}) => #{truth}: #{missing.inspect}")
+        log.debug(PNOTE+"not_installed?(#{packages.inspect}) => #{truth}: #{missing.inspect}")
         return result
       end
 
@@ -315,7 +315,7 @@ module AutomateIt
           cmd = "gem install -y "+list.join(" ")+" 2>&1"
 
           # XXX Try to warn the user that they won't see any output for a while
-          log.info("### Installing Gems (#{list.inspect}), this will take a while...") unless opts[:quiet]
+          log.info(PNOTE+"Installing Gems (#{list.inspect}), this will take a while...") unless opts[:quiet]
 
           uninstall_needed = false
           log.debug("$$$ "+cmd)
@@ -348,17 +348,17 @@ module AutomateIt
               raise "PTY/Expect hack to get exit status failed"
             end
           rescue Errno::EIO => e
-            log.error("!!! Gem install failed when session ended unexpectedly")
+            log.error(PERROR+"Gem install failed when session ended unexpectedly")
             uninstall_needed = true
           rescue PTY::ChildExited => e
             unless e.status.exitstatus.zero?
-              log.error("!!! Gem install failed with non-zero exit value even though it may have claimed success")
+              log.error(PERROR+"Gem install failed with non-zero exit value even though it may have claimed success")
               uninstall_needed = true
             end
           end
 
           if uninstall_needed
-            log.error("!!! Gem install failed, trying to uninstall broken pieces: #{list.inspect}")
+            log.error(PERROR+"Gem install failed, trying to uninstall broken pieces: #{list.inspect}")
             uninstall(list, opts)
 
             raise ArgumentError.new("Gem install failed, either it's invalid or missing a dependency: #{list.inspect}")

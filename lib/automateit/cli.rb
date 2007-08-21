@@ -4,6 +4,11 @@ require "automateit"
 
 module AutomateIt
   class CLI
+    # Create a new CLI interpreter. Options:
+    # * :project - Project directory to load. Optional.
+    # * :recipe - Recipe file to execute. Optional.
+    # * :eval - Evaluate this string. Optional.
+    # * :quiet - Don't print shell header. Optional.
     def initialize(opts={})
       opts[:project] ||= opts[:recipe] ? File.join(File.dirname(opts[:recipe]), "..") : "."
       if opts[:create]
@@ -17,8 +22,8 @@ module AutomateIt
       else
         require "irb"
         unless opts[:quiet]
-          puts "### AutomateIt Shell v#{AutomateIt::VERSION}"
-          puts "### <CTRL-D> to quit, <Tab> to auto-complete"
+          puts PNOTE+"AutomateIt Shell v#{AutomateIt::VERSION}"
+          puts PNOTE+"<CTRL-D> to quit, <Tab> to auto-complete"
         end
         IRB.setup(__FILE__)
         irb = IRB::Irb.new
@@ -29,18 +34,39 @@ module AutomateIt
       end
     end
 
+    # Create a new project. Options:
+    # * :create - Project path to create. Required.
+    # * All other options are passed to the AutomateIt::Interpreter.
     def self.create_project(opts)
-        path = opts.delete(:create)
-        interpreter = AutomateIt.new(opts)
-        interpreter.instance_eval do
-          if mkdir_p(path)
-            puts "### Creating AutomateIt project at: #{path}"
-          else
-            puts "### Updating AutomateIt project at: #{path}"
-          end
-          mkdir(path+"/config")
+      path = opts.delete(:create) \
+        or raise ArgumentError.new(":create option not specified")
+      interpreter = AutomateIt.new(opts)
+      interpreter.instance_eval do
+        template_manager.default_check = :exists
+        mkdir_p(path) do |created|
+          puts PNOTE+"#{created ? 'Creating' : 'Updating'} AutomateIt project at: #{path}"
 
-          render(:string => <<-EOB, :to => path+"/config/tags.yml", :check => :exists)
+          mkdir("config") do
+            render(:string => TAGS_CONTENT, :to => "tags.yml")
+            render(:string => FIELDS_CONTENT, :to => "fields.yml")
+            render(:string => ENV_CONTENT, :to => "automateit_env.rb")
+          end
+
+          mkdir("lib") do
+            render(:string => BASE_README_CONTENT, :to => "README.txt")
+          end
+
+          mkdir("recipes") do
+            render(:string => RECIPE_README_CONTENT, :to => "README.txt")
+          end
+        end
+        puts PNOTE+"DONE!"
+      end # of interpreter.instance_eval
+    end
+
+    #---[ Default text content for generated files ]------------------------
+
+    TAGS_CONTENT = <<-EOB
 # This is an AutomateIt tags file, used by AutomateIt::TagManager::YAML
 #
 # Use this file to assign tags to hosts using YAML. For example, to assign the
@@ -66,9 +92,9 @@ module AutomateIt
 #
 #-----------------------------------------------------------------------
 
-          EOB
+    EOB
 
-          render(:string => <<-EOB, :to => path+"/config/fields.yml", :check => :exists)
+    FIELDS_CONTENT = <<-EOB
 # This is an AutomateIt fields file, used by AutomateIt::FieldManager::YAML
 #
 # Use this file to create a multi-level hash of key value pairs with YAML. This
@@ -94,9 +120,9 @@ module AutomateIt
 #
 #-----------------------------------------------------------------------
 
-          EOB
+    EOB
 
-          render(:string => <<-EOB, :to => path+"/config/automateit_env.rb", :check => :exists)
+    ENV_CONTENT = <<-EOB
 # This is an environment file for AutomateIt. It's loaded by the
 # AutomateIt::Interpreter immediately after loading the default tags, fields
 # and the contents of your "lib" directory. This file is loaded every time you
@@ -113,10 +139,9 @@ module AutomateIt
 #
 #-----------------------------------------------------------------------
 
-          EOB
+    EOB
 
-          mkdir(path+"/lib")
-          render(:string => <<-EOB, :to => path+"/lib/README.txt", :check => :exists)
+    BASE_README_CONTENT = <<-EOB
 # This is your AutomateIt project's "lib" directory. You can put custom plugins
 # and convenience methods into this directory. For example, you'd put your
 # custom PackageManager plugin here or a file that contains a method definition
@@ -127,16 +152,12 @@ module AutomateIt
 # subdirectories within this directory. Because these files are loaded each
 # time an interpreter is started, you should try to make sure these contents
 # are loaded quickly and don't cause unintended side-effects.
-          EOB
+    EOB
 
-          mkdir(path+"/recipes")
-          render(:string => <<-EOB, :to => path+"/recipes/README.txt", :check => :exists)
+    RECIPE_README_CONTENT = <<-EOB
 # This is your AutomateIt project's "recipes" directory. You should put recipes
 # into this directory. You can then execute them by running:
 #     automateit your_project_path/recipes/your_recipe.rb
-          EOB
-        end # of interpreter.instance_eval
-        puts "### DONE!"
-    end
+    EOB
   end
 end
