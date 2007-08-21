@@ -40,6 +40,7 @@ require 'automateit/field_manager' # requires shell
 require 'automateit/service_manager' # requires shell
 require 'automateit/package_manager' # requires shell
 require 'automateit/template_manager'
+require 'automateit/edit_manager'
 
 # Output prefixes
 PEXEC = "** "
