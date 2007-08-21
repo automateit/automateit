@@ -26,7 +26,7 @@ task "spec:all" do
   specify('spec/unit/**/*_spec.rb', 'spec/functional/**/*_spec.rb', 'spec/integration/**/*_spec.rb')
 end
 
-task "spec:rcov" do
+task "rcov:all" do
   @rcov = true
   Rake::Task["spec:all"].invoke
 end
