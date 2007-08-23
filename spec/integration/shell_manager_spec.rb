@@ -218,11 +218,11 @@ describe "AutomateIt::ShellManager" do
       (File.stat(file).mode ^ (mode | 0100000)).zero?.should be_false
       (File.stat(dir).mode ^ (mode | 040000)).zero?.should be_false
 
-      @m.chmod_R(mode, [dir, file]).should == [dir, file]
+      @m.chmod_R(mode, dir).should == dir
       (File.stat(file).mode ^ (mode | 0100000)).zero?.should be_true
       (File.stat(dir).mode ^ (mode | 04000)).zero?.should be_false
 
-      @m.chmod_R(mode, [dir, file]).should be_false
+      @m.chmod_R(mode, dir).should be_false
     end
   end
 
@@ -248,6 +248,7 @@ describe "AutomateIt::ShellManager" do
         uid = 1
         group = "daemon"
         gid = Etc.getgrnam(group).gid
+
         @m.touch(target)
         stat = File.stat(target)
         (stat.uid == uid).should be_false
@@ -263,7 +264,34 @@ describe "AutomateIt::ShellManager" do
     end
 
     it "should change the ownership of files recursively (chown_R)" do
-      # TODO
+      @m.mktempdircd do
+        uid = 1
+        group = "daemon"
+        gid = Etc.getgrnam(group).gid
+        dir = "foo/bar"
+        file = dir+"/baz"
+
+        @m.mkdir_p(dir)
+        @m.touch(file)
+        File.exists?(file).should be_true
+        File.exists?(dir).should be_true
+        stat = File.stat(file)
+        (stat.uid == uid).should be_false
+        (stat.gid == gid).should be_false
+        stat = File.stat(dir)
+        (stat.uid == uid).should be_false
+        (stat.gid == gid).should be_false
+
+        @m.chown_R(uid, group, dir).should == dir
+        stat = File.stat(file)
+        (stat.uid == uid).should be_true
+        (stat.gid == gid).should be_true
+        stat = File.stat(dir)
+        (stat.uid == uid).should be_true
+        (stat.gid == gid).should be_true
+
+        @m.chown_R(uid, group, dir).should be_false
+      end
     end
   else
     puts "NOTE: Must be root to check 'chown' in #{__FILE__}"
