@@ -196,7 +196,7 @@ else
     if INTERPRETER.superuser?
       # TODO implement chown spec
     else
-      puts "\nNOTE: Must be root to check 'chown' in #{__FILE__}"
+      puts "NOTE: Must be root to check 'chown' in #{__FILE__}"
     end
   end
 end
