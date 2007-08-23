@@ -236,12 +236,10 @@ module AutomateIt
       end
 
       def mv(sources, target)
-        # TODO implement
-        # TODO log
-        raise NotImplementedError # FIXME
-        present = [dirs].flatten.select{|dir| File.directory?(dir)}
+        present = [sources].flatten.select{|entry| File.exists?(entry)}
         return false if present.empty?
-        FileUtils.mv(missing, target, _fileutils_opts)
+        present = present.first if present.size == 1
+        FileUtils.mv(present, target, _fileutils_opts) && present
       end
 
       def _rm(kind, targets)

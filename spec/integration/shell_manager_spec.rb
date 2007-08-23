@@ -131,6 +131,21 @@ describe "AutomateIt::ShellManager" do
 
   # TODO implement gap
 
+  it "should move files (mv)" do
+    @m.mktempdircd do
+      file1 = "foo"
+      file2 = "bar"
+      @m.touch(file1)
+      File.exists?(file1).should be_true
+
+      @m.mv(file1, file2).should == file1
+      File.exists?(file1).should be_false
+      File.exists?(file2).should be_true
+
+      @m.mv(file1, file2).should be_false
+    end
+  end
+
   it "should delete files (rm)" do
     @m.mktempdircd do
       file1 = "foo"
@@ -140,6 +155,7 @@ describe "AutomateIt::ShellManager" do
       File.exists?(file1).should be_true
       File.exists?(file2).should be_true
 
+      # FIXME return value?
       @m.rm([file1, file2])
       File.exists?(file1).should be_false
       File.exists?(file2).should be_false
@@ -155,6 +171,7 @@ describe "AutomateIt::ShellManager" do
       File.exists?(file).should be_true
       File.exists?(dir).should be_true
 
+      # FIXME return value?
       @m.rm_rf(dir)
       File.exists?(file).should be_false
       File.exists?(dir).should be_false
@@ -171,6 +188,7 @@ describe "AutomateIt::ShellManager" do
       File.exists?(dir).should be_true
       # FIXME chmod a file so that rm_r will fail
 
+      # FIXME return value?
       @m.rm_rf(dir)
       File.exists?(file).should be_false
       File.exists?(dir).should be_false
