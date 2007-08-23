@@ -151,14 +151,22 @@ module AutomateIt
         if block
           log.enqueue(:info, PEXEC+"cd #{dir}")
           begin
-            FileUtils.cd(dir, _fileutils_opts.merge(opts), &block)
+            if writing? or File.directory?(dir)
+              FileUtils.cd(dir, &block)
+            else
+              begin
+                block.call(true)
+              rescue Exception => e
+                raise e
+              end
+            end
           rescue Exception => e
             raise e
           ensure
             log.dequeue(:info, PEXEC+"cd -")
           end
         else
-          FileUtils.cd(dir, _fileutils_opts.merge(opts))
+          FileUtils.cd(dir) if writing?
         end
       end
 
@@ -195,7 +203,7 @@ module AutomateIt
       end
 
       def mkdir_p(dirs, opts={}, &block)
-        mkdir(dirs, {:parents => true}.merge(opts))
+        mkdir(dirs, {:parents => true}.merge(opts), &block)
       end
 
       def rmdir(dirs)
