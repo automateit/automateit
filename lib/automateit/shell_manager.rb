@@ -1,11 +1,9 @@
 require 'automateit'
 
 module AutomateIt
-  # Provides UNIX-like shell commands for the Interpreter. See documentation in
-  # ShellManager::POSIX
+  # The ShellManager provides UNIX-like shell commands for the Interpreter.
   class ShellManager < Plugin::Manager
     # FIXME noop calls to FileUtils must return true to indicate that an action would have been taken, rather than returning nil to indicate that nothing was actually done
-    # FIXME write specs for all these commands
     # TODO write docs for all these commands
     alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :touch
@@ -332,7 +330,7 @@ module AutomateIt
           raise NotImplementedError.new("command not found: #{command}")
         end
       end
-    end
+    end # UNIX
 
   end # class ShellManager
 end # module AutomateIt
