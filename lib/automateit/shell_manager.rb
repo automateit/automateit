@@ -110,6 +110,7 @@ module AutomateIt
       end
 
       def _mktemp_helper(kind, name=nil, opts={}, &block)
+        # Tempster takes care of rethrowing exceptions
         opts = {:name => name}.merge(opts)
         ::Tempster.send(kind, opts, &block)
       end
@@ -133,6 +134,8 @@ module AutomateIt
           if block
             begin
               block.call
+            rescue Exception => e
+              raise e
             ensure
               File::umask(old)
             end
@@ -147,8 +150,13 @@ module AutomateIt
       def cd(dir, opts={}, &block)
         if block
           log.enqueue(:info, PEXEC+"cd #{dir}")
-          FileUtils.cd(dir, _fileutils_opts.merge(opts), &block)
-          log.dequeue(:info, PEXEC+"cd -")
+          begin
+            FileUtils.cd(dir, _fileutils_opts.merge(opts), &block)
+          rescue Exception => e
+            raise e
+          ensure
+            log.dequeue(:info, PEXEC+"cd -")
+          end
         else
           FileUtils.cd(dir, _fileutils_opts.merge(opts))
         end
