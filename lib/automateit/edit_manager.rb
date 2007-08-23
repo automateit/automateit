@@ -10,6 +10,8 @@ module AutomateIt
     # See documentation for EditSession::edit
     def edit(opts, &block) dispatch(opts, &block) end
 
+    #-----------------------------------------------------------------------
+
     # Provides a way to edit files and strings. See documentation for EditSession.
     class Basic < Plugin::Driver
 
@@ -25,6 +27,8 @@ module AutomateIt
       def edit(opts, &block)
         EditSession.edit(opts, &block)
       end
+
+      #-----------------------------------------------------------------------
 
       class EditSession
 
@@ -69,27 +73,50 @@ module AutomateIt
           @comment_suffix = ""
         end
 
-        # Prepend the +line+ to the top of the buffer, but only if it's not in this file already.
+        # Prepend +line+ to the top of the buffer, but only if it's not in this
+        # file already.
+        #
+        # Options:
+        # * :unless - Look for this String or Regexp instead and don't prepend
+        #   if it matches.
+        #
+        # Example:
+        #   # Buffer's contents are 'add    this line'
+        #
+        #   # This will prepend a line because they're not identical.
+        #   prepend("add this line")
+        #
+        #   # Won't prepend line because Regexp matches exisint line in buffer.
+        #   prepend("add this line", :unless => /add\s*this\*line/)
         def prepend(line, opts={})
-          return if contains?(line)
+          query = Regexp.new(opts[:unless] || line)
+          return if contains?(query)
           @contents = "%s\n%s" % [line, @contents]
         end
 
-        # Append the +line+ to the bottom of the buffer, but only if it's not in this file already.
+        # Append +line+ to the bottom of the buffer, but only if it's not in
+        # this file already.
+        #
+        # Options:
+        # * :unless - Look for this String or Regexp instead and don't append
+        #   if it matches.
+        #
+        # See example for #prepend.
         def append(line, opts={})
-          return if contains?(line)
+          query = Regexp.new(opts[:unless] || line)
+          return if contains?(query)
           @contents = "%s\n%s" % [@contents.chomp, line]
         end
 
-        # Does the buffer contain anything that matches the +query+?
+        # Does the buffer contain anything that matches the String or Regexp +query+?
         def contains?(query)
           query = Regexp.new(query) unless Regexp === query
           ! @contents.match(query).nil?
         end
 
-        # Delete lines matching the +query+
+        # Delete lines matching the String or Regexp +query+
         def delete(query, opts={})
-          query = Regexp.new(query+"\n?") unless Regexp === query
+          query = Regexp.new(query+"\n?")
           @contents.gsub!(query, "")
         end
 
@@ -102,23 +129,23 @@ module AutomateIt
           @comment_suffix = suffix
         end
 
-        # Comment out lines matching the +query+.
+        # Comment out lines matching the String or Regexp +query+.
         def comment(query, opts={})
-          query = Regexp.new("^([^\n]*%s[^\n]*)(\n*)" % query) unless Regexp === query
+          query = Regexp.new("^([^\n]*%s[^\n]*)(\n*)" % query)
           return false unless @contents.match(query)
           @contents.gsub!(query, "%s%s%s%s" % [@comment_prefix, $1, @comment_suffix, $2])
         end
 
-        # Uncomment lines matching the +query+.
+        # Uncomment lines matching the String or Regexp +query+.
         def uncomment(query, opts={})
-          query = Regexp.new("^(%s)([^\n]*%s[^\n]*)(%s)(\n*)" % [@comment_prefix, query, @comment_suffix]) unless Regexp === query
+          query = Regexp.new("^(%s)([^\n]*%s[^\n]*)(%s)(\n*)" % [@comment_prefix, query, @comment_suffix])
           return false unless @contents.match(query)
           @contents.gsub!(query, "%s%s" % [$2, $4])
         end
 
-        # Replace contents matching the +query+ with the +string+.
+        # Replace contents matching the String or Regexp +query+ with the +string+.
         def replace(query, string, opts={})
-          query = Regexp.new(query) unless Regexp === query
+          query = Regexp.new(query)
           @contents.gsub!(query, string)
         end
 
