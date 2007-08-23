@@ -285,14 +285,12 @@ module AutomateIt
         rm(targets, {:recursive => true, :force => true}.merge(opts))
       end
 
+      FILE_MASK = 0100000
+      DIRECTORY_MASK = 040000
+
       def chperm(targets, opts={})
         require 'etc'
         require 'find'
-
-        mode = \
-          if opts[:mode]
-            (opts[:mode] | 0100000)
-          end
 
         user = \
           if opts[:user]
@@ -316,17 +314,21 @@ module AutomateIt
         Find.find(*targets) do |path|
           modified = false
           stat = File.stat(path)
-          if opts[:mode] and not (opts[:mode] ^ stat.mode).zero?
-            modified = true
-            File.chmod(opts[:mode], path) if writing?
+          if opts[:mode]
+            mode = opts[:mode] | (stat.directory? ? DIRECTORY_MASK : FILE_MASK)
+            unless (mode ^ stat.mode).zero?
+              #puts "in %o got %o" % [mode, stat.mode]
+              modified = true
+              File.chmod(mode, path) if writing?
+            end
           end
-          if opts[:user] and not (opts[:user] == stat.uid)
+          if user and not (user == stat.uid)
             modified = true
-            File.chown(opts[:user], nil, path) if writing?
+            File.chown(user, nil, path) if writing?
           end
-          if opts[:group] and not (opts[:group] == stat.gid)
+          if group and not (group == stat.gid)
             modified = true
-            File.chown(nil, opts[:group], path) if writing?
+            File.chown(nil, group, path) if writing?
           end
           modified_entries << path if modified
           Find.prune if not opts[:recursive] and File.directory?(path)

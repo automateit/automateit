@@ -195,20 +195,35 @@ describe "AutomateIt::ShellManager" do
   it "should change the permissions of files (chmod)" do
     @m.mktempdircd do
       target = "foo"
-      mode = 0100654
+      mode = 0654
       @m.touch(target)
-      # File.stat(target).mode.should != mode # XXX != broken on rspec
-      (File.stat(target).mode == mode).should be_false
+      (File.stat(target).mode ^ (mode | 0100000)).zero?.should be_false
 
       @m.chmod(mode, target).should == target
-      (File.stat(target).mode == mode).should be_true
+      (File.stat(target).mode ^ (mode | 0100000)).zero?.should be_true
 
-      @m.chmod(mode, target).should be_false 
+      @m.chmod(mode, target).should be_false
     end
   end
 
   it "should change the permissions of files recursively (chmod_R)" do
-    # TODO
+    @m.mktempdircd do
+      mode = 0754
+      dir = "foo/bar"
+      file = dir+"/baz"
+      @m.mkdir_p(dir)
+      @m.touch(file)
+      File.exists?(file).should be_true
+      File.exists?(dir).should be_true
+      (File.stat(file).mode ^ (mode | 0100000)).zero?.should be_false
+      (File.stat(dir).mode ^ (mode | 040000)).zero?.should be_false
+
+      @m.chmod_R(mode, [dir, file]).should == [dir, file]
+      (File.stat(file).mode ^ (mode | 0100000)).zero?.should be_true
+      (File.stat(dir).mode ^ (mode | 04000)).zero?.should be_false
+
+      @m.chmod_R(mode, [dir, file]).should be_false
+    end
   end
 
   it "should change the ownership of files (chown)" do
