@@ -25,13 +25,12 @@ module AutomateIt
 
       # See documentation for EditSession::edit
       def edit(opts, &block)
-        EditSession.edit(opts, &block)
+        EditSession.new(:interpreter => @interpreter).edit(opts, &block)
       end
 
       #-----------------------------------------------------------------------
 
-      class EditSession
-
+      class EditSession < AutomateIt::Common
         # Edit a file or string. You must specify either the :file or :string
         # options.
         #
@@ -45,15 +44,22 @@ module AutomateIt
         #     prepend "myheader"
         #     append "yo "+params[:hello]
         #   end
-        def self.edit(opts, &block)
+        def edit(opts, &block)
+          @filename = opts.delete(:file)
+          @contents = opts.delete(:string)
+          @params = opts.delete(:params) || {}
+          @comment_prefix = "# "
+          @comment_suffix = ""
+          @contents ||= read || ""
+          @original_contents = @contents.clone
+
           raise ArgumentError.new("no block given") unless block
-          session = self.new(opts)
-          session.instance_eval(&block)
-          if session.filename
-            session.write if session.different?
-            return session.different?
+          instance_eval(&block)
+          if @filename
+            write if different?
+            return different?
           else
-            return session.contents
+            return contents
           end
         end
 
@@ -63,15 +69,6 @@ module AutomateIt
         attr_accessor :params
         attr_accessor :comment_prefix
         attr_accessor :comment_suffix
-
-        def initialize(opts)
-          @filename = opts[:file]
-          @contents = opts[:string] or read
-          @original_contents = @contents.clone
-          @params = opts[:params] || {}
-          @comment_prefix = "# "
-          @comment_suffix = ""
-        end
 
         # Prepend +line+ to the top of the buffer, but only if it's not in this
         # file already.
@@ -166,12 +163,21 @@ module AutomateIt
 
         # Read contents from +filename+.
         def read
-          @contents = File.read(@filename)
+          @contents = \
+            if writing? or (noop? and @filename and File.exists?(@filename))
+              File.read(@filename)
+            else
+              nil
+            end
         end
 
         # Write contents to +filename+.
         def write
-          File.open(@filename, "w+"){|writer| writer.write(@contents)}
+          if writing?
+            File.open(@filename, "w+"){|writer| writer.write(@contents)}
+          else
+            true
+          end
         end
       end # class EditSession
 
