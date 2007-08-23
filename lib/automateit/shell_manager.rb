@@ -5,7 +5,7 @@ module AutomateIt
   class ShellManager < Plugin::Manager
     # FIXME noop calls to FileUtils must return true to indicate that an action would have been taken, rather than returning nil to indicate that nothing was actually done
     # TODO write docs for all these commands
-    alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd
+    alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :touch
 
     #...[ Custom commands ].................................................
@@ -21,6 +21,8 @@ module AutomateIt
     def mktempdir(path=nil, &block) dispatch(path, &block) end
 
     def mktempdircd(path=nil, &block) dispatch(path, &block) end
+
+    def chperm(targets, opts={}) dispatch(target, opts) end
 
     #...[ FileUtils wrappers ]...............................................
 
@@ -283,13 +285,64 @@ module AutomateIt
         rm(targets, {:recursive => true, :force => true}.merge(opts))
       end
 
+      def chperm(targets, opts={})
+        require 'etc'
+        require 'find'
+
+        mode = \
+          if opts[:mode]
+            (opts[:mode] | 0100000)
+          end
+
+        user = \
+          if opts[:user]
+            if opts[:user].is_a?(String)
+              Etc.getpwnam(opts[:user])
+            else
+              opts[:user]
+            end
+          end
+
+        group = \
+          if opts[:group]
+            if opts[:group].is_a?(String)
+              Etc.getgrnam(opts[:group])
+            else
+              opts[:group]
+            end
+          end
+
+        modified_entries = []
+        Find.find(*targets) do |path|
+          modified = false
+          stat = File.stat(path)
+          if opts[:mode] and not (opts[:mode] ^ stat.mode).zero?
+            modified = true
+            File.chmod(opts[:mode], path) if writing?
+          end
+          if opts[:user] and not (opts[:user] == stat.uid)
+            modified = true
+            File.chown(opts[:user], nil, path) if writing?
+          end
+          if opts[:group] and not (opts[:group] == stat.gid)
+            modified = true
+            File.chown(nil, opts[:group], path) if writing?
+          end
+          modified_entries << path if modified
+          Find.prune if not opts[:recursive] and File.directory?(path)
+        end
+
+        if modified_entries.empty?
+          return false
+        elsif targets.is_a?(String)
+          return modified_entries.first
+        else
+          return modified_entries
+        end
+      end
+
       def chmod(mode, targets, opts={})
-        # TODO implement
-        # TODO log
-        # if target_stat && (target_stat.mode != source_stat.mode)
-        #   chmod(source_stat.mode, target_file, _fileutils_opts)
-        # end
-        FileUtils.chmod(mode, targets, _fileutils_opts)
+        chperm(targets, {:mode => mode}.merge(opts))
       end
 
       def chmod_R(mode, targets, opts={})
@@ -297,9 +350,7 @@ module AutomateIt
       end
 
       def chown(user, group, targets, opts={})
-        # TODO implement
-        # TODO log
-        FileUtils.chown(user, group, targets, _fileutils_opts)
+        chperm(targets, {:user => user, :group => group}.merge(opts))
       end
 
       def chown_R(user, group, targets, opts={})

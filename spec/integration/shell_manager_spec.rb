@@ -192,7 +192,32 @@ describe "AutomateIt::ShellManager" do
     end
   end
 
-  # TODO implement gap
+  it "should change the permissions of files (chmod)" do
+    @m.mktempdircd do
+      target = "foo"
+      mode = 0100654
+      @m.touch(target)
+      # File.stat(target).mode.should != mode # XXX != broken on rspec
+      (File.stat(target).mode == mode).should be_false
+
+      @m.chmod(mode, target).should == target
+      (File.stat(target).mode == mode).should be_true
+
+      @m.chmod(mode, target).should be_false 
+    end
+  end
+
+  it "should change the permissions of files recursively (chmod_R)" do
+    # TODO
+  end
+
+  it "should change the ownership of files (chown)" do
+    # TODO
+  end
+
+  it "should change the ownership of files recursively (chown_R)" do
+    # TODO
+  end
 
   it "should create files and change their timestamps (touch)" do
     @m.mktempdircd do
