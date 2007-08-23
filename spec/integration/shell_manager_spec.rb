@@ -155,8 +155,7 @@ describe "AutomateIt::ShellManager" do
       File.exists?(file1).should be_true
       File.exists?(file2).should be_true
 
-      # FIXME return value?
-      @m.rm([file1, file2])
+      @m.rm([file1, file2]) == [file1, file2]
       File.exists?(file1).should be_false
       File.exists?(file2).should be_false
     end
@@ -171,8 +170,7 @@ describe "AutomateIt::ShellManager" do
       File.exists?(file).should be_true
       File.exists?(dir).should be_true
 
-      # FIXME return value?
-      @m.rm_rf(dir)
+      @m.rm_rf(dir) == [dir, file]
       File.exists?(file).should be_false
       File.exists?(dir).should be_false
     end
@@ -188,8 +186,7 @@ describe "AutomateIt::ShellManager" do
       File.exists?(dir).should be_true
       # FIXME chmod a file so that rm_r will fail
 
-      # FIXME return value?
-      @m.rm_rf(dir)
+      @m.rm_rf(dir) == [file, dir]
       File.exists?(file).should be_false
       File.exists?(dir).should be_false
     end
