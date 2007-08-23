@@ -5,7 +5,7 @@ module AutomateIt
   class ShellManager < Plugin::Manager
     # FIXME noop calls to FileUtils must return true to indicate that an action would have been taken, rather than returning nil to indicate that nothing was actually done
     # TODO write docs for all these commands
-    alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm
+    alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :touch
 
     #...[ Custom commands ].................................................
@@ -23,6 +23,8 @@ module AutomateIt
     def mktempdircd(path=nil, &block) dispatch(path, &block) end
 
     def chperm(targets, opts={}) dispatch(target, opts) end
+
+    def umask(mode=nil, &block) dispatch(mode, &block) end
 
     #...[ FileUtils wrappers ]...............................................
 
@@ -122,6 +124,22 @@ module AutomateIt
 
       def mktempdircd(name=nil, &block)
         _mktemp_helper(:mktempdircd, name, &block)
+      end
+
+      def umask(mode=nil, &block)
+        if mode
+          old = File::umask
+          File::umask(mode)
+          if block
+            begin
+              block.call
+            ensure
+              File::umask(old)
+            end
+          end
+        else
+          File::umask
+        end
       end
 
       #...[ FileUtils wrappers ]...............................................

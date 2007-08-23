@@ -129,6 +129,8 @@ describe "AutomateIt::ShellManager" do
     end
   end
 
+  # TODO implement umask spec
+
   # TODO implement gap
 
   it "should move files (mv)" do
