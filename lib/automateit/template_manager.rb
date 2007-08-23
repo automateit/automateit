@@ -137,21 +137,21 @@ module AutomateIt
 
       # Return the contents of +filename+.
       def _read(filename)
-        return File.read(filename)
+        return writing? ? File.read(filename) : ""
       end
       private :_read
 
       # Write +contents+ to +filename+.
       def _write(filename, contents)
-        return true if File.open(filename, "w+"){|writer| writer.write(contents)}
+        return writing? ? File.open(filename, "w+"){|writer| writer.write(contents)} : true
       end
       private :_write
 
       # Return the modification date for +filename+.
       def _mtime(filename)
-        return File.mtime(filename)
+        return _exists? ? File.mtime(filename) : nil
       end
       private :_mtime
-    end
-  end
-end
+    end # class ERB
+  end # class TemplateManager
+end # module AutomateIt
