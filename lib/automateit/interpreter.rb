@@ -176,9 +176,18 @@ module AutomateIt
     end
 
     def invoke(recipe)
+      # FIXME doing eval breaks the exception backtraces
       # TODO lookup partial names
       data = File.read(recipe)
       eval data
+    end
+
+    def dist
+      if @project
+        File.join(@project, "dist")
+      else
+        raise NotImplementedError.new("can't use dist without a project")
+      end
     end
   end
 end
