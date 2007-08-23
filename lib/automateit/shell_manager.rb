@@ -312,6 +312,7 @@ module AutomateIt
           modified = false
           stat = File.stat(path)
           if opts[:mode]
+            # TODO process mode strings [ugoa...][[+-=][rwxXstugo...]...][,...]
             mode = opts[:mode] | (stat.directory? ? DIRECTORY_MASK : FILE_MASK)
             unless (mode ^ stat.mode).zero?
               #puts "in %o got %o" % [mode, stat.mode]
