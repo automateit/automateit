@@ -12,6 +12,9 @@ module AutomateIt
     # Stop this +service+ if it's running.
     def stop(service, opts={}) dispatch(service, opts) end
 
+    # Restart this +service+ if it's running, or start it if it's stopped.
+    def restart(service, opts={}) dispatch(service, opts) end
+
     # Will this +service+ start when the computer is rebooted?
     def enabled?(service) dispatch(service) end
 
@@ -54,7 +57,7 @@ module AutomateIt
           cmd += " > /dev/null" # Discard only STDOUT
         end
 
-        log.send((opts[:quiet] || opts[:checking]) ? :debug : :info, "$$$ #{cmd}")
+        log.send((opts[:quiet] || opts[:checking]) ? :debug : :info, PEXEC+cmd)
         if writing?
           system(cmd)
           return $?.exitstatus.zero?
@@ -81,6 +84,11 @@ module AutomateIt
       def stop(service, opts={})
         return false if not opts[:force] and not running?(service)
         return _run_service(service, :stop, opts)
+      end
+
+      def restart(service, opts={})
+        stop(service, opts) if running?(service)
+        return start(service, opts)
       end
 
       def enabled?(service)
