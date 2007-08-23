@@ -1,0 +1,31 @@
+# This is an AutomateIt tags file, used by AutomateIt::TagManager::YAML
+#
+# Use this file to assign tags to hosts using YAML. For example, to assign the
+# tag "myrole" to two computers, named "host1" and "host2", you'd write:
+#     myrole:
+#       - host1
+#       - host2
+#
+# In your recipes, you can then check if the host has these tags:
+#     if tagged?("myrole")
+#       # Do stuff if this host has the "myrole" tag
+#     end
+#
+# You can also retrieve the tags:
+#     puts "Tags for this host: #{tags.inspect}"
+#     # => ["myrole"]
+#     puts "Tags for a specific host: #{tags_for("host1").inspect}"
+#     # => ["myrole"]
+#     puts "Hosts tagged with a set of tags: #{hosts_tagged_with("myrole").inspect}"
+#     # => ["host1", "host2"]
+#
+# You may use ERB statements within this file.
+#
+#-----------------------------------------------------------------------
+
+rails_servers:
+    michiru
+myapp_servers:
+    # FIMXE add interpolation : rails_servers
+    michiru
+

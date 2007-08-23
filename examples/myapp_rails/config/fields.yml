@@ -1,0 +1,33 @@
+# This is an AutomateIt fields file, used by AutomateIt::FieldManager::YAML
+#
+# Use this file to create a multi-level hash of key value pairs with YAML. This
+# is useful for extracting configuration-specific arguments out of your recipes
+# and make it easier to share them between recipes and command-line UNIX
+# programs.
+#
+# You can write lines like the following to declare these the hash with YAML:
+#   foo: bar
+#   mydaemon:
+#     mykey: myvalue
+#
+# And then retrieve them in your recipe with:
+#   lookup("foo") # => "bar"
+#   lookup("mydaemon") # => {"mykey" => "myvalue"}
+#   lookup("mydaemon#mykey") # => "myvalue"
+#
+# You may use ERB statements within this file. Because this file is loaded
+# after the tags, you can use ERB to provide specific fields for specific
+# groups of hosts, e.g.:
+#
+#   magical:
+#
+#-----------------------------------------------------------------------
+
+myapp:
+    name: <%=name = 'myapp'%>
+    user: <%=user = 'myuser'%>
+    path: /home/<%=user%>/<%=name%>
+    environment: production
+    port: 9000
+    backends: 2
+
