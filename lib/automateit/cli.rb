@@ -15,7 +15,7 @@ module AutomateIt
         self.class.create_project(opts)
       elsif opts[:recipe]
         interpreter = AutomateIt.new(opts)
-        interpreter.invoke(recipe)
+        interpreter.invoke(opts[:recipe])
       elsif code = opts.delete(:eval)
         interpreter = AutomateIt.new(opts)
         interpreter.instance_eval(code)
@@ -157,6 +157,7 @@ module AutomateIt
     RECIPE_README_CONTENT = <<-EOB
 # This is your AutomateIt project's "recipes" directory. You should put recipes
 # into this directory. You can then execute them by running:
+#
 #     automateit your_project_path/recipes/your_recipe.rb
     EOB
   end
