@@ -224,12 +224,29 @@ module AutomateIt
         _ln(:ln_sf, sources, target)
       end
 
+      def install(source, target, mode)
+        raise NotImplementedError
+        # TODO needs more sophisticated algorithm, maybe combine with copy
+        # TODO log
+        source_stat = File.stat(source)
+        target_file = (File.directory?(target) || File.stat(target).symlink?) ?
+          File.join(target, File.basename(source)) : target
+        target_stat = File.exists?(target_file) ? File.stat(target) : nil
+        unless target_stat and FileUtils.identical?(source, target_file)
+          FileUtils.install(source, target, mode,
+                            {:preserve => true}.merge(_fileutils_opts))
+        end
+      end
+
       def cp(sources, target)
+        raise NotImplementedError
         # TODO needs much more sophisticated algorithm
         # TODO log
         FileUtils.cp(sources, target, _fileutils_opts)
       end
+
       def cp_r(sources, target)
+        raise NotImplementedError
         # TODO log
         # TODO needs much more sophisticated algorithm
         FileUtils.cp_r(sources, target, _fileutils_opts)
@@ -260,19 +277,6 @@ module AutomateIt
 
       def rm_rf(targets)
         _rm(:rm_rf, targets)
-      end
-
-      def install(source, target, mode)
-        # TODO needs more sophisticated algorithm, maybe combine with copy
-        # TODO log
-        source_stat = File.stat(source)
-        target_file = (File.directory?(target) || File.stat(target).symlink?) ?
-          File.join(target, File.basename(source)) : target
-        target_stat = File.exists?(target_file) ? File.stat(target) : nil
-        unless target_stat and FileUtils.identical?(source, target_file)
-          FileUtils.install(source, target, mode,
-                            {:preserve => true}.merge(_fileutils_opts))
-        end
       end
 
       def chmod(mode, targets)
