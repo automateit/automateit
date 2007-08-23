@@ -6,6 +6,8 @@ require 'open3'
 require 'pty'
 require 'set'
 require 'yaml'
+require 'find'
+require 'etc'
 
 # Gems
 require 'rubygems'

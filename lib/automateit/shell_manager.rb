@@ -289,13 +289,10 @@ module AutomateIt
       DIRECTORY_MASK = 040000
 
       def chperm(targets, opts={})
-        require 'etc'
-        require 'find'
-
         user = \
           if opts[:user]
             if opts[:user].is_a?(String)
-              Etc.getpwnam(opts[:user])
+              Etc.getpwnam(opts[:user]).uid
             else
               opts[:user]
             end
@@ -304,7 +301,7 @@ module AutomateIt
         group = \
           if opts[:group]
             if opts[:group].is_a?(String)
-              Etc.getgrnam(opts[:group])
+              Etc.getgrnam(opts[:group]).gid
             else
               opts[:group]
             end

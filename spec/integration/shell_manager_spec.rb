@@ -226,14 +226,6 @@ describe "AutomateIt::ShellManager" do
     end
   end
 
-  it "should change the ownership of files (chown)" do
-    # TODO
-  end
-
-  it "should change the ownership of files recursively (chown_R)" do
-    # TODO
-  end
-
   it "should create files and change their timestamps (touch)" do
     @m.mktempdircd do
       target = "foo"
@@ -250,7 +242,29 @@ describe "AutomateIt::ShellManager" do
   end
 
   if INTERPRETER.superuser?
-    # TODO implement chown spec
+    it "should change the ownership of files (chown)" do
+      @m.mktempdircd do
+        target = "foo"
+        uid = 1
+        group = "daemon"
+        gid = Etc.getgrnam(group).gid
+        @m.touch(target)
+        stat = File.stat(target)
+        (stat.uid == uid).should be_false
+        (stat.gid == gid).should be_false
+
+        @m.chown(uid, group, target).should == target
+        stat = File.stat(target)
+        (stat.uid == uid).should be_true
+        (stat.gid == gid).should be_true
+
+        @m.chown(uid, group, target).should be_false
+      end
+    end
+
+    it "should change the ownership of files recursively (chown_R)" do
+      # TODO
+    end
   else
     puts "NOTE: Must be root to check 'chown' in #{__FILE__}"
   end
