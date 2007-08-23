@@ -22,8 +22,8 @@ else
       @m.which("not_a_real_program").should be_nil
     end
 
-    it "should throw exception if command isn't in path (raise_unless_which)" do
-      lambda{ @m.raise_unless_which("not_a_real_program") }.should raise_error(NotImplementedError, /not_a_real_program/)
+    it "should throw exception if command isn't in path (which!)" do
+      lambda{ @m.which!("not_a_real_program") }.should raise_error(NotImplementedError, /not_a_real_program/)
     end
 
     it "should change directories (cd)" do

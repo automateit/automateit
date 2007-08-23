@@ -7,7 +7,7 @@ module AutomateIt
     # FIXME noop calls to FileUtils must return true to indicate that an action would have been taken, rather than returning nil to indicate that nothing was actually done
     # FIXME write specs for all these commands
     # TODO write docs for all these commands
-    alias_methods :sh, :which, :raise_unless_which, :mktemp, :mktempdir, :mktempdircd
+    alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :touch
 
     #...[ Custom commands ].................................................
@@ -16,7 +16,7 @@ module AutomateIt
 
     def which(command) dispatch(command) end
 
-    def raise_unless_which(command) dispatch(command) end
+    def which!(command) dispatch(command) end
 
     def mktemp(path=nil, &block) dispatch(path, &block) end
 
@@ -58,12 +58,17 @@ module AutomateIt
 
     #-----------------------------------------------------------------------
 
-    class POSIX < Plugin::Driver
-      # XXX Interrogate individual methods for fine-grained control? E.g. Windows can run almost all of these pure ruby commands, so it should run them rather than failing just because a few aren't there.
-      depends_on :programs => %w(which)
+    # The Basic driver for ShellManager provides common shell commands
+    # available on all Ruby platforms.
+    #
+    # Commands it does not provide include:
+    # * #which
+    # * #which!
+    class Basic < Plugin::Driver
+      depends_on :nothing
 
       def suitability(method, *args)
-        return available? ? 1 : 0
+        return 1
       end
 
       def setup(opts={})
@@ -85,17 +90,6 @@ module AutomateIt
         args, opts = args_and_opts(*commands)
         log.info(PEXEC+"#{args.join(' ')}")
         return writing? ? system(*args) : true
-      end
-
-      def which(command)
-        data = `which "#{command}" 2>&1`.chomp
-        return File.exists?(data) ? data : nil
-      end
-
-      def raise_unless_which(command)
-        if which(command).nil?
-          raise NotImplementedError.new("command not found: #{command}")
-        end
       end
 
       def rbsync(sources, target)
@@ -316,6 +310,29 @@ module AutomateIt
         log.info(PEXEC+"touch #{String === targets ? targets : targets.join(' ')}")
         FileUtils.touch(targets, _fileutils_opts)
       end
+    end # Basic
+
+    #-----------------------------------------------------------------------
+
+    class UNIX < Basic
+      depends_on :programs => %w(which)
+
+      def suitability(method, *args)
+        # Level must be higher than Basic
+        return available? ? 2 : 0
+      end
+
+      def which(command)
+        data = `which "#{command}" 2>&1`.chomp
+        return File.exists?(data) ? data : nil
+      end
+
+      def which!(command)
+        if which(command).nil?
+          raise NotImplementedError.new("command not found: #{command}")
+        end
+      end
     end
-  end
-end
+
+  end # class ShellManager
+end # module AutomateIt

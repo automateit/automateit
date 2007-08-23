@@ -177,8 +177,14 @@ module AutomateIt
       # do the work, while the <tt>suitability</tt> method determines if the
       # driver *should* be automatically selected.
       def available?
-        is_available = self.class._is_available
+        # Some drivers don't run +depends_on+, so assume they're available.
+        return true unless self.class.respond_to?(:_depends_on_opts)
         opts = self.class._depends_on_opts
+
+        # Driver said that it +depends_on :nothing+, so it's available.
+        return true if opts == :nothing
+
+        is_available = self.class._is_available
         if is_available.nil? and opts.nil?
           log.debug("don't know if driver #{self.class} is available, maybe it doesn't state what it +depends_on+")
           return false
@@ -195,9 +201,13 @@ module AutomateIt
                 when :directories
                   File.directory?(item)
                 when :programs
-                  # FIXME How do +which+ when interpreter queries availability, which causes an infinite loop? Temporary hack is to bypass the check.
-                  ### when :programs: ! interpreter.which(item).nil?
-                  ! interpreter.shell_manager[:posix].which(item).nil?
+                  # XXX Find less awkward way to check if a program exists. Can't use +shell_manager.which+ because that will use +dispatch+ and go into an infinite loop checking +available?+. The +which+ command isn't available on all platforms, so that failure must be handled as well.
+                  begin
+                    interpreter.shell_manager[:unix].which!(item)
+                    true
+                  rescue ArgumentError, NotImplementedError
+                    false
+                  end
                 else
                   raise "unknown kind: #{kind}"
                 end
