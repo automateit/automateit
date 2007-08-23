@@ -26,31 +26,31 @@ module AutomateIt
 
     def cd(dir, opts={}, &block) dispatch(dir, opts, &block) end
     def pwd() dispatch() end
-    def mkdir(dirs, &block) dispatch(dirs, &block) end
-    def mkdir_p(dirs, &block) dispatch(dirs, &block) end
+    def mkdir(dirs, opts={}, &block) dispatch(dirs, &block) end
+    def mkdir_p(dirs, opts={}, &block) dispatch(dirs, &block) end
 
     def rmdir(dirs) dispatch(dirs) end
 
-    def ln(source, target) dispatch(source, target) end
-    def ln_s(sources, target) dispatch(sources, target) end
-    def ln_sf(sources, target) dispatch(sources, target) end
+    def ln(source, target, opts={}) dispatch(source, target, opts) end
+    def ln_s(sources, target, opts={}) dispatch(sources, target, opts) end
+    def ln_sf(sources, target, opts={}) dispatch(sources, target, opts) end
 
-    def cp(sources, target) dispatch(sources, target) end
-    def cp_r(sources, target) dispatch(sources, target) end
+    def cp(sources, target, opts={}) dispatch(sources, target, opts) end
+    def cp_r(sources, target, opts={}) dispatch(sources, target, opts) end
 
     def mv(sources, target) dispatch(sources, target) end
 
-    def rm(targets) dispatch(targets) end
-    def rm_r(targets) dispatch(targets) end
-    def rm_rf(targets) dispatch(targets) end
+    def rm(targets, opts={}) dispatch(targets, opts) end
+    def rm_r(targets, opts={}) dispatch(targets, opts) end
+    def rm_rf(targets, opts={}) dispatch(targets, opts) end
 
     def install(source, target, mode) dispatch(source, target, mode) end
 
-    def chmod(mode, targets) dispatch(mode, targets) end
-    def chmod_R(mode, targets) dispatch(mode, targets) end
+    def chmod(mode, targets, opts={}) dispatch(mode, targets, opts) end
+    def chmod_R(mode, targets, opts={}) dispatch(mode, targets, opts) end
 
-    def chown(user, group, targets) dispatch(user, group, targets) end
-    def chown_R(user, group, targets) dispatch(user, group, targets) end
+    def chown(user, group, targets, opts={}) dispatch(user, group, targets, opts) end
+    def chown_R(user, group, targets, opts={}) dispatch(user, group, targets, opts) end
 
     def touch(targets) dispatch(targets) end
 
@@ -138,7 +138,12 @@ module AutomateIt
         FileUtils.pwd()
       end
 
-      def _mkdir(dirs, kind, &block)
+      def mkdir(dirs, opts={}, &block)
+        kind = if opts[:parents]
+                 :mkdir_p
+               else
+                 :mkdir
+               end
         missing = [dirs].flatten.select{|dir| ! File.directory?(dir)}
         result = false
         if missing.empty? and not block
@@ -160,14 +165,9 @@ module AutomateIt
         end
         return result
       end
-      private :_mkdir
 
-      def mkdir(dirs, &block)
-        _mkdir(dirs, :mkdir, &block)
-      end
-
-      def mkdir_p(dirs, &block)
-        _mkdir(dirs, :mkdir_p, &block)
+      def mkdir_p(dirs, opts={}, &block)
+        mkdir(dirs, {:parents => true}.merge(opts))
       end
 
       def rmdir(dirs)
@@ -177,9 +177,20 @@ module AutomateIt
         FileUtils.rmdir(present, _fileutils_opts)
       end
 
-      def _ln(kind, sources, target)
+      def ln(sources, target, opts={})
+        kind = if opts[:symbolic] and opts[:force]
+                 :ln_sf
+               elsif opts[:symbolic]
+                 :ln_s
+               else
+                 :ln
+               end
         missing = []
-        for source in [sources].flatten
+        sources = [sources].flatten
+        if kind == :ln
+          raise TypeError.new("source for hard link must be a String") unless sources.size == 1
+        end
+        for source in sources
           peer = File.directory?(target) ? File.join(target, File.basename(source)) : target
           begin
             peer_lstat = File.lstat(peer)
@@ -200,8 +211,7 @@ module AutomateIt
         return false if missing.empty?
         log.debug(PNOTE+"_ln(%s, %s, %s) # => %s" % [kind, sources.inspect, target.inspect, missing.inspect])
         missing = missing.first if missing.size == 1
-        case kind
-        when :ln
+        if kind == :ln
           log.info(PEXEC+"ln #{missing} #{target}")
           FileUtils.ln(missing, target, _fileutils_opts) && missing
         else
@@ -209,19 +219,13 @@ module AutomateIt
           FileUtils.send(kind, missing, target, _fileutils_opts) && missing
         end
       end
-      private :_ln
 
-      def ln(source, target)
-        raise TypeError.new("source for hard link must be a String") unless String === source
-        _ln(:ln, source, target)
+      def ln_s(sources, target, opts={})
+        ln(sources, target, {:symbolic => true}.merge(opts))
       end
 
-      def ln_s(sources, target)
-        _ln(:ln_s, sources, target)
-      end
-
-      def ln_sf(sources, target)
-        _ln(:ln_sf, sources, target)
+      def ln_sf(sources, target, opts={})
+        ln(sources, target, {:symbolic => true, :force => true}.merge(opts))
       end
 
       def install(source, target, mode)
@@ -238,18 +242,15 @@ module AutomateIt
         end
       end
 
-      def cp(sources, target)
+      def cp(sources, target, opts={})
         raise NotImplementedError
         # TODO needs much more sophisticated algorithm
         # TODO log
         FileUtils.cp(sources, target, _fileutils_opts)
       end
 
-      def cp_r(sources, target)
-        raise NotImplementedError
-        # TODO log
-        # TODO needs much more sophisticated algorithm
-        FileUtils.cp_r(sources, target, _fileutils_opts)
+      def cp_r(sources, target, opts={})
+        cp(sources, target, {:recursive => true}.merge(opts))
       end
 
       def mv(sources, target)
@@ -259,7 +260,14 @@ module AutomateIt
         FileUtils.mv(present, target, _fileutils_opts) && present
       end
 
-      def _rm(kind, targets)
+      def rm(targets, opts={})
+        kind = if opts[:recursive] and opts[:force]
+                 :rm_rf
+               elsif opts[:recursive]
+                 :rm_r
+               else
+                 :rm
+               end
         present = [targets].flatten.select{|entry| File.exists?(entry)}
         return false if present.empty?
         present = present.first if present.size == 0
@@ -267,19 +275,15 @@ module AutomateIt
         FileUtils.send(kind, present, _fileutils_opts) && present
       end
 
-      def rm(targets)
-        _rm(:rm_r, targets)
+      def rm_r(targets, opts={})
+        rm(targets, {:recursive => true}.merge(opt))
       end
 
-      def rm_r(targets)
-        _rm(:rm_r, targets)
+      def rm_rf(targets, opts={})
+        rm(targets, {:recursive => true, :force => true}.merge(opts))
       end
 
-      def rm_rf(targets)
-        _rm(:rm_rf, targets)
-      end
-
-      def chmod(mode, targets)
+      def chmod(mode, targets, opts={})
         # TODO implement
         # TODO log
         # if target_stat && (target_stat.mode != source_stat.mode)
@@ -288,22 +292,18 @@ module AutomateIt
         FileUtils.chmod(mode, targets, _fileutils_opts)
       end
 
-      def chmod_R(mode, targets)
-        # TODO implement
-        # TODO log
-        FileUtils.chmod_R(mode, targets, _fileutils_opts)
+      def chmod_R(mode, targets, opts={})
+        chmod(mode, targets, {:recursive => true}.merge(opts))
       end
 
-      def chown(user, group, targets)
+      def chown(user, group, targets, opts={})
         # TODO implement
         # TODO log
         FileUtils.chown(user, group, targets, _fileutils_opts)
       end
 
-      def chown_R(user, group, targets)
-        # TODO implement
-        # TODO log
-        FileUtils.chown_R(user, group, targets, _fileutils_opts)
+      def chown_R(user, group, targets, opts={})
+        chown(user, group, targets, {:recursive => true}.merge(opts))
       end
 
       def touch(targets)
