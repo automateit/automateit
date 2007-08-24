@@ -15,6 +15,9 @@ module AutomateIt
     # Restart this +service+ if it's running, or start it if it's stopped.
     def restart(service, opts={}) dispatch(service, opts) end
 
+    # Tell the +service+ to take a specific +action+, e.g. "condrestart".
+    def tell(service, action, opts={}) dispatch(service, action, opts={}) end
+
     # Will this +service+ start when the computer is rebooted?
     def enabled?(service) dispatch(service) end
 
@@ -67,23 +70,22 @@ module AutomateIt
       end
       private :_run_command
 
-      def _run_service(service, action, opts={})
+      def tell(service, action, opts={})
         return _run_command(["#{ETC_INITD}/#{service}", action.to_s], opts)
       end
-      private :_run_service
 
       def running?(service)
-        return _run_service(service, :status, :checking => true)
+        return tell(service, :status, :checking => true)
       end
 
       def start(service, opts={})
         return false if not opts[:force] and running?(service)
-        return _run_service(service, :start, opts)
+        return tell(service, :start, opts)
       end
 
       def stop(service, opts={})
         return false if not opts[:force] and not running?(service)
-        return _run_service(service, :stop, opts)
+        return tell(service, :stop, opts)
       end
 
       def restart(service, opts={})
