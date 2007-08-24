@@ -2,7 +2,8 @@
 if tagged?("rails_servers | myapp_servers")
   # Install system-level packages, if needed
   if tagged?("ubuntu | debian")
-    package_manager.install(%w(build-essential swig ruby1.8-dev libsqlite3-dev pen))
+    package_manager.install(
+      %w(build-essential swig ruby1.8-dev libsqlite3-dev pen))
   elsif tagged?("fedoracore | redhat | centos")
     package_manager.install(%w(ruby-devel sqlite-devel pen))
   else
@@ -10,21 +11,21 @@ if tagged?("rails_servers | myapp_servers")
   end
 
   # Install Ruby gems, if needed
-  package_manager.install(%w(rails mongrel mongrel_cluster sqlite3-ruby), :with => :gem)
+  package_manager.install(%w(rails mongrel mongrel_cluster sqlite3-ruby),
+    :with => :gem)
 end
 
 # Install myapp app
 if tagged?("myapp_servers")
   # Create a user login, if needed
   account_manager.add_user(lookup("myapp#user"))
+
   mkdir_p(lookup("myapp#path")) do
     chown(lookup("myapp#user"), nil, ".")
 
-    # Track changes so we know when to restart the Rails server
-    restart_needed= false
-
     # Create Rails application, if needed
-    sh("su #{lookup('myapp#user')} -c 'rails --database=sqlite3 .'") unless File.exists?("config/routes.rb")
+    sh("su #{lookup('myapp#user')} -c 'rails --database=sqlite3 . " \
+      +"> /dev/null'") unless File.exists?("config/routes.rb")
 
     # Create mongrel cluster configuration from template string, if needed
     render(
@@ -37,6 +38,8 @@ environment: <%=environment%>
 pid_file: <%=path%>/log/mongrel.pid
 servers: <%=backends%>",
       :to => "config/mongrel_cluster.yml",
+      :user => lookup("myapp#user"),
+      :mode => 0444,
       :locals => {
         :environment => lookup("myapp#environment"),
         :path => lookup("myapp#path"),
@@ -46,7 +49,11 @@ servers: <%=backends%>",
     )
 
     # Instantiate db, if needed
-    sh "su #{lookup('myapp#user')} -c 'rake db:migrate'" if Dir["db/*.sqlite3"].empty?
+    sh "su #{lookup('myapp#user')} -c 'rake db:migrate'" \
+      if Dir["db/*.sqlite3"].empty?
+
+    # Track changes so we know when to restart the Rails server
+    restart_needed = false
 
     # Edit a file to set the application name, if needed
     restart_needed |= edit(
@@ -61,6 +68,8 @@ servers: <%=backends%>",
     restart_needed |= render(
       :file => dist+"/etc/init.d/"+lookup("myapp#name")+".erb",
       :to => "/etc/init.d/"+lookup("myapp#name"),
+      :user => "root",
+      :group => "root",
       :mode => 0555,
       :locals => {
         :name => lookup("myapp#name"),
@@ -84,4 +93,3 @@ servers: <%=backends%>",
     end
   end
 end
-
