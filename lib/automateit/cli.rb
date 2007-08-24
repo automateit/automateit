@@ -42,7 +42,9 @@ module AutomateIt
         or raise ArgumentError.new(":create option not specified")
       interpreter = AutomateIt.new(opts)
       interpreter.instance_eval do
+        # Make +render+ only generate files only if they don't already exist.
         template_manager.default_check = :exists
+
         mkdir_p(path) do |created|
           puts PNOTE+"#{created ? 'Creating' : 'Updating'} AutomateIt project at: #{path}"
 
@@ -50,6 +52,10 @@ module AutomateIt
             render(:string => TAGS_CONTENT, :to => "tags.yml")
             render(:string => FIELDS_CONTENT, :to => "fields.yml")
             render(:string => ENV_CONTENT, :to => "automateit_env.rb")
+          end
+
+          mkdir("dist") do
+            render(:string => DIST_README_CONTENT, :to => "README.txt")
           end
 
           mkdir("lib") do
@@ -152,6 +158,18 @@ module AutomateIt
 # subdirectories within this directory. Because these files are loaded each
 # time an interpreter is started, you should try to make sure these contents
 # are loaded quickly and don't cause unintended side-effects.
+    EOB
+
+    DIST_README_CONTENT = <<-EOB
+# This is your AutomateIt project's "dist" directory. You should keep files and
+# templates that you wish to distribute into this directory. You can access
+# this path using the "dist" keyword in your recipes, for example:
+#
+#     # Render the template file "dist/foo.erb"
+#     render(:file => dist+"/foo.erb", ...)
+#
+#     # Or copy the same file
+#     cp(dist+"/foo.erb", ...)
     EOB
 
     RECIPE_README_CONTENT = <<-EOB

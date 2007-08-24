@@ -24,7 +24,7 @@ if tagged?("myapp_servers")
     # Create Rails application, if needed
     sh("rails --database=sqlite3 .") unless File.exists?("config/routes.rb")
 
-    # Create mongrel cluster configuration from template, if needed
+    # Create mongrel cluster configuration from template string, if needed
     render(
       :string => \
 "<%=WARNING_BOILERPLATE%>
@@ -46,7 +46,7 @@ servers: <%=backends%>",
     # Instantiate db, if needed
     sh "rake db:migrate" if Dir["db/*.sqlite3"].empty?
 
-    # Edit a file, if needed
+    # Edit a file to set the application name, if needed
     restart_needed |= edit(
       :file => "public/index.html", :params => {:name => lookup("myapp#name")}
     ) do
@@ -54,7 +54,7 @@ servers: <%=backends%>",
       replace("Welcome aboard", "This is "+params[:name])
     end
 
-    # Create service, if needed
+    # Create service by rendering a template file, if needed
     restart_needed |= render(
       :file => dist+"/etc/init.d/"+lookup("myapp#name")+".erb",
       :to => "/etc/init.d/"+lookup("myapp#name"),
