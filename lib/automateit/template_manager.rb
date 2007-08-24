@@ -61,61 +61,70 @@ module AutomateIt
         target_filename = args[1] || opts[:to]
         source_contents = opts[:string]
 
-        # source_filename, target_filename, opts={}
-        opts[:check] ||= @default_check
-        target_exists = _exists?(target_filename)
-        updates = []
+        begin
+          # source_filename, target_filename, opts={}
+          opts[:check] ||= @default_check
+          target_exists = _exists?(target_filename)
+          updates = []
 
-        unless opts[:force]
-          case opts[:check]
-          when :exists
-            if target_exists
-              log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because it already exists")
-              return false
-            else
-              log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
-            end
-          when :timestamp
-            if target_exists
-              updates = _newer(target_filename, \
-                  *[source_filename, opts[:dependencies]].reject{|t| t.nil?}.flatten)
-              if updates.empty?
-                log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because dependencies haven't been updated")
+          unless opts[:force]
+            case opts[:check]
+            when :exists
+              if target_exists
+                log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because it already exists")
                 return false
+              else
+                log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
+              end
+            when :timestamp
+              if target_exists
+                updates = _newer(target_filename, \
+                    *[source_filename, opts[:dependencies]].reject{|t| t.nil?}.flatten)
+                if updates.empty?
+                  log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because dependencies haven't been updated")
+                  return false
+                end
               end
             end
           end
-        end
 
-        target_contents = target_exists ? _read(target_filename) : ""
-        source_contents ||= _read(source_filename)
-        binder = nil
-        if opts[:locals]
-          # Create a binding that the template can get variables from without
-          # polluting the Driver's namespace.
-          binder = lambda{
-            code = ""
-            for key in opts[:locals].keys
-              code << "#{key} = opts[:locals][:#{key}]\n"
-            end
-            eval code
-            binding
-          }.call
-        end
-        output = ::ERB.new(source_contents, nil, '-').result(binder)
-
-        case opts[:check]
-        when :compare
-          if source_contents == target_contents
-            log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because contents are the same")
-            return false
-          else
-            log.info(PNOTE+"Rendering '#{target_filename} because its contents changed")
+          target_contents = target_exists ? _read(target_filename) : ""
+          source_contents ||= _read(source_filename)
+          binder = nil
+          if opts[:locals]
+            # Create a binding that the template can get variables from without
+            # polluting the Driver's namespace.
+            binder = lambda{
+              code = ""
+              for key in opts[:locals].keys
+                code << "#{key} = opts[:locals][:#{key}]\n"
+              end
+              eval code
+              binding
+            }.call
           end
-        when :timestamp
-          log.info(PNOTE+"Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
+          output = ::ERB.new(source_contents, nil, '-').result(binder)
+
+          case opts[:check]
+          when :compare
+            if not target_exists
+              log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
+            elsif source_contents == target_contents
+              log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because contents are the same")
+              return false
+            else
+              log.info(PNOTE+"Rendering '#{target_filename} because its contents changed")
+            end
+          when :timestamp
+            log.info(PNOTE+"Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
+          end
+          result = _write(target_filename, output)
+          return result
+        ensure
+          if opts[:mode] or opts[:user] or opts[:group]
+            interpreter.chperm(target_filename, :mode => opts[:mode], :user => opts[:user], :group => opts[:group])
+          end
         end
-        return _write(target_filename, output)
       end
 
       # Return an Array of +dependencies+ newer than +filename+. Will be empty if +filename+ is newer than all of the +dependencies+.
