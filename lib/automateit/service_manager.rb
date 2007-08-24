@@ -61,7 +61,7 @@ module AutomateIt
         end
 
         log.send((opts[:quiet] || opts[:checking]) ? :debug : :info, PEXEC+cmd)
-        if writing?
+        if writing? or opts[:checking]
           system(cmd)
           return $?.exitstatus.zero?
         else
