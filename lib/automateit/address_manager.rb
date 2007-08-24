@@ -77,9 +77,8 @@ module AutomateIt
     #-----------------------------------------------------------------------
 
     module ResolvHelpers
-      require 'resolv'
-
       def hostnames()
+        # NOTE: depends on driver's implementation of addresses
         names = addresses.inject(Set.new) do |sum, address|
           # Some addresses can't be resolved, bummer.
           sum.merge(Resolv.getnames(address)) rescue Resolv::ResolvError; sum
@@ -100,13 +99,45 @@ module AutomateIt
 
     #-----------------------------------------------------------------------
 
+    # Portable driver for AddressManager provides minimal support for querying
+    # the hostname using sockets. Although it lacks advanced features found in
+    # other drivers, it will work on all platforms.
+    class Portable < Plugin::Driver
+      include ResolvHelpers
+
+      def suitability(method, *args)
+        return 1
+      end
+
+      def has?(opts)
+        raise NotImplementedError.new("this driver doesn't support queries for devices or labels") if opts[:device] or opts[:label]
+        result = true
+        result &= addresses.include?(opts[:address]) if opts[:address]
+        return result
+      end
+
+      def hostnames
+        names = Set.new(Socket.gethostbyname(Socket.gethostname)[1])
+        names.each{|name| names.merge(hostnames_for(name))}
+        return names.to_a.sort
+      end
+
+      def addresses
+        return [TCPSocket.gethostbyname(Socket.gethostname)[3]]
+      end
+    end
+
+    #-----------------------------------------------------------------------
+
+    # Linux driver for AddressManager provides complete support for querying,
+    # adding and removing addresses on platforms that feature Linux-like tools.
     class Linux < Plugin::Driver
       include ResolvHelpers
 
       depends_on :programs => %w(ifconfig ip arping)
 
       def suitability(method, *args)
-        return available? ? 1 : 0
+        return available? ? 2 : 0
       end
 
       def has?(opts)
