@@ -14,14 +14,13 @@
 # description: <%=name%>
 # processname: <%=name%>
 
-# FIXME PATH to find mongrel_rails and pen
-
+ENV="env -i LANG=C PATH=/bin:/usr/bin:/usr/local/bin"
 PEN_PID_FILE=/var/run/pen_for_<%=name%>.pid
 
 case "$1" in
   start)
     su - <%=user%> "cd <%=path%>; mongrel_rails cluster::start -C config/mongrel_cluster.yml"
-    pen <%=bind%> -H -r -p $PEN_PID_FILE <%=(1..backend).map{|i| "localhost:"+(i-1+port)}.join(" ")%>
+    pen <%=bind%> -H -r -p $PEN_PID_FILE <%=(1..backends).map{|i| "localhost:%s" % (i-1+port)}.join(" ")%>
     ;;
   stop)
     su - <%=user%> "cd <%=path%>; mongrel_rails cluster::stop -C config/mongrel_cluster.yml"
@@ -32,7 +31,7 @@ case "$1" in
     # Leave pen alone for simplicity's sake
     ;;
   status)
-    su - <%=user%> "cd <%=path%>; ! (mongrel_rails cluster::status -C config/mongrel_cluster.yml 2>&1 | ! grep -q missing)"
+    su - <%=user%> "cd <%=path%>; ! (mongrel_rails cluster::status -C config/mongrel_cluster.yml 2>&1 | grep -q missing)"
     # Leave pen alone for simplicity's sake
     ;;
   *)
