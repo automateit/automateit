@@ -387,6 +387,7 @@ module AutomateIt
       def chmod(mode, targets, opts={})
         results = chperm(targets, {:mode => mode}.merge(opts))
         log.info(PEXEC+"chmod#{opts[:recursive] ? ' -R' : ''} #{mode} #{results.is_a?(String) ? results : results.join(' ')}") if results and not results.empty?
+        return results
       end
 
       def chmod_R(mode, targets, opts={})
@@ -396,6 +397,7 @@ module AutomateIt
       def chown(user, group, targets, opts={})
         results = chperm(targets, {:user => user, :group => group}.merge(opts))
         log.info(PEXEC+"chown#{opts[:recursive] ? ' -R' : ''} #{user} #{group} #{results.is_a?(String) ? results : results.join(' ')}") if results and not results.empty?
+        return results
       end
 
       def chown_R(user, group, targets, opts={})
