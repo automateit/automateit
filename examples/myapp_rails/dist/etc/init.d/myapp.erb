@@ -31,7 +31,7 @@ case "$1" in
     # Leave pen alone for simplicity's sake
     ;;
   status)
-    su - <%=user%> "cd <%=path%>; ! (mongrel_rails cluster::status -C config/mongrel_cluster.yml 2>&1 | grep -q missing)"
+    cd <%=path%> && ! (mongrel_rails cluster::status -C config/mongrel_cluster.yml 2>&1 | grep -q missing)
     # Leave pen alone for simplicity's sake
     ;;
   *)
