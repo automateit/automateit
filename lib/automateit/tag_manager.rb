@@ -15,7 +15,7 @@ module AutomateIt
     def tags_for(hostname) dispatch(hostname) end
 
     #-----------------------------------------------------------------------
-    
+
     class Struct < Plugin::Driver
       attr_accessor :tags
 
@@ -34,20 +34,25 @@ module AutomateIt
         @struct = opts[:struct] if opts[:struct]
         # TODO parse @group and !negation
 
-        # TODO Refactor tags using lazy-loading to improve performance. 
-
+        # TODO Refactor tags using lazy-loading to improve performance.
         @tags ||= Set.new
+
+        # AddressManager::Portable is available everywhere, no need to rescue
         hostnames = interpreter.address_manager.hostnames.to_a # SLOW 0.4s
         @tags.merge(hostnames)
         @tags.merge(tags_for(hostnames))
 
-        # SLOW 1.3s incurred by PlatformManager::LSB#setup
-        @tags.add(interpreter.platform_manager.query("os")) rescue IndexError
-        @tags.add(interpreter.platform_manager.query("arch")) rescue IndexError
-        @tags.add(interpreter.platform_manager.query("distro")) rescue IndexError
-        @tags.add(interpreter.platform_manager.query("release")) rescue IndexError
-        @tags.add(interpreter.platform_manager.query("os#arch")) rescue IndexError
-        @tags.add(interpreter.platform_manager.query("distro#release")) rescue IndexError
+        begin
+          # SLOW 1.3s incurred by PlatformManager::LSB#setup
+          @tags.add(interpreter.platform_manager.query("os")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("arch")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("distro")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("release")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("os#arch")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("distro#release")) rescue IndexError
+        rescue NotImplementedError
+          log.debug("this platform doesn't have a PlatformManager driver")
+        end
       end
 
       def hosts_tagged_with(query)
