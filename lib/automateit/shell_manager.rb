@@ -22,7 +22,7 @@ module AutomateIt
 
     def mktempdircd(path=nil, &block) dispatch(path, &block) end
 
-    def chperm(targets, opts={}) dispatch(target, opts) end
+    def chperm(targets, opts={}) dispatch(targets, opts) end
 
     def umask(mode=nil, &block) dispatch(mode, &block) end
 
@@ -353,21 +353,20 @@ module AutomateIt
         modified_entries = []
         Find.find(*targets) do |path|
           modified = false
-          stat = File.stat(path)
+          stat = writing? || File.exists?(path) ? File.stat(path) : nil
           if opts[:mode]
             # TODO process mode strings [ugoa...][[+-=][rwxXstugo...]...][,...]
-            mode = opts[:mode] | (stat.directory? ? DIRECTORY_MASK : FILE_MASK)
-            unless (mode ^ stat.mode).zero?
-              #puts "in %o got %o" % [mode, stat.mode]
+            mode = opts[:mode] | (stat.directory? ? DIRECTORY_MASK : FILE_MASK) if stat
+            unless stat and (mode ^ stat.mode).zero?
               modified = true
               File.chmod(mode, path) if writing?
             end
           end
-          if user and user != stat.uid
+          if user and (not stat or user != stat.uid)
             modified = true
             File.chown(user, nil, path) if writing?
           end
-          if group and group != stat.gid
+          if group and (not stat or group != stat.gid)
             modified = true
             File.chown(nil, group, path) if writing?
           end
