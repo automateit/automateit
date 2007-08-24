@@ -8,6 +8,8 @@ require 'set'
 require 'yaml'
 require 'find'
 require 'etc'
+require 'resolv'
+require 'socket'
 
 # Gems
 require 'rubygems'
