@@ -30,4 +30,5 @@ myapp:
     environment: production
     port: 9000
     backends: 2
+    bind: "localhost:8000"
 

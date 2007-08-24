@@ -58,6 +58,7 @@ servers: <%=backends%>",
     restart_needed |= render(
       :file => dist+"/etc/init.d/"+lookup("myapp#name")+".erb",
       :to => "/etc/init.d/"+lookup("myapp#name"),
+      :mode => 0555,
       :locals => {
         :user => lookup("myapp#user"),
         :path => lookup("myapp#path"),
