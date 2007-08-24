@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+
+# XXX What can go wrong with this loading approach?
+libdir = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+if File.directory?(libdir) and File.exists?(File.join(libdir, "automateit.rb"))
+  $LOAD_PATH.unshift(libdir)
+end
+
+require 'rubygems'
+require 'optparse'
+
+OptionParser.new do |parser|
+  PROG = File.basename($0)
+  opts = {}
+  parser.banner = <<EOB
+#{PROG} - tool for querying AutomateIt fields
+
+Usage: #{PROG} [options] query
+
+Examples:
+  # Load 'myproject' and get value of 'user' field in 'myapp' hash:
+  #{PROG} -p myproject myapp#user
+
+  # Same but using environmental variable to specify project:
+  AUTOMATEIT_PROJECT=myproject
+  #{PROG} myapp#user
+
+  # Dump the 'myapp' hash contents as YAML
+  #{PROG} -x myapp#user
+
+  # Dump the 'myapp' hash contents as XML
+  #{PROG} -y myproject myapp#user
+
+Options:
+EOB
+  parser.on("-p", "--project PATH", "Set project path") do |v|
+    opts[:project] = v
+  end
+
+  parser.on("-y", "--yaml", "Dump as YAML") do |v|
+    opts[:yaml] = v
+  end
+
+  parser.on("-x", "--xml", "Dump as XML") do |v|
+    opts[:xml] = v
+  end
+
+  args = parser.parse!.dup
+
+  # Clear ARGV so that IRB doesn't try to parse our options
+  opts[:args] = args
+  ARGV.clear
+
+  query = args.first unless args.empty?
+
+  require 'automateit'
+  interpreter = AutomateIt.new(:project => opts[:project])
+  result = interpreter.lookup(query)
+  if result.nil?
+    puts result.inspect
+    exit 1
+  elsif opts[:yaml]
+    puts result.to_yaml
+  elsif opts[:xml]
+    puts result.to_xml
+  else
+    puts result.is_a?(String) ? result : result.inspect
+  end
+  exit 0
+end
