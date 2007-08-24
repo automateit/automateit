@@ -11,7 +11,7 @@ require 'etc'
 
 # Gems
 require 'rubygems'
-require 'active_support'
+require 'active_support' # SLOW 0.5s
 begin
   require 'eruby'
 rescue LoadError

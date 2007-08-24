@@ -92,7 +92,8 @@ module AutomateIt
         @struct[:distro]  ||= @@struct_cache[:distro]
         @struct[:release] ||= @@struct_cache[:release]
         unless @struct[:distro] and @struct[:release]
-          data = _read_lsb_release_output
+          # TODO Refactor using lazy-loading to boost performance.
+          data = _read_lsb_release_output # SLOW 1.3s
           begin
             yaml = YAML::load(data)
             @struct[:distro]  ||= @@struct_cache[:distro]  ||= yaml["Distributor ID"].to_s.downcase
