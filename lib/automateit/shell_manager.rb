@@ -6,7 +6,7 @@ module AutomateIt
     # FIXME noop calls to FileUtils must return true to indicate that an action would have been taken, rather than returning nil to indicate that nothing was actually done
     # TODO write docs for all these commands
     alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
-    alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :touch
+    alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch
 
     #...[ Custom commands ].................................................
 
@@ -186,7 +186,8 @@ module AutomateIt
           return result
         end
         unless missing.empty?
-          log.info(PEXEC+"#{kind} #{missing.join(" ")}")
+          cmd = kind.to_s.gsub(/_/, ' -')
+          log.info(PEXEC+"#{cmd} #{missing.join(" ")}")
           result = [FileUtils.send(kind, missing, _fileutils_opts)].flatten
         end
         if block
@@ -326,7 +327,11 @@ module AutomateIt
         user = \
           if opts[:user]
             if opts[:user].is_a?(String)
-              Etc.getpwnam(opts[:user]).uid
+              begin
+                Etc.getpwnam(opts[:user]).uid
+              rescue ArgumentError
+                :not_present
+              end
             else
               opts[:user]
             end
@@ -335,7 +340,11 @@ module AutomateIt
         group = \
           if opts[:group]
             if opts[:group].is_a?(String)
-              Etc.getgrnam(opts[:group]).gid
+              begin
+                Etc.getgrnam(opts[:group]).gid
+              rescue ArgumentError
+                :not_present
+              end
             else
               opts[:group]
             end
@@ -354,11 +363,11 @@ module AutomateIt
               File.chmod(mode, path) if writing?
             end
           end
-          if user and not (user == stat.uid)
+          if user and user != stat.uid
             modified = true
             File.chown(user, nil, path) if writing?
           end
-          if group and not (group == stat.gid)
+          if group and group != stat.gid
             modified = true
             File.chown(nil, group, path) if writing?
           end
@@ -376,7 +385,8 @@ module AutomateIt
       end
 
       def chmod(mode, targets, opts={})
-        chperm(targets, {:mode => mode}.merge(opts))
+        results = chperm(targets, {:mode => mode}.merge(opts))
+        log.info(PEXEC+"chmod#{opts[:recursive] ? ' -R' : ''} #{mode} #{results.is_a?(String) ? results : results.join(' ')}") if results and not results.empty?
       end
 
       def chmod_R(mode, targets, opts={})
@@ -384,7 +394,8 @@ module AutomateIt
       end
 
       def chown(user, group, targets, opts={})
-        chperm(targets, {:user => user, :group => group}.merge(opts))
+        results = chperm(targets, {:user => user, :group => group}.merge(opts))
+        log.info(PEXEC+"chown#{opts[:recursive] ? ' -R' : ''} #{user} #{group} #{results.is_a?(String) ? results : results.join(' ')}") if results and not results.empty?
       end
 
       def chown_R(user, group, targets, opts={})
