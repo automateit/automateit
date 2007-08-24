@@ -173,6 +173,7 @@ module AutomateIt
 
         # Write contents to +filename+.
         def write
+          log.info(PNOTE+"Edited '#{@filename}'")
           if writing?
             File.open(@filename, "w+"){|writer| writer.write(@contents)}
           else
