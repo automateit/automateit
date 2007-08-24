@@ -33,11 +33,11 @@ module AutomateIt
       # Instantiate core plugins so they're available to the project
       _instantiate_plugins
 
-      if opts[:project]
+      if project_path = opts[:project] || ENV["AUTOMATEIT_PROJECT"]
         # Only load a project if we find its env file
-        env_file = File.join(opts[:project], "config", "automateit_env.rb")
+        env_file = File.join(project_path, "config", "automateit_env.rb")
         if File.exists?(env_file)
-          @project = File.expand_path(opts[:project])
+          @project = File.expand_path(project_path)
           log.debug(PNOTE+"Loading project from path: #{@project}")
 
           tag_file = File.join(@project, "config", "tags.yml")
@@ -179,7 +179,7 @@ module AutomateIt
       # FIXME doing eval breaks the exception backtraces
       # TODO lookup partial names
       data = File.read(recipe)
-      eval data
+      eval(data, binding, recipe, 0)
     end
 
     def dist
