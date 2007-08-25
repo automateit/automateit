@@ -157,11 +157,11 @@ module AutomateIt
         return [] if noop? and not pwent
         username = pwent.name
         result = Set.new
-        result << groups[pwent.gid] if groups[pwent.gid]
+        result << groups[pwent.gid].name if groups[pwent.gid]
         Etc.group do |grent|
           result << grent.name if grent.mem.include?(username)
         end
-        return result
+        return result.to_a
       end
 
       def users_for_group(query)
@@ -248,7 +248,7 @@ module AutomateIt
         groups = [groups].flatten
         present = groups_for_user(username)
         missing = groups - present
-        return false if missing.empt?
+        return false if missing.empty?
 
         cmd = "usermod -a -G #{missing.join(',')} #{username}"
         interpreter.sh(cmd)
@@ -294,7 +294,9 @@ module AutomateIt
         # FIXME must include pwent.gid
         grent = groups[groupname]
         missing = \
-          if writing? or grent
+          if writing? and not grent
+            raise ArgumentError.new("no such group: #{groupname}")
+          elsif writing? or grent
             users - grent.mem
           else
             users
@@ -313,7 +315,9 @@ module AutomateIt
         users = [users].flatten
         grent = groups[groupname]
         present = \
-          if writing? or grent
+          if writing? and not grent
+            raise ArgumentError.new("no such group: #{groupname}")
+          elsif writing? or grent
             grent.mem & users
           else
             users

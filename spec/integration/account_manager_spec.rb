@@ -8,7 +8,6 @@ else
   describe "AutomateIt::AccountManager" do
     before(:all) do
       @a = AutomateIt.new(:verbosity => Logger::WARN)
-      #@a = AutomateIt.new(:verbosity => Logger::DEBUG)
       @m = @a.account_manager
 
       @username = "asdfasdf"
@@ -47,14 +46,27 @@ else
       @m.has_user?(@username).should be_true
     end
 
-    it "should be able to query user data for newly-created user" do
+    it "should query user data by name" do
       # Depends on user to be created by previous tests
       entry = @m.users[@username]
       entry.should_not be_nil
       entry.name.should == @username
     end
 
-    it "should have created a group for the user" do
+    it "should query user data by id" do
+      # Depends on user to be created by previous tests
+      uid = @m.users[@username].uid
+
+      entry = @m.users[uid]
+      entry.should_not be_nil
+      entry.name.should == @username
+    end
+
+    it "should not query user data by invalid type" do
+      lambda{ @m.users[false] }.should raise_error(TypeError)
+    end
+
+    it "should create user group" do
       # Depends on user to be created by previous tests
       @m.groups[@username].should_not be_nil
     end
@@ -72,10 +84,29 @@ else
       entry = @m.add_group(@groupname)
       entry.should_not be_nil
       entry.name.should == @groupname
+      # Leaves behind group for further tests
     end
 
     it "should not re-add a group" do
       @m.add_group(@groupname).should be_false
+    end
+
+    it "should query group data by name" do
+      entry = @m.groups[@groupname]
+      entry.should_not be_nil
+      entry.name.should == @groupname
+    end
+
+    it "should query group data by id" do
+      gid = @m.groups[@groupname].gid
+
+      entry = @m.groups[gid]
+      entry.should_not be_nil
+      entry.name.should == @groupname
+    end
+
+    it "should not query group data by invalid type" do
+      lambda{ @m.groups[false] }.should raise_error(TypeError)
     end
 
     it "should remove a group" do
@@ -114,9 +145,45 @@ else
       @m.remove_users_from_group(@username, @groupname).should == [@username]
     end
 
+    it "should add groups to a user" do
+      # Depends on user to be created by previous tests
+      @m.add_groups_to_user(@groupname, @username).should == [@groupname]
+    end
+
+    it "should remove groups from user" do
+      # Depends on user to be created by previous tests
+      @m.remove_groups_from_user(@groupname, @username).should == [@groupname]
+    end
+
     it "should remove a group with members" do
       # Depends on group to be created by previous tests
       @m.remove_group(@groupname).should be_true
+    end
+
+    it "should not add users to non-existent group" do
+      lambda{ @m.add_users_to_group(@username, @groupname) }.should raise_error(ArgumentError)
+    end
+
+    it "should pretend to add users to non-existent group in noop mode" do
+      begin
+        @a.noop true
+        @m.add_users_to_group(@username, @groupname).should == [@username]
+      ensure
+        @a.noop false
+      end
+    end
+
+    it "should not remove users from non-existent group" do
+      lambda{ @m.remove_users_from_group(@username, @groupname) }.should raise_error(ArgumentError)
+    end
+
+    it "should pretend to remove users from non-existent group in noop mode" do
+      begin
+        @a.noop true
+        @m.remove_users_from_group(@username, @groupname).should == [@username]
+      ensure
+        @a.noop false
+      end
     end
 
     it "should remove a user" do
@@ -127,6 +194,5 @@ else
     it "should not remove a non-existent user" do
       @m.remove_user(@username).should be_false
     end
-
   end
 end
