@@ -79,10 +79,13 @@ module AutomateIt
     def remove_users_from_group(users, group) dispatch(users, group) end
 
     # Array of groupnames this user is a member of.
-    def groupnames_for_user(query) dispatch(query) end
+    def groups_for_user(query) dispatch(query) end
+
+    # Array of usernames in group.
+    def users_for_group(query) dispatch(query) end
 
     # Hash of usernames and the groupnames they're members of.
-    def usernames_to_groupnames() dispatch() end
+    def users_to_groups() dispatch() end
 
     #-----------------------------------------------------------------------
 
@@ -149,7 +152,7 @@ module AutomateIt
         return ! groups[query].nil?
       end
 
-      def groupnames_for_user(query)
+      def groups_for_user(query)
         pwent = users[query]
         return [] if noop? and not pwent
         username = pwent.name
@@ -161,7 +164,12 @@ module AutomateIt
         return result
       end
 
-      def usernames_to_groupnames
+      def users_for_group(query)
+        grent = groups[query]
+        return (noop? || ! grent) ? [] : grent.mem
+      end
+
+      def users_to_groups
         result = {}
         Etc.group do |grent|
           grent.mem.each do |username|
@@ -171,6 +179,7 @@ module AutomateIt
         end
         Etc.passwd do |pwent|
           grent = groups[pwent.gid]
+          result[pwent.name] ||= Set.new
           result[pwent.name] << grent.name
         end
         return result
@@ -204,6 +213,7 @@ module AutomateIt
         cmd << " --uid #{opts[:uid]}" if opts[:uid]
         cmd << " --gid #{opts[:gid]}" if opts[:gid]
         cmd << " #{username} < /dev/null"
+        cmd << " > /dev/null" if opts[:quiet]
         # --password CRYPT(3)ENCRYPTED
         # TODO set password
         interpreter.sh(cmd)
@@ -227,6 +237,7 @@ module AutomateIt
         cmd = "deluser"
         cmd << " --remove-home" unless opts[:remove_home] == false
         cmd << " #{username}"
+        cmd << " > /dev/null" if opts[:quiet]
         interpreter.sh(cmd)
         interpreter.sh("nscd --invalidate passwd") if @nscd
         remove_group(username) if has_group?(username)
@@ -234,7 +245,8 @@ module AutomateIt
       end
 
       def add_groups_to_user(groups, username)
-        present = groupnames_for_user(username)
+        groups = [groups].flatten
+        present = groups_for_user(username)
         missing = groups - present
         return false if missing.empt?
 
@@ -245,7 +257,8 @@ module AutomateIt
       end
 
       def remove_groups_from_user(groups, username)
-        present = groupnames_for_user(username)
+        groups = [groups].flatten
+        present = groups_for_user(username)
         removeable = groups & present
         return false if removeable.empty?
 
@@ -277,6 +290,7 @@ module AutomateIt
       end
 
       def add_users_to_group(users, groupname)
+        users = [users].flatten
         # FIXME must include pwent.gid
         grent = groups[groupname]
         missing = \
@@ -296,6 +310,7 @@ module AutomateIt
       end
 
       def remove_users_from_group(users, groupname)
+        users = [users].flatten
         grent = groups[groupname]
         present = \
           if writing? or grent
@@ -305,10 +320,10 @@ module AutomateIt
           end
         return false if present.empty?
 
-        u2g = usernames_to_groupnames
+        u2g = users_to_groups
         for username in present
-          user_groups = g2u[username]
-          cmd = "usermod -G #{(user_groups-[groupname]).join(',')} #{username}"
+          user_groups = u2g[username]
+          cmd = "usermod -G #{(user_groups.to_a-[groupname]).join(',')} #{username}"
           interpreter.sh(cmd)
         end
         interpreter.sh("nscd --invalidate group") if @nscd
