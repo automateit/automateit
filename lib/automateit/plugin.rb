@@ -9,14 +9,27 @@ module AutomateIt
         @interpreter ||= opts[:interpreter] || AutomateIt::Interpreter.new(:parent => self)
       end
 
+      # Get token for the plugin. The token is a symbol that represents the
+      # classname of the underlying object.
+      #
+      # Example:
+      #   AddressManager.token # => :address_manager
+      #   AddressManager::Portable.token => :portable
       def token
         self.class.token
       end
 
+      # See +#token+.
       def self.token
         return to_s.demodulize.underscore.to_sym
       end
 
+      # Running this method makes a class collect registrations into a
+      # +classes+ class variable when inherited. For example, the
+      # Plugin::Manager class uses this to keep track of what subclasses (e.g.
+      # PlatformManager) are available. As plugins are defined, they'll be
+      # recorded in this register so that the Interpreter can find what plugins
+      # are available without anyone needing to create a hard-coded list.
       def self.collect_registrations
         cattr_accessor :classes
 
@@ -25,10 +38,32 @@ module AutomateIt
         def self.inherited(subclass)
           classes << subclass unless classes.include?(subclass)
         end
+      end
 
-        def self.abstract_plugin
-          classes.delete(self) if classes.include?(self)
-        end
+      # Remove this plugin from the class registry populated by
+      # ::collect_registrations. This is useful for when you write an abstract
+      # driver that shouldn't be made available to the Interpreter because you
+      # want only its subclasses to be available.
+      #
+      # For example, note how only the MyConcreteManager is made available to
+      # the Interpreter:
+      #
+      #   class MyAbstractManager < Plugin::Manager
+      #     abstract_plugin
+      #     ...
+      #   end
+      #
+      #   class MyConcreteManager < MyAbstractManager
+      #     ...
+      #   end
+      #
+      #   interpreter = AutomateIt.new
+      #   interpreter.plugins[:my_abstract_manager]
+      #   # => nil
+      #   interpreter.plugins[:my_concrete_manager]
+      #   # => #<MyConcreteManager...>
+      def self.abstract_plugin
+        classes.delete(self) if classes.include?(self)
       end
     end
 
@@ -69,6 +104,10 @@ module AutomateIt
         end
       end
 
+      # Instantiate drivers for this manager. This method is smart enough that
+      # it can be called multiple times and will only instantiate drivers it
+      # hasn't instantiated yet. All drivers will share an instance of the
+      # Interpreter, thus providing common state storage.
       def instantiate_drivers
         @drivers ||= {}
         self.class.driver_classes.each do |driver_class|
@@ -96,16 +135,47 @@ module AutomateIt
         end
       end
 
+      # Set the default driver to the +token+. See also +#default+.
       def default=(token)
         default(token)
       end
 
+      # Dispatch a method by guessing its name. This is the recommended way to
+      # write wrappers for a Manager methods.
+      #
+      # Example:
+      #   class MyManager < Plugin::Manager
+      #     # Your RDoc here
+      #     def my_method(*args)
+      #       # Will guess that you want to +dispatch_to+ the +my_method+ by
+      #       # introspecting the name of the wrapper method.
+      #       dispatch(*args)
+      #     end
+      #     ...
+      #   end
       def dispatch(*args, &block)
         # Extract caller's method as symbol to save user from having to specify it
         method = caller[0].match(/:in `(.+?)'/)[1].to_sym
         dispatch_to(method, *args, &block)
       end
 
+      # Dispatch the +method+ with +args+ and +block+ to the appropriate
+      # driver. If the arguments include an option of the form <tt>:with =>
+      # :mytoken</tt> argument, then the method will be dispatched to the
+      # driver represented by <tt>:mytoken</tt>. If no :with argument is
+      # specified, the most-suitable driver will be automatically selected. If
+      # no suitable driver is available, a NotImplementedError will be raised.
+      #
+      # Examples:
+      #   # Run 'hostnames' method on most appropriate AddressManager driver:
+      #   address_manager.dispatch_to(:hostnames)
+      #
+      #   # Run AddressManager::Portable#hostnames
+      #   address_manager.dispatch_to(:hostnames, :with => :portable)
+      #
+      # You will typically not want to use this method directly and instead
+      # write wrappers that call +dispatch+ because it can guess the name of
+      # the +method+ argument for you.
       def dispatch_to(method, *args, &block)
         list, options = args_and_opts(*args)
         driver = \
@@ -119,6 +189,18 @@ module AutomateIt
         driver.send(method, *args, &block)
       end
 
+      # Returns structure which helps choose a suitable driver for the +method+
+      # and +args+. Result is a hash of driver tokens and their suitability
+      # levels.
+      #
+      # For example, if we ask the AddressManager for suitability levels for
+      # the AddressManager#hostnames method, we might find that there are two
+      # drivers (:portable is the token for AddressManager::Portable) and that
+      # the :linux driver is most appropriate because it has the highest
+      # suitability level:
+      #
+      #   address_manager.driver_suitability_levels_for(:hostnames)
+      #   # => {:portable=>1, :linux=>2}
       def driver_suitability_levels_for(method, *args, &block)
         results = {}
         @drivers.each_pair do |name, driver|
@@ -128,6 +210,10 @@ module AutomateIt
         return results
       end
 
+      # Get the most suitable driver for this +method+ and +args+. Uses
+      # automatic-detection routines and returns the most suitable driver
+      # instance found, else raises a NotImplementedError if no suitable driver
+      # is found.
       def driver_for(method, *args, &block)
         begin
           driver, level = driver_suitability_levels_for(method, *args, &block).sort_by{|k,v| v}.last
@@ -139,6 +225,19 @@ module AutomateIt
           return @drivers[driver]
         else
           raise NotImplementedError.new("can't find driver for method '#{method}' with arguments: #{args.inspect}")
+        end
+      end
+
+      # Is a driver available for this +method+ and +args+? Uses
+      # automatic-detection routines and returns a boolean to indicate if a
+      # suitable driver is available. Unlike +#driver_for+, this will not raise
+      # an exception.
+      def available?(method, *args, &block)
+        begin
+          driver_for(method, *args, &block)
+          true
+        rescue NotImplementedError
+          false
         end
       end
     end
@@ -166,7 +265,7 @@ module AutomateIt
       end
 
       # Is this driver available on this platform? Queries the dependencies set
-      # by +depends_on+ to make sure that they're all present, otherwise throws
+      # by +depends_on+ to make sure that they're all present, otherwise raises
       # a NotImplementedError. If a driver author needs to do some other kind
       # of check, it's reasonable to override this method.
       #
