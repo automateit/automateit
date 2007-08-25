@@ -11,5 +11,5 @@ def prepare_rails()
 
   # Install Ruby gems, if needed
   package_manager.install(%w(rails mongrel mongrel_cluster sqlite3-ruby),
-    :with => :gem)
+    :with => :gem, :docs => false)
 end
