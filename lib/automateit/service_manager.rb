@@ -108,6 +108,8 @@ module AutomateIt
     # underlying "sysvconfig" program is slow enough that it's better to rely
     # on the SYSV driver's simpler but much faster implementation.
     class Sysvconfig < SYSV
+      # FIXME sysvconfig package isn't installed by default :(
+      # FIXME but the "service" command is available
       depends_on :programs => %w(sysvconfig)
 
       def suitability(method, *args)
