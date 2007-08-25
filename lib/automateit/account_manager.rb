@@ -1,8 +1,6 @@
 module AutomateIt
   # AccountManager provides a way of managing system accounts, such as UNIX
   # users and groups.
-  #--
-  # TODO Create specs because much of this is off-the-cuff coding
   class AccountManager < Plugin::Manager
     # Find a user account. Method returns a query helper which takes a
     # +username+ as an index argument and returns a Struct::Passwd entry as
@@ -14,7 +12,7 @@ module AutomateIt
     #   users["does_not_exist"] # => nil
     def users() dispatch() end
 
-    # Add the +username+ if not already created. 
+    # Add the +username+ if not already created.
     #
     # Options:
     # * :description - User's full name. Defaults to username.
@@ -99,6 +97,7 @@ module AutomateIt
 
       class UserQuery
         def [](query)
+          Etc.endpwent
           begin
             case query
             when String
@@ -126,6 +125,7 @@ module AutomateIt
 
       class GroupQuery
         def [](query)
+          Etc.endgrent
           begin
             case query
             when String
@@ -161,7 +161,7 @@ module AutomateIt
         return result
       end
 
-      def usernames_to_groupnames 
+      def usernames_to_groupnames
         result = {}
         Etc.group do |grent|
           grent.mem.each do |username|
@@ -186,6 +186,11 @@ module AutomateIt
         return available? ? 2 : 0
       end
 
+      def setup(*args)
+        super(*args)
+        @nscd = interpreter.which("nscd")
+      end
+
       #.......................................................................
 
       def add_user(username, opts={})
@@ -202,6 +207,7 @@ module AutomateIt
         # --password CRYPT(3)ENCRYPTED
         # TODO set password
         interpreter.sh(cmd)
+        interpreter.sh("nscd --invalidate passwd") if @nscd
 
         unless opts[:group] == false
           groupname = opts[:group] || username
@@ -222,6 +228,7 @@ module AutomateIt
         cmd << " --remove-home" unless opts[:remove_home] == false
         cmd << " #{username}"
         interpreter.sh(cmd)
+        interpreter.sh("nscd --invalidate passwd") if @nscd
         remove_group(username) if has_group?(username)
         return true
       end
@@ -233,6 +240,8 @@ module AutomateIt
 
         cmd = "usermod -a -G #{missing.join(',')} #{username}"
         interpreter.sh(cmd)
+        interpreter.sh("nscd --invalidate group") if @nscd
+        return missing
       end
 
       def remove_groups_from_user(groups, username)
@@ -242,6 +251,8 @@ module AutomateIt
 
         cmd = "usermod -G #{(present-groups).join(',')} #{username}"
         interpreter.sh(cmd)
+        interpreter.sh("nscd --invalidate group") if @nscd
+        return removeable
       end
 
       #.......................................................................
@@ -252,6 +263,7 @@ module AutomateIt
         cmd << " -g #{opts[:gid]}" if opts[:gid]
         cmd << " #{groupname}"
         interpreter.sh(cmd)
+        interpreter.sh("nscd --invalidate group") if @nscd
         add_users_to_group(opts[:members], groupname) if opts[:members]
         return groups[groupname]
       end
@@ -260,6 +272,7 @@ module AutomateIt
         return false unless has_group?(groupname)
         cmd = "groupdel #{groupname}"
         interpreter.sh(cmd)
+        interpreter.sh("nscd --invalidate group") if @nscd
         return true
       end
 
@@ -278,6 +291,7 @@ module AutomateIt
           cmd = "usermod -a -G #{groupname} #{username}"
           interpreter.sh(cmd)
         end
+        interpreter.sh("nscd --invalidate group") if @nscd
         return missing
       end
 
@@ -297,6 +311,7 @@ module AutomateIt
           cmd = "usermod -G #{(user_groups-[groupname]).join(',')} #{username}"
           interpreter.sh(cmd)
         end
+        interpreter.sh("nscd --invalidate group") if @nscd
         return present
       end
     end # class Linux
