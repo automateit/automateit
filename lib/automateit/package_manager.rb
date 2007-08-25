@@ -236,7 +236,9 @@ module AutomateIt
           # -d 0 : no debugging info
           # -e 0 : show only fatal errors
           # -C : don't download headers
-          cmd = "yum -y -d 0 -e 0 -C install "+list.join(" ")+" < /dev/null"
+          cmd = "yum -y -d 0 -e 0"
+          cmd << " -C" if opts[:cache] == true
+          cmd << " install "+list.join(" ")+" < /dev/null"
           cmd << " > /dev/null" if opts[:quiet]
           cmd << " 2>&1"
 
