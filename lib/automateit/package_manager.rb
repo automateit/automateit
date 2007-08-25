@@ -361,8 +361,6 @@ module AutomateIt
             end
           rescue Errno::ENOENT => e
             raise NotImplementedError.new("can't find gem command: #{e}")
-          rescue Errno::EIO => e
-            # End of content reached through alternative means
           end
 
           if uninstall_needed or not exitstruct.exitstatus.zero?
@@ -378,7 +376,19 @@ module AutomateIt
         return _uninstall_helper(*packages) do |list, opts|
           # FIXME idiotic program MAY prompt you like this on uninstall:
 =begin
-root@ubuntu:/mnt/satori/svnwork/automateit/src/examples/myapp_rails# gem uninstall mongrel
+Gem 0.9.4 generates prompts like this:
+** gem uninstall -x mongrel < /dev/null 2>&1
+
+You have requested to uninstall the gem:
+        mongrel-1.0.1
+mongrel_cluster-1.0.2 depends on [mongrel (>= 1.0.1)]
+If you remove this gems, one or more dependencies will not be met.
+Continue with Uninstall? [Yn]  Successfully uninstalled mongrel version 1.0.1
+Removing mongrel_rails
+
+#-----------------------------------------------------------------------
+Gem 0.9.0 generates prompts like this:
+** gem uninstall -x mongrel < /dev/null 2>&1
 
 Select RubyGem to uninstall:
  1. mongrel-1.0.1
@@ -393,9 +403,6 @@ If you remove this gems, one or more dependencies will not be met.
 Continue with Uninstall? [Yn]  y
 Successfully uninstalled mongrel version 1.0.1
 Successfully uninstalled mongrel_cluster version 1.0.2
-Remove executables and scripts for
-'mongrel_cluster_ctl' in addition to the gem? [Yn]  y
-Removing mongrel_cluster_ctl
 root@ubuntu:/mnt/satori/svnwork/automateit/src/examples/myapp_rails#
 =end
           for package in list
