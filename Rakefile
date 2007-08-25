@@ -8,13 +8,15 @@ def specify(*files)
   Spec::Rake::SpecTask.new(:spec_internal) do |t|
     t.rcov = @rcov
     t.rcov_opts = ['--exclude', 'spec']
+    #t.rcov_opts = ['--exclude', 'spec', '--aggregate', 'aggregate.rcov']
     t.spec_files = FileList[*files]
   end
   Rake::Task[:spec_internal].invoke
 end
 
 task "spec" do
-  specify('spec/unit/**/*_spec.rb')
+  target = ENV['F'] || ENV['FILE'] || 'spec/unit/**/*_spec.rb'
+  specify(target)
 end
 
 task "rcov" do
