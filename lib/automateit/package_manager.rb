@@ -330,49 +330,42 @@ module AutomateIt
           return true if noop?
 
           uninstall_needed = false
-          install_succeeded = false
           begin
-            # Why is PTY/Expect such a steaming pile of offal? :(
-            PTY.spawn(cmd) do |sout, sin, pid|
+            exitstruct = Open4::popen4(cmd) do |pid, sin, sout, serr|
               $expect_verbose = opts[:quiet] ? false : true
 
               re_missing=/Could not find.+in any repository/m
-              re_success=/Successfully installed/m
               re_select=/Select which gem to install.+>/m
               re_failed=/Gem files will remain.+for inspection/m
-              re_all=/#{re_missing}|#{re_success}|#{re_select}|#{re_failed}/m
+              re_all=/#{re_missing}|#{re_select}|#{re_failed}/m
 
               while true
-                sout.expect(re_all) do |captureded|
-                  captured = captureded.first
-                  #puts "captured %s" % captured.inspect
-                  if captured.match(re_failed)
-                    uninstall_needed = true
-                  elsif captured.match(re_select)
-                    choice = captured.match(/^ (\d+)\. .+?\(ruby\)\s+$/)[1]
-                    sin.puts(choice)
-                  elsif captured.match(re_success)
-                    # XXX How quit block AND loop? "break" does nothing and "raise" causes problems.
-                    install_succeeded = true
-                  end
+                begin
+                  captureded = sout.expect(re_all)
+                rescue NoMethodError
+                  log.debug(PNOTE+"Gem seems to be done")
+                  break
+                end
+                ### puts "Captureded %s" % captureded.inspect
+                captured = captureded.first
+                if captured.match(re_failed)
+                  log.warn(PNOTE+"Gem install failed mid-process")
+                  uninstall_needed = true
+                  break
+                elsif captured.match(re_select)
+                  choice = captured.match(/^ (\d+)\. .+?\(ruby\)\s*$/)[1]
+                  log.info(PNOTE+"Guessing: #{choice}")
+                  sin.puts(choice)
                 end
               end
             end
+          rescue Errno::ENOENT => e
+            raise NotImplementedError.new("can't find gem command: #{e}")
           rescue Errno::EIO => e
-            if install_succeeded
-              log.info(PNOTE+"Gem install appears to have worked")
-            else
-              log.error(PERROR+"Gem install failed when session ended unexpectedly")
-              uninstall_needed = true
-            end
-          rescue PTY::ChildExited => e
-            unless e.status.exitstatus.zero?
-              log.error(PERROR+"Gem install failed with non-zero exit value even though it may have claimed success")
-              uninstall_needed = true
-            end
+            # End of content reached through alternative means
           end
 
-          if uninstall_needed
+          if uninstall_needed or not exitstruct.exitstatus.zero?
             log.error(PERROR+"Gem install failed, trying to uninstall broken pieces: #{list.inspect}")
             uninstall(list, opts)
 

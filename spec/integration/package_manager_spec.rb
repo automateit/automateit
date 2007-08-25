@@ -87,19 +87,6 @@ else
           @package = package
           raise PACKAGE_FOUND_ERROR % [@package, @d.class] if @d.installed?(@package)
         end
-
-        if :gem == driver_token
-          it "should fail reasonably when dealing with broken Gems" do
-            raise "Found Gem 'sys-cpu' installed, you must remove it to test how broken packages are handled" if @d.installed?("sys-cpu")
-            # Temporarily quiet down logging so we don't get warnings during the test
-            old_level = @d.log.level
-            @d.log.level = Logger::FATAL
-            lambda{ @d.install("sys-cpu", :quiet => true) }.should raise_error(ArgumentError, /invalid/)
-            @d.log.level = old_level
-            # Cleanup, just in case
-            @d.uninstall("sys-cpu").should be_false
-          end
-        end
       end
     else
       puts PACKAGE_DRIVER_MISSING_ERROR % driver.class

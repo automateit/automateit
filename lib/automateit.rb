@@ -14,6 +14,7 @@ require 'socket'
 # Gems
 require 'rubygems'
 require 'active_support' # SLOW 0.5s
+require 'open4'
 begin
   require 'eruby'
 rescue LoadError
