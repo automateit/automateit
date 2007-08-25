@@ -84,10 +84,8 @@ module AutomateIt
 
         missing = not_installed?(packages, :list => true)
         return false if missing.blank?
-        return true if noop?
-
-        # XXX Ignore return value?
         block.call(missing, opts)
+        return true if noop?
         unless (failed = not_installed?(missing, :list => true)).empty?
           # FIXME spec failure
           raise ArgumentError.new("couldn't install: #{failed.join(' ')}")
@@ -115,10 +113,8 @@ module AutomateIt
 
         present = installed?(packages, :list => true)
         return false if present.blank?
-        return true if noop?
-
-        # XXX Ignore return value?
         block.call(present, opts)
+        return true if noop?
         unless (failed = installed?(present, :list => true)).empty?
           # FIXME spec failure
           raise ArgumentError.new("couldn't uninstall: #{failed.join(' ')}")
@@ -147,7 +143,7 @@ module AutomateIt
           ### data = `dpkg --status nomarch apache2 not_a_real_package 2>&1`
           cmd = "dpkg --status "+list.join(" ")+" 2>&1"
 
-          log.debug("$$$ "+cmd)
+          log.debug(PEXEC+cmd)
           data = `#{cmd}`
           matches = data.scan(/^Package: (.+)$\s*^Status: (.+)$/)
           available = matches.inject([]) do |sum, match|
@@ -215,7 +211,7 @@ module AutomateIt
           list.each{|package| cmd << " "+package}
           cmd << " 2>&1" # missing packages are listed on STDERR
 
-          log.debug("$$$ "+cmd)
+          log.debug(PEXEC+cmd)
           data = `#{cmd}`
           matches = data.scan(/^(.+) # (.+) # .+$/)
           available = matches.inject([]) do |sum, match|
@@ -284,9 +280,18 @@ module AutomateIt
           #     needle (>= 1.2.0)
           cmd = "gem dependency "+list.join(" ")+" 2>&1"
 
-          log.debug("$$$ "+cmd)
+          log.debug(PEXEC+cmd)
           data = `#{cmd}`
-          available = data.scan(/^Gem (.+)-.+?$/).flatten
+
+          # Gem lists packages out of order, which screws up the
+          # install/uninstall sequence, so we need to put them back in the
+          # order that the user specified.
+          present = data.scan(/^Gem (.+)-.+?$/).flatten
+          available = []
+          for package in list
+            available << package if present.include?(package)
+          end
+          available
         end
       end
 
@@ -312,44 +317,52 @@ module AutomateIt
           # gem options:
           # -y : Include dependencies,
           # -E : use /usr/bin/env for installed executables; but only with >= 0.9.4
-          cmd = "gem install -y "+list.join(" ")+" 2>&1"
+          cmd = "gem install -y"
+          cmd << " --no-ri" if opts[:ri] == false or opts[:docs] == false
+          cmd << " --no-rdoc" if opts[:rdoc] == false or opts[:docs] == false
+          cmd << " "+list.join(" ")+" 2>&1"
 
           # XXX Try to warn the user that they won't see any output for a while
-          log.info(PNOTE+"Installing Gems (#{list.inspect}), this will take a while...") unless opts[:quiet]
+          log.info(PNOTE+"Installing Gems, this will take a while...") if writing? and not opts[:quiet]
+          log.info(PEXEC+cmd)
+          return true if noop?
 
           uninstall_needed = false
-          log.debug("$$$ "+cmd)
+          install_succeeded = false
           begin
             # Why is PTY/Expect such a steaming pile of offal? :(
             PTY.spawn(cmd) do |sout, sin, pid|
               $expect_verbose = opts[:quiet] ? false : true
-              #$expect_verbose = true
 
-              sout.expect(/Could not find.+in any repository|Successfully installed|Select which gem to install.+>/m) do |o|
-                o1 = o.first
-                if o1.match(/Select which gem to install/)
-                  choice = o1.match(/^ (\d+)\. .+?\(ruby\)\s+$/)[1]
-                  sin.puts(choice)
-                  sout.expect(/Successfully installed|Gem files will remain.+for inspection/) do |o|
-                    o2 = o.first
-                    if o2.match(/Gem files will remain.+for inspection/)
-                      uninstall_needed = true
-                    end
+              re_missing=/Could not find.+in any repository/m
+              re_success=/Successfully installed/m
+              re_select=/Select which gem to install.+>/m
+              re_failed=/Gem files will remain.+for inspection/m
+              re_all=/#{re_missing}|#{re_success}|#{re_select}|#{re_failed}/m
+
+              while true
+                sout.expect(re_all) do |captureded|
+                  captured = captureded.first
+                  #puts "captured %s" % captured.inspect
+                  if captured.match(re_failed)
+                    uninstall_needed = true
+                  elsif captured.match(re_select)
+                    choice = captured.match(/^ (\d+)\. .+?\(ruby\)\s+$/)[1]
+                    sin.puts(choice)
+                  elsif captured.match(re_success)
+                    # XXX How quit block AND loop? "break" does nothing and "raise" causes problems.
+                    install_succeeded = true
                   end
                 end
               end
-
-              # Gem doesn't always print a trailing newline
-              print "\n" if $expect_verbose
-
-              # PTY/Expect hack to throw ChildExited exception so we can read command's exit status
-              sout.read
-              sleep 5
-              raise "PTY/Expect hack to get exit status failed"
             end
           rescue Errno::EIO => e
-            log.error(PERROR+"Gem install failed when session ended unexpectedly")
-            uninstall_needed = true
+            if install_succeeded
+              log.info(PNOTE+"Gem install appears to have worked")
+            else
+              log.error(PERROR+"Gem install failed when session ended unexpectedly")
+              uninstall_needed = true
+            end
           rescue PTY::ChildExited => e
             unless e.status.exitstatus.zero?
               log.error(PERROR+"Gem install failed with non-zero exit value even though it may have claimed success")
@@ -368,15 +381,36 @@ module AutomateIt
 
       def uninstall(*packages)
         return _uninstall_helper(*packages) do |list, opts|
-          # gem options:
-          # -x : remove installed executables
-          cmd = "gem uninstall -x"
-          list.each{|package| cmd << " "+package}
-          cmd << " < /dev/null"
-          cmd << " > /dev/null" if opts[:quiet]
-          cmd << " 2>&1"
+          # FIXME idiotic program MAY prompt you like this on uninstall:
+=begin
+root@ubuntu:/mnt/satori/svnwork/automateit/src/examples/myapp_rails# gem uninstall mongrel
 
-          interpreter.sh(cmd)
+Select RubyGem to uninstall:
+ 1. mongrel-1.0.1
+ 2. mongrel_cluster-1.0.2
+ 3. All versions
+> 3
+
+You have requested to uninstall the gem:
+        mongrel-1.0.1
+mongrel_cluster-1.0.2 depends on [mongrel (>= 1.0.1)]
+If you remove this gems, one or more dependencies will not be met.
+Continue with Uninstall? [Yn]  y
+Successfully uninstalled mongrel version 1.0.1
+Successfully uninstalled mongrel_cluster version 1.0.2
+Remove executables and scripts for
+'mongrel_cluster_ctl' in addition to the gem? [Yn]  y
+Removing mongrel_cluster_ctl
+root@ubuntu:/mnt/satori/svnwork/automateit/src/examples/myapp_rails#
+=end
+          for package in list
+            # gem options:
+            # -x : remove installed executables
+            cmd = "gem uninstall -x #{package} < /dev/null"
+            cmd << " > /dev/null" if opts[:quiet]
+            cmd << " 2>&1"
+            interpreter.sh(cmd)
+          end
         end
       end
     end
@@ -400,7 +434,7 @@ module AutomateIt
         return _installed_helper?(*packages) do |list, opts|
           cmd = "python -c 'import sys; print(sys.path)' 2>&1"
 
-          log.debug("$$$ "+cmd)
+          log.debug(PEXEC+cmd)
           data = `#{cmd}`
           # Extract array elements, turn them into basenames, and then split on
           # '-' because that's the separator for the name and version.
@@ -438,6 +472,7 @@ module AutomateIt
 
           # Parse output for paths and remove the orphaned entries
           log.info(PEXEC+cmd)
+          return packages if noop?
           data = `#{cmd}`
           paths = data.scan(/^Using ([^\n]+\.egg)$/m).flatten
           for path in paths
