@@ -24,8 +24,9 @@
 #-----------------------------------------------------------------------
 
 rails_servers:
-    michiru
+    - michiru
+    - rheya
 myapp_servers:
     # FIMXE add interpolation : rails_servers
-    michiru
-
+    - michiru
+    - rheya
