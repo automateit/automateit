@@ -4,7 +4,7 @@ module AutomateIt
     #
     # A Linux-specific driver for the AccountManager.
     class Linux < Portable
-      depends_on :programs => %w(useradd usermod deluser groupadd groupmod groupdel)
+      depends_on :programs => %w(useradd usermod userdel groupadd groupmod groupdel)
 
       def suitability(method, *args) # :nodoc:
         return available? ? 2 : 0
@@ -51,8 +51,9 @@ module AutomateIt
       # See AccountManager#remove_user
       def remove_user(username, opts={})
         return false unless has_user?(username)
-        cmd = "deluser"
-        cmd << " --remove-home" unless opts[:remove_home] == false
+        # Options: -r -- remove the homedirectory and mail spool
+        cmd = "userdel"
+        cmd << " -r" unless opts[:remove_home] == false
         cmd << " #{username}"
         cmd << " > /dev/null" if opts[:quiet]
         interpreter.sh(cmd)
