@@ -2,11 +2,11 @@
 
 === Executing commands and invoking recipe files
 
-You can run a recipe from the command-line by running:
+You can run a recipe from the UNIX command-line by running:
 
   automateit your_recipe_file.rb
 
-Or start an interactive shell from the command-line by running:
+Or start an interactive shell from the UNIX command-line by running:
 
   automateit
 
@@ -15,24 +15,31 @@ shell, plus the special methods offered by the interpreter.
 
 === Discovering Interpreter features
 
-The best way to discover AutomateIt's methods is to start the interactive
-shell and run commands from it. You can find out what commands the
-interpreter offers by entering:
+Let's explore AutomateIt by starting up an interactive shell by running the
+following command from the UNIX command-line:
 
-  unique_methods
+  automateit
 
-This will display an array of strings, each one is the name of an
-AutomateIt::Interpreter method.
-
-For example, there's a method called <tt>superuser?</tt> that tells you if
-you're running the interpreter with superuser (root) privileges. You can run
-this by entering:
+You can now enter commands into AutomateIt. Each command you enter will be run
+against the AutomateIt Interpreter. For example, there's an Interpreter method
+called <tt>superuser?</tt> that tells you if you're running the Interpreter
+with superuser (root) privileges. You can run this by entering the following
+into the interactive shell:
 
   superuser?
 
+Although you should read the documentation for the AutomateIt::Interpreter,
+it's often useful to be able to interactively see what methods are available.
+You can do this by entering:
+
+  unique_methods
+
+This will display an array of strings, each one is the name of an Interpreter
+method. You'll notice the <tt>superuser?</tt> method listed among these.
+
 === Plugins
 
-AutomateIt uses plugins to provide features:
+AutomateIt uses plugins to provide related features:
 
 * AutomateIt::AccountManager -- Manipulates users and groups.
 * AutomateIt::AddressManager -- Manipulates host's network addresses.
@@ -47,37 +54,42 @@ AutomateIt uses plugins to provide features:
 
 === Using plugins
 
-You can see the plugins available in your Interpreter by entering:
+Plugins can be accessed from the Interpreter. For example, the ShellManager
+plugin has a +sh+ command that executes UNIX commands (documented at
+AutomateIt::ShellManager#sh). You can run this command from the Interpreter by
+entering:
+
+  shell_manager.sh "ls -la"
+
+Although you should read the documentation for the various plugins, you can
+also interactively query them to see what methods they provide by entering a
+command like this:
+
+  shell_manager.unique_methods
+
+You can also interactively see what plugins are available by entering:
 
   plugins.keys
 
-The above command will return an array like:
+You will then see an array like this:
 
   [:field_manager, :shell_manager, :edit_manager, :address_manager,
   :account_manager, :package_manager, :tag_manager, :platform_manager,
   :template_manager, :service_manager]
 
-Each of these names represents a plugin. For example, the
-<tt>:shell_manager</tt> corresponds to the AutomateIt::ShellManager plugin.
-That particular plugin provides a +sh+ method (AutomateIt::ShellManager#sh)
-that executes shell commands. You can call this method by entering:
-
-  shell_manager.sh "ls"
-
-You can also see what methods that specific plugin provides by entering:
-
-  shell_manager.unique_methods
-
-You'll get an array of +ShellManager+'s methods and see the +sh+ method amongst
-them.
+Each name above represents. For example, we see <tt>:shell_manager</tt> which
+corresponds to the <tt>shell_manager</tt> method in the Interpreter, which is
+documented in Automateit::ShellManager.
 
 === Aliased methods
 
-The most common plugin methods are aliased to shorter names. For example, the
-following commands do the same thing:
+You'll use some plugin methods frequently and may get tired of typing them, so
+the most common ones have been aliased to shorter names. For example, the
+following commands will do the same thing:
 
-    shell_manager.sh "ls"
-    sh "ls"
+  shell_manager.sh "ls"
+
+  sh "ls"
 
 A complete set of aliased methods includes:
 
@@ -119,9 +131,9 @@ A complete set of aliased methods includes:
 
 === Projects
 
-When you have enough code, you should consider creating a Project that contains
-your recipes, tags, fields and custom plugins and libraries. It also provides
-you with additional convenience features. See documentation for AutomateIt::Project.
+You should consider creating a Project to organize your recipes, tags, fields
+and custom plugins and libraries. It also provides you with additional
+convenience features. See documentation for AutomateIt::Project.
 
 === Embedding
 

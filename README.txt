@@ -4,8 +4,8 @@
 
 === Getting started
 
-1. Read INSTALL.txt[link:files/INSTALL_txt.html] for installation instructions.
-2. Read USAGE.txt[link:files/USAGE_txt.html] to learn how to use the tool.
+1. Install[link:files/INSTALL_txt.html] it.
+2. Use[link:files/USAGE_txt.html] it.
 3. Profit!
 
 === What is AutomateIt and why should you care?
@@ -18,8 +18,18 @@ Unlike most competing products, AutomateIt is built to solve real-world problems
 
 Check out AutomateIt today!
 
-Professional services are available for AutomateIt are available through <b>Pragmaticraft[http://pragmaticraft.com]</b>.
+=== Support
+
+Professional services for AutomateIt are available through Pragmaticraft[http://Pragmaticraft.com].
+
+Community support and release notifications are available at the http://AutomateIt.org website.
+
+=== Beta
+
+AutomateIt is beta-quality software. It's feature-complete, exceeds the capabilities of other major products, and ensures its quality with a test suite that provides nearly-complete code coverage. However, this is a young, product and early users should have a high-degree of technical understanding, be willing to accept rough spots and work through problems. Driver support for some operating systems is limited, although users are encouraged to write and submit drivers or provide access to their platforms so the product's authors can write these. Users are expected to sign up at the http://Automate.org website so they can be notified of releases and apply these updates regularly to take advantage of bugfixes and new features.
+
+=== Legal
 
 Author:: Igal Koshevoy (igal@pragmaticraft.com)
-Copyright:: Copyright (c) 2007 Pragmaticraft
+Copyright:: Copyright (c) 2007 Igal Koshevoy
 License:: Distributed under the same terms as Ruby (http://www.ruby-lang.org/en/LICENSE.txt)
