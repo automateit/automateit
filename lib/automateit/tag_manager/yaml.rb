@@ -13,7 +13,7 @@ module AutomateIt
       end
 
       # Options:
-      # * :file - File to read tags from. The file is preprocessed with ERB and
+      # * :file -- File to read tags from. The file is preprocessed with ERB and
       #   must produce YAML content.
       def setup(opts={})
         if filename = opts.delete(:file)

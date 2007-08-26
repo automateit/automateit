@@ -43,7 +43,7 @@ module AutomateIt
       end
 
       # Options:
-      # * :default - The token of the driver to set as the default.
+      # * :default -- The token of the driver to set as the default.
       def setup(opts={})
         super(opts)
 

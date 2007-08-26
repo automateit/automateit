@@ -30,7 +30,7 @@ module AutomateIt
     # Create a new project.
     #
     # Options:
-    # * :create - Project path to create. Required.
+    # * :create -- Project path to create. Required.
     # * All other options are passed to the AutomateIt::Interpreter.
     def self.create(opts)
       path = opts.delete(:create) \

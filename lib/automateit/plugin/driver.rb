@@ -16,10 +16,12 @@ module AutomateIt
     class Driver < Base
       collect_registrations
 
-      # Defines what this driver depends on the system for. Options:
-      # * :files - Array of filenames that must exist.
-      # * :directories - Array of directories that must exist.
-      # * :programs - Array of programs, checked with +which+, that must exist.
+      # Defines what this driver depends on the system for. 
+      #
+      # Options:
+      # * :files -- Array of filenames that must exist.
+      # * :directories -- Array of directories that must exist.
+      # * :programs -- Array of programs, checked with +which+, that must exist.
       #
       # Example:
       #   class APT < Plugin::Driver

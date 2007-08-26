@@ -147,14 +147,14 @@ module AutomateIt
     # Setup the Interpreter. This method is also called from Interpreter#new.
     #
     # Options for users:
-    # * :verbosity - Alias for :log_level
-    # * :log_level - Set log level, defaults to Logger::INFO.
-    # * :noop - Set noop (no-operation) mode as boolean.
-    # * :project - Set project as directory path.
+    # * :verbosity -- Alias for :log_level
+    # * :log_level -- Set log level, defaults to Logger::INFO.
+    # * :noop -- Set noop (no-operation) mode as boolean.
+    # * :project -- Set project as directory path.
     #
     # Options for internal use:
-    # * :parent - Parent plugin instance.
-    # * :log - QueuedLogger instance.
+    # * :parent -- Parent plugin instance.
+    # * :log -- QueuedLogger instance.
     def setup(opts={})
       super(opts.merge(:interpreter => self))
 

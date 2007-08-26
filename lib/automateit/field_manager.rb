@@ -35,7 +35,7 @@ module AutomateIt
       end
 
       # Options:
-      # * :struct - Hash to use as the fields data structure.
+      # * :struct -- Hash to use as the fields data structure.
       def setup(opts={})
         super(opts)
 
@@ -71,7 +71,7 @@ module AutomateIt
       end
 
       # Options:
-      # * :file - Filename to read data structure from. Contents will be
+      # * :file -- Filename to read data structure from. Contents will be
       #   parsed with ERB and then handed to YAML.
       def setup(opts={})
         if filename = opts.delete(:file)

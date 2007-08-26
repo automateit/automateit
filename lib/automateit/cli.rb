@@ -10,10 +10,10 @@ module AutomateIt
     # it starts an interactive IRB session for the Interpreter.
     #
     # Options:
-    # * :project - Project directory to load.
-    # * :recipe - Recipe file to execute.
-    # * :eval - Evaluate this string.
-    # * :quiet - Don't print shell header.
+    # * :project -- Project directory to load.
+    # * :recipe -- Recipe file to execute.
+    # * :eval -- Evaluate this string.
+    # * :quiet -- Don't print shell header.
     def initialize(opts={})
       opts[:project] ||= opts[:recipe] ? File.join(File.dirname(opts[:recipe]), "..") : "."
       if opts[:create]

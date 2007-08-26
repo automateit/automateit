@@ -20,10 +20,10 @@ module AutomateIt
     #   query("os#arch#distro#release") # => "linux_i686_ubuntu_6.06"
     #
     # Fields that may be provided by drivers:
-    # * :arch - Hardware architecture, e.g. "i686"
-    # * :os - Operating system, e.g. "linux"
-    # * :distro - Operating system distribution, e.g. "ubuntu"
-    # * :release - Operating system distribution release, e.g. "6.06"
+    # * :arch -- Hardware architecture, e.g. "i686"
+    # * :os -- Operating system, e.g. "linux"
+    # * :distro -- Operating system distribution, e.g. "ubuntu"
+    # * :release -- Operating system distribution release, e.g. "6.06"
     def query(search) dispatch(search) end
   end
 end

@@ -30,16 +30,14 @@ module AutomateIt
 
       # Render +source+ filename to +target+ filename.
       #
-      # Options hash may have a :check argument that determines when to render
-      # the target, otherwise it uses the value specified in #default_check:
-      # * +compare+: Only render if rendered template is different than the target's contents or if the target doesn't exist.
-      # * +timestamp+: Only render if the target is older than the template and dependencies.
-      # * +exists+: Only render if the target doesn't exist.
-      #
-      # Options hash includes optional arguments:
-      # * +locals+: Hash of variables passed to template as local variables.
-      # * +dependencies+: When checking timestamps, include this Array of filenames when checking timestamps.
-      # * +force+: Boolean to force rendering without checking timestamps.
+      # Options:
+      # * :locals -- Hash of variables passed to template as local variables.
+      # * :dependencies -- When checking timestamps, include this Array of filenames when checking timestamps.
+      # * :force -- Boolean to force rendering without checking timestamps.
+      # * :check -- Determines when to render, otherwise uses value of +default_check+, possible values:
+      #   * :compare -- Only render if rendered template is different than the target's contents or if the target doesn't exist.
+      #   * :timestamp -- Only render if the target is older than the template and dependencies.
+      #   * :exists -- Only render if the target doesn't exist.
       #
       # For example, if the file +my_template_file+ contains:
       #   Hello <%=entity%>!

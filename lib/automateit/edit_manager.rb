@@ -49,9 +49,9 @@ module AutomateIt
         # options.
         #
         # Options:
-        # * :file - File to edit.
-        # * :string - String to edit.
-        # * :params - Hash to make available to editor session. Optional.
+        # * :file -- File to edit.
+        # * :string -- String to edit.
+        # * :params -- Hash to make available to editor session. Optional.
         #
         # Example:
         #   EditSession.edit(:file => "myfile", :params => {:hello => "world"} do
@@ -99,7 +99,7 @@ module AutomateIt
         # file already.
         #
         # Options:
-        # * :unless - Look for this String or Regexp instead and don't prepend
+        # * :unless -- Look for this String or Regexp instead and don't prepend
         #   if it matches.
         #
         # Example:
@@ -120,7 +120,7 @@ module AutomateIt
         # this file already.
         #
         # Options:
-        # * :unless - Look for this String or Regexp instead and don't append
+        # * :unless -- Look for this String or Regexp instead and don't append
         #   if it matches.
         #
         # See example for #prepend.

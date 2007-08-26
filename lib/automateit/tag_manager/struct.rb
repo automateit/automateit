@@ -16,7 +16,7 @@ module AutomateIt
       end
 
       # Options:
-      # * :struct - Hash to use for queries.
+      # * :struct -- Hash to use for queries.
       def setup(opts={})
         super(opts)
 

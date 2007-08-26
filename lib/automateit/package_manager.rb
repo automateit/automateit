@@ -4,7 +4,7 @@ module AutomateIt
   # The PackageManager provides a way to manage packages, e.g. install,
   # uninstall and query if the Apache package is installed with APT.
   #
-  # Example:
+  # Examples:
   #   package_manager.installed?("apache2") # => false
   #   package_manager.install("apache2") # => true
   #   package_manager.installed?("apache2") # => true

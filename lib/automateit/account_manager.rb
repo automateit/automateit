@@ -20,15 +20,15 @@ module AutomateIt
     # Add the +username+ if not already created.
     #
     # Options:
-    # * :description - User's full name. Defaults to username.
-    # * :home - Path to user's home directory. If not specified, uses system
+    # * :description -- User's full name. Defaults to username.
+    # * :home -- Path to user's home directory. If not specified, uses system
     #   default like "/home/username".
-    # * :create_home - Create homedir. Defaults to true.
-    # * :groups - Array of group names to add this user to.
-    # * :shell - Path to login shell. If not specified, uses system default
+    # * :create_home -- Create homedir. Defaults to true.
+    # * :groups -- Array of group names to add this user to.
+    # * :shell -- Path to login shell. If not specified, uses system default
     #   like "/bin/bash".
-    # * :uid - Fixnum user ID for user. Default chooses an unused id.
-    # * :gid - Fixnum group ID for user. Default chooses same gid as uid.
+    # * :uid -- Fixnum user ID for user. Default chooses an unused id.
+    # * :gid -- Fixnum group ID for user. Default chooses same gid as uid.
     #
     # Example:
     #   add_user("bob", :description => "Bob Smith")
@@ -39,7 +39,7 @@ module AutomateIt
     # Remove the +username+ if present.
     #
     # Options:
-    # * :remove_home - Delete user's home directory and mail spool. Default is
+    # * :remove_home -- Delete user's home directory and mail spool. Default is
     #   true.
     def remove_user(username, opts={}) dispatch(username, opts) end
 
@@ -65,8 +65,8 @@ module AutomateIt
     def groups() dispatch() end
 
     # Add +groupname+ if it doesn't exist. Options:
-    # * :members - Array of usernames to add as members.
-    # * :gid - Group ID to use. Default is to find an unused id.
+    # * :members -- Array of usernames to add as members.
+    # * :gid -- Group ID to use. Default is to find an unused id.
     def add_group(groupname, opts={}) dispatch(groupname, opts) end
 
     def update_group(groupname, opts={}) dispatch(groupname, opts) end
