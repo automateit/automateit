@@ -1,10 +1,7 @@
 require 'automateit'
 
 module AutomateIt
-  # == Plugin
-  #
-  # See Plugin::Base
-  class Plugin
+  class Plugin # :nodoc:
     require 'automateit/plugin/base'
     require 'automateit/plugin/manager'
     require 'automateit/plugin/driver'

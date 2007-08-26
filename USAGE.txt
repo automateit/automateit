@@ -1,0 +1,152 @@
+= Using AutomateIt
+
+=== Executing commands and invoking recipe files
+
+You can run a recipe from the command-line by running:
+
+  automateit your_recipe_file.rb
+
+Or start an interactive shell from the command-line by running:
+
+  automateit
+
+You can enter any valid Ruby code into the recipe file or interpreter
+shell, plus the special methods offered by the interpreter.
+
+=== Discovering Interpreter features
+
+The best way to discover AutomateIt's methods is to start the interactive
+shell and run commands from it. You can find out what commands the
+interpreter offers by entering:
+
+  unique_methods
+
+This will display an array of strings, each one is the name of an
+AutomateIt::Interpreter method.
+
+For example, there's a method called <tt>superuser?</tt> that tells you if
+you're running the interpreter with superuser (root) privileges. You can run
+this by entering:
+
+  superuser?
+
+=== Plugins
+
+AutomateIt uses plugins to provide features:
+
+* AutomateIt::AccountManager -- Manipulates users and groups.
+* AutomateIt::AddressManager -- Manipulates host's network addresses.
+* AutomateIt::EditManager -- Edits files and strings.
+* AutomateIt::FieldManager -- Queries configuration variables.
+* AutomateIt::PackageManager -- Manipulates software packages.
+* AutomateIt::PlatformManager -- Queries platform, e.g. its OS version.
+* AutomateIt::ServiceManager -- Manipulates services, e.g. UNIX daemons.
+* AutomateIt::ShellManager -- Manipulates files and executes UNIX commands.
+* AutomateIt::TagManager -- Groups hosts by role and queries membership.
+* AutomateIt::TemplateManager -- Renders templates to files.
+
+=== Using plugins
+
+You can see the plugins available in your Interpreter by entering:
+
+  plugins.keys
+
+The above command will return an array like:
+
+  [:field_manager, :shell_manager, :edit_manager, :address_manager,
+  :account_manager, :package_manager, :tag_manager, :platform_manager,
+  :template_manager, :service_manager]
+
+Each of these names represents a plugin. For example, the
+<tt>:shell_manager</tt> corresponds to the AutomateIt::ShellManager plugin.
+That particular plugin provides a +sh+ method (AutomateIt::ShellManager#sh)
+that executes shell commands. You can call this method by entering:
+
+  shell_manager.sh "ls"
+
+You can also see what methods that specific plugin provides by entering:
+
+  shell_manager.unique_methods
+
+You'll get an array of +ShellManager+'s methods and see the +sh+ method amongst
+them.
+
+=== Aliased methods
+
+The most common plugin methods are aliased to shorter names. For example, the
+following commands do the same thing:
+
+    shell_manager.sh "ls"
+    sh "ls"
+
+A complete set of aliased methods includes:
+
+* cd -- AutomateIt::ShellManager#cd
+* chmod -- AutomateIt::ShellManager#chmod
+* chmod_R -- AutomateIt::ShellManager#chmod_R
+* chown -- AutomateIt::ShellManager#chown
+* chown_R -- AutomateIt::ShellManager#chown_R
+* chperm -- AutomateIt::ShellManager#chperm
+* cp -- AutomateIt::ShellManager#cp
+* cp_r -- AutomateIt::ShellManager#cp_r
+* edit -- AutomateIt::EditManager#edit
+* hosts_tagged_with -- AutomateIt::TagManager#hosts_tagged_with
+* install -- AutomateIt::ShellManager#install
+* ln -- AutomateIt::ShellManager#ln
+* ln_s -- AutomateIt::ShellManager#ln_s
+* ln_sf -- AutomateIt::ShellManager#ln_sf
+* lookup -- AutomateIt::FieldManager#lookup
+* mkdir -- AutomateIt::ShellManager#mkdir
+* mkdir_p -- AutomateIt::ShellManager#mkdir_p
+* mktemp -- AutomateIt::ShellManager#mktemp
+* mktempdir -- AutomateIt::ShellManager#mktempdir
+* mktempdircd -- AutomateIt::ShellManager#mktempdircd
+* mv -- AutomateIt::ShellManager#mv
+* pwd -- AutomateIt::ShellManager#pwd
+* render -- AutomateIt::TemplateManager#render
+* rm -- AutomateIt::ShellManager#rm
+* rm_r -- AutomateIt::ShellManager#rm_r
+* rm_rf -- AutomateIt::ShellManager#rm_rf
+* rmdir -- AutomateIt::ShellManager#rmdir
+* sh -- AutomateIt::ShellManager#sh
+* tagged? -- AutomateIt::TagManager#tagged?
+* tags -- AutomateIt::TagManager#tags
+* tags_for -- AutomateIt::TagManager#tags_for
+* touch -- AutomateIt::ShellManager#touch
+* umask -- AutomateIt::ShellManager#umask
+* which -- AutomateIt::ShellManager#which
+* which! -- AutomateIt::ShellManager#which!
+
+=== Projects
+
+When you have enough code, you should consider creating a Project that contains
+your recipes, tags, fields and custom plugins and libraries. It also provides
+you with additional convenience features. See documentation for AutomateIt::Project.
+
+=== Embedding
+
+You can embed the AutomateIt Interpreter inside a Ruby program like this:
+
+  require 'rubygems'
+  require 'automateit'
+
+  interpreter = AutomateIt.new
+
+  # Use the interpreter as an object:
+  interpreter.sh "ls -la"
+
+  # Have it execute a recipe:
+  interpreter.invoke "myrecipe.rb"
+
+  # Or execute recipes within a block
+  interpreter.instance_eval do
+    puts superuser?
+    sh "ls -la"
+  end
+
+=== Conclusion
+
+I hope you enjoy working with AutomateIt and look forward to hearing about your
+experiences with it. Drivers, patches, documentation and ideas are welcome.
+
+- Igal Koshevoy (igal@pragmaticraft.com)

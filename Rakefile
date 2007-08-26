@@ -81,7 +81,8 @@ end
 #---[ misc ]------------------------------------------------------------
 
 task :rdoc do
-  sh "rdoc --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt"
+  # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
+  sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt USAGE.txt"
 end
 
 task :prof do
@@ -96,7 +97,7 @@ task :am do
     plugins.values.each{|plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| methods_and_plugins << [method.to_s, plugin.class.to_s]}}
 
     for method, plugin in methods_and_plugins.sort_by{|x| x[0]}
-      puts "  # * %s for %s#%s" % [method, plugin, method]
+      puts "  # * %s -- %s#%s" % [method, plugin, method]
     end
   end
 end
@@ -123,7 +124,7 @@ spec = Gem::Specification.new do |s|
   s.date = File.mtime('lib/automateit/root.rb')
   s.email = "igal@pragmaticraft.org"
   s.executables << 'automateit' << 'field_lookup'
-  s.extra_rdoc_files = ["README.txt", "INSTALL.txt"]
+  s.extra_rdoc_files = ["README.txt", "INSTALL.txt", "USAGE.txt"]
   s.files = FileList["{bin,lib}/**/*"].to_a
   s.has_rdoc = true
   s.homepage = "http://AutomateIt.org/"

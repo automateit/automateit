@@ -1,9 +1,12 @@
 module AutomateIt
-  # == Project
+  # = Project
   #
   # An AutomateIt Project is a collection of related recipes, tags, fields and
-  # custom plugins. You can create a project by running the following from the
-  # command-line:
+  # custom plugins. 
+  #
+  # === Create a project
+  #
+  # You can create a project by running the following from the command-line:
   #
   #   automateit --create myproject
   #
@@ -11,21 +14,25 @@ module AutomateIt
   # directories and files. Each directory has a <tt>README.txt</tt> that
   # explains what it's used for.
   #
+  # === Advantages of a project over raw recipe files
+  #
   # Although you can run recipes without a project, putting your recipes into a
   # project provides you with the following benefits:
   #
-  # * Directory structure to organize your files.
-  # * Automatically loads tags from project's <tt>config/tags.yml</tt> file.
-  # * Loads fields from the <tt>config/fields.yml</tt> file.
-  # * Loads all custom plugins and libraries found in the +lib+ directory.
-  # * Provides a +dist+ method that corresponds to your project's +dist+
+  # 1. Directory structure to organize your files.
+  # 2. Automatically loads tags from project's <tt>config/tags.yml</tt> file.
+  # 3. Loads fields from the <tt>config/fields.yml</tt> file.
+  # 4. Loads all custom plugins and libraries found in the +lib+ directory.
+  # 5. Provides a +dist+ method that corresponds to your project's +dist+
   #   directory. Using this method will save you from having to type paths for
   #   files you intend to distribute from recipes, e.g.:
   #     cp(dist+"/source.txt", "/tmp/target.txt")
   #
-  # For the curious, the project creator is actually an AutomateIt recipe. You
-  # can read the recipe source code by clicking the <tt>create(opts)</tt>
-  # header below.
+  # === Curios
+  #
+  # In case you're interested, the project creator is actually an AutomateIt
+  # recipe. You can read the recipe source code by looking at the
+  # AutomateIt::Project::create method.
   class Project
     # Create a new project.
     #

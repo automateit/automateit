@@ -5,4 +5,4 @@
 3. Install the toolkit:
     sudo gem install -y automateit
 
-When you've finished installing the software, read the documentation for the AutomateIt::Interpreter which explains how to use the toolkit.
+When you've finished installing the software, read USAGE.txt[link:files/USAGE_txt.html] to learn how to use the toolkit.
