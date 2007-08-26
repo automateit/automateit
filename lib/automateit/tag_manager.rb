@@ -6,7 +6,7 @@ module AutomateIt
   # The TagManager provides a way of querying tags. Tags are keywords
   # associated with a specific hostname or group. These are useful for grouping
   # together hosts and defining common behavior for them. The tags are
-  # typically stored in a project's <tt>config/tags.yml</tt> file. 
+  # typically stored in a project's <tt>config/tags.yml</tt> file.
   #
   # For example, consider a <tt>tags.yml</tt> file that contains YAML like:
   #   desktops:
@@ -39,7 +39,7 @@ module AutomateIt
     # Return a list of tags for this host.
     def tags() dispatch() end
 
-    # Is this host tagged with the +query+? 
+    # Is this host tagged with the +query+?
     #
     # Examples:
     #   tags # => ["localhost", "foo", "bar", ...]

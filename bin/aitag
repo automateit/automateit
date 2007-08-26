@@ -1,0 +1,116 @@
+#!/usr/bin/env ruby
+
+# XXX What can go wrong with this loading approach?
+libdir = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+if File.directory?(libdir) and File.exists?(File.join(libdir, "automateit.rb"))
+  $LOAD_PATH.unshift(libdir)
+end
+
+require 'rubygems'
+require 'optparse'
+require 'automateit'
+
+OptionParser.new do |parser|
+  PROG = File.basename($0)
+  opts = {}
+  parser.banner = <<EOB
+#{PROG} - tool for querying AutomateIt tags
+
+Usage: #{PROG} [options] [arguments...]
+
+Examples:
+  # Load 'myproject' and see if it's tagged with 'apache' or 'svn':
+  #{PROG} -p myproject 'apache || svn'
+  echo $?
+
+  # Same but using environmental variable to specify project:
+  AUTOMATEIT_PROJECT=myproject
+  #{PROG} 'apache || svn'
+  echo $?
+
+  # Dump the results of a query as YAML
+  #{PROG} -Y myapp#user
+
+  # Dump the results of a query as XML
+  #{PROG} -X myapp#user
+
+Options:
+EOB
+  parser.on("-s", "--tags", "List tags for this host") do |v|
+    opts[:tags] = v
+  end
+
+  parser.on("-f", "--tags_for HOST", "List tags for a specific host") do |v|
+    opts[:tags_for] = v
+  end
+
+  parser.on("-t", "--tagged? QUERY", "Is this host tagged with the query?") do |v|
+    opts[:tagged?] = v
+  end
+
+  parser.on("-w", "--hosts_tagged_with QUERY", "List hosts tagged with query") do |v|
+    opts[:hosts_tagged_with] = v
+  end
+
+  parser.on("-p", "--project PATH", "Set project path") do |v|
+    opts[:project] = v
+  end
+
+  parser.on("-Y", "--yaml", "Dump as YAML") do |v|
+    opts[:yaml] = v
+  end
+
+  parser.on("-X", "--xml", "Dump as XML") do |v|
+    opts[:xml] = v
+  end
+
+  args = parser.parse!.dup
+
+  # Clear ARGV so that IRB doesn't try to parse our options
+  opts[:args] = args
+  ARGV.clear
+
+  interpreter = AutomateIt.new(:project => opts[:project])
+  result = nil
+
+  unless opts[:tags] or opts[:tags_for] or opts[:tagged?] or opts[:hosts_tagged_with]
+    if args.first
+      opts[:tagged?] = args.first
+    else
+      puts parser
+      puts "\nERROR: insufficient arguments"
+      exit 1
+    end
+  end
+
+  result = \
+    if opts[:tags]
+      interpreter.tags
+    elsif opts[:tags_for]
+      interpreter.tags_for(opts[:tags_for])
+    elsif opts[:tagged?]
+      exit(interpreter.tagged?(opts[:tagged?]) ? 0 : 1)
+    elsif opts[:hosts_tagged_with]
+      interpreter.hosts_tagged_with(opts[:hosts_tagged_with])
+    end
+
+  puts(
+    if result.nil?
+      result.inspect
+    elsif opts[:yaml]
+      result.to_yaml
+    elsif opts[:xml]
+      result.to_xml
+    else
+      case result
+      when String: result
+      when Set: result.sort.to_a.join(' ')
+      when Array: result.sort.join(' ')
+      else result.inspect
+      end
+    end
+  )
+
+  exit 0
+end
+

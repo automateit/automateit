@@ -38,11 +38,11 @@ EOB
     opts[:project] = v
   end
 
-  parser.on("-y", "--yaml", "Dump as YAML") do |v|
+  parser.on("-Y", "--yaml", "Dump as YAML") do |v|
     opts[:yaml] = v
   end
 
-  parser.on("-x", "--xml", "Dump as XML") do |v|
+  parser.on("-X", "--xml", "Dump as XML") do |v|
     opts[:xml] = v
   end
 
