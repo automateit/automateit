@@ -3,12 +3,21 @@ require "active_support"
 require "automateit"
 
 module AutomateIt
+  # == CLI
+  #
+  # The CLI class provides AutomateIt's command-line interface. It's
+  # responsible for invoking recipes from the command line, starting the
+  # interactive shell and creating projects. It's run from
+  # <tt>bin/automate</tt>.
   class CLI
-    # Create a new CLI interpreter. Options:
-    # * :project - Project directory to load. Optional.
-    # * :recipe - Recipe file to execute. Optional.
-    # * :eval - Evaluate this string. Optional.
-    # * :quiet - Don't print shell header. Optional.
+    # Create a new CLI interpreter. If no :recipe or :eval option is provided,
+    # it starts an interactive IRB session for the Interpreter.
+    #
+    # Options:
+    # * :project - Project directory to load.
+    # * :recipe - Recipe file to execute.
+    # * :eval - Evaluate this string.
+    # * :quiet - Don't print shell header.
     def initialize(opts={})
       opts[:project] ||= opts[:recipe] ? File.join(File.dirname(opts[:recipe]), "..") : "."
       if opts[:create]
@@ -34,7 +43,9 @@ module AutomateIt
       end
     end
 
-    # Create a new project. Options:
+    # Create a new project.
+    #
+    # Options:
     # * :create - Project path to create. Required.
     # * All other options are passed to the AutomateIt::Interpreter.
     def self.create_project(opts)
@@ -72,7 +83,7 @@ module AutomateIt
 
     #---[ Default text content for generated files ]------------------------
 
-    TAGS_CONTENT = <<-EOB
+    TAGS_CONTENT = <<-EOB # :nodoc:
 # This is an AutomateIt tags file, used by AutomateIt::TagManager::YAML
 #
 # Use this file to assign tags to hosts using YAML. For example, to assign the
@@ -100,7 +111,7 @@ module AutomateIt
 
     EOB
 
-    FIELDS_CONTENT = <<-EOB
+    FIELDS_CONTENT = <<-EOB #:nodoc:
 # This is an AutomateIt fields file, used by AutomateIt::FieldManager::YAML
 #
 # Use this file to create a multi-level hash of key value pairs with YAML. This
@@ -128,7 +139,7 @@ module AutomateIt
 
     EOB
 
-    ENV_CONTENT = <<-EOB
+    ENV_CONTENT = <<-EOB #:nodoc:
 # This is an environment file for AutomateIt. It's loaded by the
 # AutomateIt::Interpreter immediately after loading the default tags, fields
 # and the contents of your "lib" directory. This file is loaded every time you
@@ -147,7 +158,7 @@ module AutomateIt
 
     EOB
 
-    BASE_README_CONTENT = <<-EOB
+    BASE_README_CONTENT = <<-EOB #:nodoc:
 # This is your AutomateIt project's "lib" directory. You can put custom plugins
 # and convenience methods into this directory. For example, you'd put your
 # custom PackageManager plugin here or a file that contains a method definition
@@ -160,7 +171,7 @@ module AutomateIt
 # are loaded quickly and don't cause unintended side-effects.
     EOB
 
-    DIST_README_CONTENT = <<-EOB
+    DIST_README_CONTENT = <<-EOB #:nodoc:
 # This is your AutomateIt project's "dist" directory. You should keep files and
 # templates that you wish to distribute into this directory. You can access
 # this path using the "dist" keyword in your recipes, for example:
@@ -172,7 +183,7 @@ module AutomateIt
 #     cp(dist+"/foo.erb", ...)
     EOB
 
-    RECIPE_README_CONTENT = <<-EOB
+    RECIPE_README_CONTENT = <<-EOB #:nodoc:
 # This is your AutomateIt project's "recipes" directory. You should put recipes
 # into this directory. You can then execute them by running:
 #
