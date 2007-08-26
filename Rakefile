@@ -74,7 +74,7 @@ end
 #---[ misc ]------------------------------------------------------------
 
 task :rdoc do
-  sh "rdoc --main 'AutomateIt::Interpreter' --promiscuous --accessor class_inheritable_accessor=R --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib"
+  sh "rdoc --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt"
 end
 
 task :prof do

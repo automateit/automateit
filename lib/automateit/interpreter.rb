@@ -1,6 +1,6 @@
 require 'automateit'
 
-module AutomateIt #:main: AutomateIt
+module AutomateIt
   # == Interpreter
   #
   # The AutomateIt Interpreter is the class you'll use to create your
@@ -110,6 +110,30 @@ module AutomateIt #:main: AutomateIt
   # Please read about the different methods available in the Interpreter and
   # the different plugins (e.g. ShellManager) to learn more about what you can
   # use AutomateIt for.
+  #
+  # You can also embed the AutomateIt interpreter inside an existing Ruby
+  # program like this:
+  #
+  #   require 'automateit'
+  #   interpreter = AutomateIt.new
+  #
+  #   # Use the interpreter as an object:
+  #   interpreter.sh "ls -la" 
+  #
+  #   # Have it execute a recipe:
+  #   interpreter.invoke "myrecipe.rb"
+  #
+  #   # Or execute recipes within a block
+  #   interpreter.instance_eval do
+  #     puts superuser?
+  #     sh "ls -la"
+  #   end
+  #
+  # Anyway, I hope you enjoy working with AutomateIt and look forward to
+  # hearing about your experiences with it. Drivers, patches, documentation and
+  # ideas are welcome. 
+  #
+  # --Igal Koshevoy
   class Interpreter < Common
     # Plugin instance that instantiated the Interpreter.
     attr_accessor :parent

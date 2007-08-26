@@ -24,14 +24,15 @@ module AutomateIt
   #     cp(dist+"/source.txt", "/tmp/target.txt")
   #
   # For the curious, the project creator is actually an AutomateIt recipe. You
-  # can find this method in the <tt>lib/automateit/project.rb</tt> file.
+  # can read the recipe source code by clicking the <tt>create(opts)</tt>
+  # header below.
   class Project
     # Create a new project.
     #
     # Options:
     # * :create - Project path to create. Required.
     # * All other options are passed to the AutomateIt::Interpreter.
-    def self.create_project(opts)
+    def self.create(opts)
       path = opts.delete(:create) \
         or raise ArgumentError.new(":create option not specified")
       interpreter = AutomateIt.new(opts)

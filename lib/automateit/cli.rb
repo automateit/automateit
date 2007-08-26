@@ -17,7 +17,7 @@ module AutomateIt
     def initialize(opts={})
       opts[:project] ||= opts[:recipe] ? File.join(File.dirname(opts[:recipe]), "..") : "."
       if opts[:create]
-        Project::create_project(opts)
+        Project::create(opts)
       elsif opts[:recipe]
         interpreter = AutomateIt.new(opts)
         interpreter.invoke(opts[:recipe])
