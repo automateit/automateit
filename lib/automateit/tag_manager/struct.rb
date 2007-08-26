@@ -1,0 +1,99 @@
+module AutomateIt
+  class TagManager
+    # == TagManager::Struct
+    #
+    # A TagManager driver for querying a data structure. It's not useful on its
+    # own, but can be subclassed by other drivers that actually load tags.
+    class Struct < Plugin::Driver
+      attr_accessor :tags
+
+      def available? # :nodoc:
+        true
+      end
+
+      def suitability(method, *args) # :nodoc:
+        return 1
+      end
+
+      # Options:
+      # * :struct - Hash to use for queries.
+      def setup(opts={})
+        super(opts)
+
+        @struct ||= {}
+        @struct = opts[:struct] if opts[:struct]
+        # TODO parse @group and !negation
+
+        # TODO Refactor tags using lazy-loading to improve performance.
+        @tags ||= Set.new
+
+        # AddressManager::Portable is available everywhere, no need to rescue
+        hostnames = interpreter.address_manager.hostnames.to_a # SLOW 0.4s
+        @tags.merge(hostnames)
+        @tags.merge(tags_for(hostnames))
+
+        begin
+          # SLOW 1.3s incurred by PlatformManager::LSB#setup
+          @tags.add(interpreter.platform_manager.query("os")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("arch")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("distro")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("release")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("os#arch")) rescue IndexError
+          @tags.add(interpreter.platform_manager.query("distro#release")) rescue IndexError
+        rescue NotImplementedError
+          log.debug("this platform doesn't have a PlatformManager driver")
+        end
+      end
+
+      # See TagManager#hosts_tagged_with
+      def hosts_tagged_with(query)
+        hosts = @struct.values.flatten.uniq
+        return hosts.select{|hostname| tagged?(query, hostname)}
+      end
+
+      # See TagManager#tagged?
+      def tagged?(query, hostname=nil)
+        query = query.to_s
+        tags = hostname ? tags_for(hostname) : @tags
+        # XXX This tokenization process discards unknown characters, which may hide errors in the query
+        tokens = query.scan(%r{\!|\(|\)|\&+|\|+|!?[\.\w]+})
+        if tokens.size > 1
+          booleans = tokens.map do |token|
+            if matches = token.match(/^(!?)([\.\w]+)$/)
+              tags.include?(matches[2]) && matches[1].empty?
+            else
+              token
+            end
+          end
+          code = booleans.join(" ")
+          return eval(code) # XXX What could possibly go wrong?
+        else
+          return tags.include?(query)
+        end
+      end
+
+      # See TagManager#tags_for
+      def tags_for(hostnames)
+        hostnames = \
+          case hostnames
+          when String
+            interpreter.address_manager.hostnames_for(hostnames)
+          when Array, Set
+            hostnames.inject(Set.new) do |sum, hostname|
+              sum.merge(interpreter.address_manager.hostnames_for(hostname)); sum
+            end
+          else
+            raise TypeError.new("invalid hostnames argument type: #{hostnames.class}")
+          end
+        return @struct.inject(Set.new) do |sum, role_and_members|
+          role, members = role_and_members
+          members_aliases = members.inject(Set.new) do |aliases, member|
+            aliases.merge(interpreter.address_manager.hostnames_for(member)); aliases
+          end.to_a
+          sum.add(role) unless (hostnames & members_aliases).empty?
+          sum
+        end
+      end
+    end
+  end
+end
