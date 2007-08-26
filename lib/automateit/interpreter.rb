@@ -1,11 +1,26 @@
 require 'automateit'
 
-module AutomateIt
+module AutomateIt #:main: AutomateIt
   class Interpreter < Common
+    # Plugin instance that instantiated the Interpreter.
     attr_accessor :parent
+    private :parent
+    private :parent=
 
+    # Project path for this Interpreter. If no path is available, nil.
     attr_accessor :project
 
+    # Setup the Interpreter. This method is also called from Interpreter#new.
+    #
+    # Options for users:
+    # * :verbosity - Alias for :log_level
+    # * :log_level - Set log level, defaults to Logger::INFO.
+    # * :noop - Set noop (no-operation) mode as boolean.
+    # * :project - Set project as directory path.
+    #
+    # Options for internal use:
+    # * :parent - Parent plugin instance.
+    # * :log - QueuedLogger instance.
     def setup(opts={})
       super(opts.merge(:interpreter => self))
 
@@ -69,6 +84,11 @@ module AutomateIt
       end
     end
 
+    # Hash of plugin tokens to plugin instances for this Interpreter.
+    #
+    # Example:
+    #   interpreter.plugins
+    #   # => {:account_manager => #<AccountManager...>}
     attr_accessor :plugins
 
     def _instantiate_plugins
@@ -115,7 +135,11 @@ module AutomateIt
     end
     private :_expose_plugin_methods
 
+    # Set the QueuedLogger instance for the Interpreter.
     attr_writer :log
+
+    # Get or set the QueuedLogger instance for the Interpreter, a special
+    # wrapper around the Ruby Logger.
     def log(value=nil)
       if value.nil?
         return defined?(@log) ? @log : nil
@@ -124,11 +148,18 @@ module AutomateIt
       end
     end
 
-    attr_writer :noop
+    # Set noop (no-operation mode) to +value+.
     def noop(value)
+      self.noop = value
+    end
+
+    # Set noop (no-operation mode) to +value+.
+    def noop=(value)
       @noop = value
     end
 
+    # Are we in noop (no-operation) mode? If a block is given, executes the
+    # block if in noop mode.
     def noop?(&block)
       if @noop and block
         block.call
@@ -137,14 +168,31 @@ module AutomateIt
       end
     end
 
+    # Set writing to +value+.
     def writing(value)
       self.writing = value
     end
 
+    # Set writing to +value+.
     def writing=(value)
       @noop = !value
     end
 
+    # Are we writing? Opposite of #noop. If given a block, executes it when in
+    # writing mode. If given a +message+, displays it when in noop mode, which
+    # is handy so you can preview a complex command.
+    #
+    # Example:
+    #   writing?("Making big changes") do
+    #     # do your big changes
+    #     sh "ls -la"
+    #   end
+    #
+    #   # When in noop mode, will print the message and won't execute the block:
+    #   => Making big changes
+    #
+    #   # When in writing mode, won't print the message and will execute the block:
+    #   ** ls -la
     def writing?(message=nil, &block)
       if block
         log.info(PNOTE+"#{message}") if message and @noop
@@ -154,10 +202,12 @@ module AutomateIt
       end
     end
 
+    # Does the current user have superuser (root) privileges?
     def superuser?
       Process.euid.zero?
     end
 
+=begin
     def run_nonblocking(command, callback)
       data = ""
       IO.popen(command) do |handle|
@@ -174,7 +224,9 @@ module AutomateIt
       end
       return data
     end
+=end
 
+    # Invoke the +recipe+ at the given path.
     def invoke(recipe)
       # FIXME doing eval breaks the exception backtraces
       # TODO lookup partial names
@@ -182,9 +234,16 @@ module AutomateIt
       eval(data, binding, recipe, 0)
     end
 
+    # Path of this project's "dist" directory. If a project isn't available or
+    # the directory doesn't exist, this will throw a NotImplementedError.
     def dist
       if @project
-        File.join(@project, "dist")
+        result = File.join(@project, "dist")
+        if File.directory?(result)
+          return result
+        else
+          raise NotImplementedError.new("can't find dist directory at: #{result}")
+        end
       else
         raise NotImplementedError.new("can't use dist without a project")
       end

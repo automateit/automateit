@@ -111,7 +111,7 @@ describe "MyManager" do
   end
 
   it "should inherit common instance mehtods" do
-    @m.should respond_to(:omfg)
+    @m.should respond_to(:log)
   end
 
   it "should access drivers by index keys" do

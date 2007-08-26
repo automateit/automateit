@@ -1,5 +1,7 @@
 module AutomateIt
-  # AccountManager provides a way of managing system accounts, such as UNIX
+  # == AccountManager
+  #
+  # The AccountManager provides a way of managing system accounts, such as UNIX
   # users and groups.
   class AccountManager < Plugin::Manager
     # Find a user account. Method returns a query helper which takes a
@@ -89,7 +91,12 @@ module AutomateIt
 
     #-----------------------------------------------------------------------
 
-    class Basic < Plugin::Driver
+    # == AccountManager::Portable
+    #
+    # A pure-Ruby, portable driver for the AccountManager. It is only suitable
+    # for doing queries and lacks methods such as +add_user+. Platform-specific
+    # drivers inherit from this class and provide these methods.
+    class Portable < Plugin::Driver
       depends_on :nothing
 
       def suitability(method, *args)
@@ -98,7 +105,11 @@ module AutomateIt
 
       #.......................................................................
 
+      # == UserQuery
+      #
+      # A class used for querying users. See AccountManager#users.
       class UserQuery
+        # See AccountManager#users
         def [](query)
           Etc.endpwent
           begin
@@ -116,17 +127,23 @@ module AutomateIt
         end
       end
 
+      # See AccountManager#users
       def users
         return UserQuery.new
       end
 
+      # See AccountManager#has_user?
       def has_user?(query)
         return ! users[query].nil?
       end
 
       #.......................................................................
 
+      # == GroupQuery
+      #
+      # A class used for querying groups. See AccountManager#groups.
       class GroupQuery
+        # See AccountManager#groups
         def [](query)
           Etc.endgrent
           begin
@@ -144,14 +161,17 @@ module AutomateIt
         end
       end
 
+      # See AccountManager#groups
       def groups
         return GroupQuery.new
       end
 
+      # See AccountManager#has_group?
       def has_group?(query)
         return ! groups[query].nil?
       end
 
+      # See AccountManager#groups_for_user
       def groups_for_user(query)
         pwent = users[query]
         return [] if noop? and not pwent
@@ -164,11 +184,13 @@ module AutomateIt
         return result.to_a
       end
 
+      # See AccountManager#users_for_group
       def users_for_group(query)
         grent = groups[query]
         return (noop? || ! grent) ? [] : grent.mem
       end
 
+      # See AccountManager#users_to_groups
       def users_to_groups
         result = {}
         Etc.group do |grent|
@@ -184,11 +206,14 @@ module AutomateIt
         end
         return result
       end
-    end # class Basic
+    end # class Portable
 
     #-----------------------------------------------------------------------
 
-    class Linux < Basic
+    # == AccountManager::Linux
+    #
+    # A Linux-specific driver for the AccountManager.
+    class Linux < Portable
       depends_on :programs => %w(useradd usermod deluser groupadd groupmod groupdel)
 
       def suitability(method, *args)
@@ -202,6 +227,7 @@ module AutomateIt
 
       #.......................................................................
 
+      # See AccountManager#add_user
       def add_user(username, opts={})
         return false if has_user?(username)
         cmd = "useradd"
@@ -232,6 +258,7 @@ module AutomateIt
         return users[username]
       end
 
+      # See AccountManager#remove_user
       def remove_user(username, opts={})
         return false unless has_user?(username)
         cmd = "deluser"
@@ -244,6 +271,7 @@ module AutomateIt
         return true
       end
 
+      # See AccountManager#add_groups_to_user
       def add_groups_to_user(groups, username)
         groups = [groups].flatten
         present = groups_for_user(username)
@@ -256,6 +284,7 @@ module AutomateIt
         return missing
       end
 
+      # See AccountManager#remove_groups_from_user
       def remove_groups_from_user(groups, username)
         groups = [groups].flatten
         present = groups_for_user(username)
@@ -270,6 +299,7 @@ module AutomateIt
 
       #.......................................................................
 
+      # See AccountManager#add_group
       def add_group(groupname, opts={})
         return false if has_group?(groupname)
         cmd = "groupadd"
@@ -281,6 +311,7 @@ module AutomateIt
         return groups[groupname]
       end
 
+      # See AccountManager#remove_group
       def remove_group(groupname, opts={})
         return false unless has_group?(groupname)
         cmd = "groupdel #{groupname}"
@@ -289,6 +320,7 @@ module AutomateIt
         return true
       end
 
+      # See AccountManager#add_users_to_group
       def add_users_to_group(users, groupname)
         users = [users].flatten
         # FIXME must include pwent.gid
@@ -311,6 +343,7 @@ module AutomateIt
         return missing
       end
 
+      # See AccountManager#remove_users_from_group
       def remove_users_from_group(users, groupname)
         users = [users].flatten
         grent = groups[groupname]
