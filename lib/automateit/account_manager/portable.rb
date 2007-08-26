@@ -8,7 +8,7 @@ module AutomateIt
     class Portable < Plugin::Driver
       depends_on :nothing
 
-      def suitability(method, *args)
+      def suitability(method, *args) # :nodoc:
         return 1
       end
 

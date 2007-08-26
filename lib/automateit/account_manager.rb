@@ -93,5 +93,3 @@ module AutomateIt
     def users_to_groups() dispatch() end
   end # class AccountManager
 end # module AutomateIt
-
-

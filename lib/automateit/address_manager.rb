@@ -1,7 +1,15 @@
 require 'automateit'
 
 module AutomateIt
+  # == AddressManager
+  #
+  # The AddressManager provides a way to query, add and remove network
+  # addresses on a host.
   class AddressManager < Plugin::Manager
+    require 'automateit/address_manager/resolv_helpers'
+    require 'automateit/address_manager/portable'
+    require 'automateit/address_manager/linux'
+
     # Does host have an address or interface? Arguments hash must include
     # either a :device (e.g. "eth0") or :address (e.g. "10.0.0.10"), and an
     # optional :label (e.g. "foo"). Note that an interface is the combination
@@ -35,6 +43,8 @@ module AutomateIt
     #   add(:address => "10.0.0.10", :mask => 24, :device => "eth0",
     #     :label => "foo", :announcements => 3)
     def add(opts) dispatch(opts) end
+
+    # Number of ARP announcements to make by default during #add.
     DEFAULT_ANNOUNCEMENTS = 3
 
     # Remove address from host if it has it. Requires root-level access.
@@ -73,138 +83,5 @@ module AutomateIt
     #   hostnames_for("kagami")
     #   => ["kagami"]
     def hostnames_for(hostname) dispatch(hostname) end
-
-    #-----------------------------------------------------------------------
-
-    module ResolvHelpers
-      def hostnames()
-        # NOTE: depends on driver's implementation of addresses
-        names = addresses.inject(Set.new) do |sum, address|
-          # Some addresses can't be resolved, bummer.
-          sum.merge(Resolv.getnames(address)) rescue Resolv::ResolvError; sum
-        end
-        names.each{|name| names.merge(hostnames_for(name))}
-        return names.to_a.sort
-      end
-
-      def hostnames_for(hostname)
-        results = []
-        elements = hostname.split(".")
-        for i in 1..elements.size
-          results << elements[0..i-1].join(".")
-        end
-        return results.to_a.sort
-      end
-    end
-
-    #-----------------------------------------------------------------------
-
-    # Portable driver for AddressManager provides minimal support for querying
-    # the hostname using sockets. Although it lacks advanced features found in
-    # other drivers, it will work on all platforms.
-    class Portable < Plugin::Driver
-      include ResolvHelpers
-
-      def suitability(method, *args)
-        return 1
-      end
-
-      def has?(opts)
-        raise NotImplementedError.new("this driver doesn't support queries for devices or labels") if opts[:device] or opts[:label]
-        result = true
-        result &= addresses.include?(opts[:address]) if opts[:address]
-        return result
-      end
-
-      def hostnames
-        names = Set.new(Socket.gethostbyname(Socket.gethostname)[1])
-        names.each{|name| names.merge(hostnames_for(name))}
-        return names.to_a.sort
-      end
-
-      def addresses
-        return [TCPSocket.gethostbyname(Socket.gethostname)[3]]
-      end
-    end
-
-    #-----------------------------------------------------------------------
-
-    # Linux driver for AddressManager provides complete support for querying,
-    # adding and removing addresses on platforms that feature Linux-like tools.
-    class Linux < Plugin::Driver
-      include ResolvHelpers
-
-      depends_on :programs => %w(ifconfig ip arping)
-
-      def suitability(method, *args)
-        return available? ? 2 : 0
-      end
-
-      def has?(opts)
-        raise ArgumentError.new(":device or :address must be specified") unless opts[:device] or opts[:address]
-        result = true
-        result &= interfaces.include?(opts[:device]) if opts[:device] and not opts[:label]
-        result &= interfaces.include?(opts[:device]+":"+opts[:label]) if opts[:device] and opts[:label]
-        result &= addresses.include?(opts[:address]) if opts[:address]
-        return result
-      end
-
-      def add(opts)
-        announcements = opts[:announcements].to_i || AutomateIt::AddressManager::DEFAULT_ANNOUNCEMENTS
-        raise SecurityEror.new("you must be root") unless Process.euid.zero?
-        raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
-        return false if has?(opts)
-        #run(%{ip address add #{ip}/#{mask} brd + dev #{device} label #{device}:#{label}})
-        if interpreter.sh(_add_or_remove_command(:add, opts))
-          #run(%{arping -q -c 3 -A -I #{device} #{ip} &})
-          return interpreter.sh("arping -q -c #{announcements} -A -I #{opts[:device]} #{opts[:address]}")
-        else
-          return false
-        end
-      end
-
-      def remove(opts)
-        return false unless has?(opts)
-        raise SecurityEror.new("you must be root") unless Process.euid.zero?
-        raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
-        return interpreter.sh(_add_or_remove_command(:remove, opts))
-      end
-
-      def _add_or_remove_command(action, opts)
-        _raise_unless_available
-        case action.to_sym
-        when :add
-          # Accept
-        when :remove
-          # Rename
-          action = :del
-        else
-          raise ArgumentError.new("action must be :add or :remove")
-        end
-
-        # Accept common alternative names
-        opts[:mask] ||= opts[:netmask] if opts[:netmask]
-        opts[:alias] ||= opts[:alias] if opts[:alias]
-        opts[:device] ||= opts[:interface] if opts[:interface]
-
-        # ip address add 10.0.0.123/24 brd + dev eth0 label eth0:foo
-        ipcmd = "ip address #{action} #{opts[:address]}"
-        ipcmd += "/#{opts[:mask]}" if opts[:mask]
-        ipcmd += " brd + dev #{opts[:device]}"
-        ipcmd += " label #{opts[:device]}:#{opts[:label]}" if opts[:label]
-        return ipcmd
-      end
-      private :_add_or_remove_command
-
-      def interfaces()
-        _raise_unless_available
-        return `ifconfig`.scan(/^(\w+?(?::\w+)?)\b\s+Link/).flatten
-      end
-
-      def addresses()
-        _raise_unless_available
-        return `ifconfig`.scan(/inet6? addr:\s*(.+?)\s+/).flatten
-      end
-    end
   end
 end

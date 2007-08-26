@@ -6,11 +6,11 @@ module AutomateIt
     class Linux < Portable
       depends_on :programs => %w(useradd usermod deluser groupadd groupmod groupdel)
 
-      def suitability(method, *args)
+      def suitability(method, *args) # :nodoc:
         return available? ? 2 : 0
       end
 
-      def setup(*args)
+      def setup(*args) # :nodoc:
         super(*args)
         @nscd = interpreter.which("nscd")
       end
