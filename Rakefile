@@ -82,7 +82,7 @@ end
 
 task :rdoc do
   # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-  sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt USAGE.txt"
+  sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt USAGE.txt"
 end
 
 task :prof do
@@ -130,10 +130,10 @@ spec = Gem::Specification.new do |s|
   s.homepage = "http://AutomateIt.org/"
   s.name = "automateit"
   s.platform = Gem::Platform::RUBY
-  s.rdoc_options << %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' << %w(lib)
+  s.rdoc_options << %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' << %w(lib)
   s.require_path = "lib"
   s.rubyforge_project = 'automateit'
-  s.summary = "Toolkit for automating the setup and maintenance of UNIX-like systems"
+  s.summary = "AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems"
   s.test_files = FileList["{spec}/**/*_spec.rb"].to_a
   s.version = AutomateIt::VERSION
 end
