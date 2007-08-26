@@ -74,7 +74,7 @@ end
 #---[ misc ]------------------------------------------------------------
 
 task :rdoc do
-  sh "rdoc --main 'AutomateIt' --exclude 'spec/*'"
+  sh "rdoc --main 'AutomateIt::Interpreter' lib --promiscuous --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.'"
 end
 
 task :prof do
