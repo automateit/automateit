@@ -1,6 +1,20 @@
-require 'automateit'
-
 module AutomateIt
+  # == FieldManager
+  #
+  # The FieldManager provides a way of accessing a hash of constants that
+  # represent configuration data. These are typically stored in a project's
+  # <tt>config/fields.yml</tt> file.
+  #
+  # For example, consider a <tt>field.yml</tt> that contains YAML like:
+  #   foo: bar
+  #   my_app:
+  #     my_key: my_value
+  #
+  # With the above file, we can query the fields like this:
+  #   lookup(:foo) # => "bar"
+  #   lookup("foo") # => "bar"
+  #   lookup("my_app#my_key") # => "my_value"
+  #   lookup("my_app#my_branch") # => "my_value"
   class FieldManager < Plugin::Manager
     alias_methods :lookup
 
@@ -8,15 +22,20 @@ module AutomateIt
 
     #-----------------------------------------------------------------------
 
+    # == FieldManager::Struct
+    #
+    # A FileManager driver that queries a data structure.
     class Struct < Plugin::Driver
-      def available?
+      def available? # :nodoc:
         return true
       end
 
-      def suitability(method, *args)
+      def suitability(method, *args) # :nodoc:
         return 1
       end
 
+      # Options:
+      # * :struct - Hash to use as the fields data structure.
       def setup(opts={})
         super(opts)
 
@@ -27,6 +46,7 @@ module AutomateIt
         end
       end
 
+      # See FieldManager#lookup
       def lookup(search)
         ref = @struct
         for key in search.to_s.split("#")
@@ -38,15 +58,21 @@ module AutomateIt
 
     #-----------------------------------------------------------------------
 
+    # == FieldManager::YAML
+    #
+    # A FieldManager driver that reads its data structure from a file.
     class YAML < Struct
-      def available?
+      def available? # :nodoc:
         return true
       end
 
-      def suitability(method, *args)
+      def suitability(method, *args) # :nodoc:
         return 5
       end
 
+      # Options:
+      # * :file - Filename to read data structure from. Contents will be
+      #   parsed with ERB and then handed to YAML.
       def setup(opts={})
         if filename = opts.delete(:file)
           opts[:struct] = ::YAML::load(
