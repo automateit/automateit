@@ -74,11 +74,25 @@ end
 #---[ misc ]------------------------------------------------------------
 
 task :rdoc do
-  sh "rdoc --main 'AutomateIt::Interpreter' lib --promiscuous --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.'"
+  sh "rdoc --main 'AutomateIt::Interpreter' --promiscuous --accessor class_inheritable_accessor=R --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib"
 end
 
 task :prof do
   sh "ruby-prof -f prof.txt `which spec` spec/unit/*.rb"
+end
+
+desc "List aliased_methods for inclusion into rdoc"
+task :am do
+  $LOAD_PATH << "lib"
+  require 'automateit'
+  AutomateIt.new.instance_eval do
+    methods_and_plugins = []
+    plugins.values.each{|plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| methods_and_plugins << [method.to_s, plugin.class.to_s]}}
+
+    for method, plugin in methods_and_plugins.sort_by{|x| x[0]}
+      puts "  # * %s for %s#%s" % [method, plugin, method]
+    end
+  end
 end
 
 #===[ fin ]=============================================================
