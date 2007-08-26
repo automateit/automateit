@@ -2,34 +2,48 @@ require 'automateit'
 
 module AutomateIt
 
-  # EditManager provides a way of editing files and strings.
+  # == EditManager
+  #
+  # The EditManager provides a way of editing files and strings
+  # programmatically.
   class EditManager < Plugin::Manager
-
     alias_methods :edit
 
-    # See documentation for EditSession::edit
+    # Creates an editing session. See documentation for EditManager::Basic::EditSession#edit.
     def edit(opts, &block) dispatch(opts, &block) end
 
     #-----------------------------------------------------------------------
 
+    # == EditManager::Basic
+    #
     # Provides a way to edit files and strings. See documentation for EditSession.
     class Basic < Plugin::Driver
 
-      def available?
+      def available? # :nodoc:
         true
       end
 
-      def suitability(method, *args)
+      def suitability(method, *args) # :nodoc:
         1
       end
 
-      # See documentation for EditSession::edit
+      # Creates an editing session. See documentation for EditSession#edit.
       def edit(opts, &block)
         EditSession.new(:interpreter => @interpreter).edit(opts, &block)
       end
 
       #-----------------------------------------------------------------------
 
+      # == EditSession
+      #
+      # EditSession provides a way to edit files and strings.
+      #
+      # Example:
+      #   edit(:string => "# hello") do
+      #     uncomment "llo"
+      #     append "world"
+      #   end
+      #   # => "hello\nworld"
       class EditSession < AutomateIt::Common
         # Edit a file or string. You must specify either the :file or :string
         # options.
@@ -63,11 +77,22 @@ module AutomateIt
           end
         end
 
+        # File that was read for editing.
         attr_accessor :filename
+
+        # Current contents of the editing buffer.
         attr_accessor :contents
+
+        # Original contents of the editing buffer before any changes were made.
         attr_accessor :original_contents
+
+        # Hash of parameters to make available to the editing session.
         attr_accessor :params
+
+        # Comment prefix, e.g. "/*"
         attr_accessor :comment_prefix
+
+        # Comment suffix, e.g. "*/"
         attr_accessor :comment_suffix
 
         # Prepend +line+ to the top of the buffer, but only if it's not in this
@@ -117,8 +142,9 @@ module AutomateIt
           @contents.gsub!(query, "")
         end
 
-        # Specify the comment style's +prefix+ and +suffix+. Example:
+        # Specify the comment style's +prefix+ and +suffix+. 
         #
+        # Example:
         #   # C style comments
         #   comment_style "/*", "*/"
         def comment_style(prefix, suffix="")
@@ -147,8 +173,9 @@ module AutomateIt
         end
 
         # Manipulate the buffer. The result of your block will replace the
-        # buffer. This is very useful for complex edits. Example:
+        # buffer. This is very useful for complex edits. 
         #
+        # Example:
         #   manipulate do |buffer|
         #     buffer.gsub(/foo/, "bar")
         #   end
@@ -161,7 +188,7 @@ module AutomateIt
           @contents != @original_contents
         end
 
-        # Read contents from +filename+.
+        # Read contents from +#filename+.
         def read
           @contents = \
             if writing? or (noop? and @filename and File.exists?(@filename))
@@ -171,7 +198,7 @@ module AutomateIt
             end
         end
 
-        # Write contents to +filename+.
+        # Write contents to +#filename+.
         def write
           log.info(PNOTE+"Edited '#{@filename}'")
           if writing?
@@ -181,7 +208,6 @@ module AutomateIt
           end
         end
       end # class EditSession
-
     end # class Base
   end # class EditManager
 end # module AutomateIt
