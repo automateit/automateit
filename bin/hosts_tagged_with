@@ -14,23 +14,23 @@ OptionParser.new do |parser|
   PROG = File.basename($0)
   opts = {}
   parser.banner = <<EOB
-#{PROG} - tool for querying AutomateIt fields
+#{PROG} - tool for querying lists of hosts with certain AutomateIt tags
 
 Usage: #{PROG} [options] query
 
 Examples:
-  # Load 'myproject' and get value of 'user' field in 'myapp' hash:
-  #{PROG} -p myproject myapp#user
+  # Load 'myproject' and query hosts tagged with 'svn' or 'apache'
+  #{PROG} -p myproject 'svn || apache'
 
   # Same but using environmental variable to specify project:
   AUTOMATEIT_PROJECT=myproject
-  #{PROG} myapp#user
+  #{PROG} 'svn || apache'
 
-  # Dump the 'myapp' hash contents as YAML
-  #{PROG} -y myapp#user
+  # Dump the list of matching hosts as YAML
+  #{PROG} -y apache
 
-  # Dump the 'myapp' hash contents as XML
-  #{PROG} -x myapp#user
+  # Dump the list of matching hosts as XML
+  #{PROG} -x apache
 
 Options:
 EOB
@@ -55,7 +55,7 @@ EOB
   query = args.first unless args.empty?
 
   interpreter = AutomateIt.new(:project => opts[:project])
-  result = interpreter.lookup(query)
+  result = interpreter.hosts_tagged_with(query)
   if result.nil?
     puts result.inspect
     exit 1
@@ -64,7 +64,8 @@ EOB
   elsif opts[:xml]
     puts result.to_xml
   else
-    puts result.is_a?(String) ? result : result.inspect
+    puts result.is_a?(String) ? result : result.join(" ")
   end
   exit 0
 end
+
