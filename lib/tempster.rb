@@ -1,7 +1,7 @@
 require 'tmpdir'
 require 'fileutils'
 
-# =Tempster=
+# == Tempster
 #
 # Tempster is a pure-Ruby library for creating temporary files and directories.
 # Unlike other tools, it can create both temporary files and directories, and
@@ -15,7 +15,7 @@ require 'fileutils'
 # collisions. Linux "mktemp" works fine but is platform-specific. Therefore, I
 # had to write something.
 #
-# ==Credits==
+# = Credits
 # * Random string generator taken from
 #   http://pleac.sourceforge.net/pleac_ruby/numbers.html
 class Tempster
