@@ -2,7 +2,7 @@ module AutomateIt
   # == FieldManager
   #
   # The FieldManager provides a way of accessing a hash of constants that
-  # represent configuration data. These are typically stored in a project's
+  # represent configuration data. These are typically stored in a Project's
   # <tt>config/fields.yml</tt> file.
   #
   # For example, consider a <tt>field.yml</tt> that contains YAML like:

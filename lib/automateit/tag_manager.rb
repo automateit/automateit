@@ -6,7 +6,7 @@ module AutomateIt
   # The TagManager provides a way of querying tags. Tags are keywords
   # associated with a specific hostname or group. These are useful for grouping
   # together hosts and defining common behavior for them. The tags are
-  # typically stored in a project's <tt>config/tags.yml</tt> file.
+  # typically stored in a Project's <tt>config/tags.yml</tt> file.
   #
   # For example, consider a <tt>tags.yml</tt> file that contains YAML like:
   #   desktops:
@@ -21,11 +21,12 @@ module AutomateIt
   # fields like this:
   #   tags # => ["satori", "desktops", "localhost", ...]
   #
-  #   tagged?(:satori) # => true
-  #   tagged?("satori") # => true
-  #   tagged?("satori || sunyata") # => true
   #   tagged?("desktops") # => true
   #   tagged?("notebooks") # => false
+  #   tagged?(:satori) # => true
+  #   tagged?("satori") # => true
+  #   tagged?("satori || desktops") # => true
+  #   tagged?("(satori || desktops) && !notebooks") # => true
   class TagManager < Plugin::Manager
     require 'automateit/tag_manager/struct'
     require 'automateit/tag_manager/yaml'
