@@ -34,7 +34,8 @@ module AutomateIt
     #   add_user("bob", :description => "Bob Smith")
     def add_user(username, opts={}) dispatch(username, opts) end
 
-    def update_user(username, opts={}) dispatch(username, opts) end
+    # FIXME implement AccountManager#update_user
+    ### def update_user(username, opts={}) dispatch(username, opts) end
 
     # Remove the +username+ if present.
     #
@@ -69,7 +70,8 @@ module AutomateIt
     # * :gid -- Group ID to use. Default is to find an unused id.
     def add_group(groupname, opts={}) dispatch(groupname, opts) end
 
-    def update_group(groupname, opts={}) dispatch(groupname, opts) end
+    # FIXME implement AccountManager#update_group
+    ### def update_group(groupname, opts={}) dispatch(groupname, opts) end
 
     # Remove +groupname+ if it exists.
     def remove_group(groupname, opts={}) dispatch(groupname, opts) end

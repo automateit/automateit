@@ -31,7 +31,7 @@ module AutomateIt
         cmd << " #{username} < /dev/null"
         cmd << " > /dev/null" if opts[:quiet]
         # --password CRYPT(3)ENCRYPTED
-        # TODO set password
+        # FIXME set password
         interpreter.sh(cmd)
         interpreter.sh("nscd --invalidate passwd") if @nscd
 
@@ -47,6 +47,9 @@ module AutomateIt
 
         return users[username]
       end
+
+      # FIXME implement AccountManager#update_user
+      ### def update_user(username, opts={}) dispatch(username, opts) end
 
       # See AccountManager#remove_user
       def remove_user(username, opts={})
@@ -101,6 +104,9 @@ module AutomateIt
         add_users_to_group(opts[:members], groupname) if opts[:members]
         return groups[groupname]
       end
+
+      # FIXME implement AccountManager#update_group
+      ### def update_group(groupname, opts={}) dispatch(groupname, opts) end
 
       # See AccountManager#remove_group
       def remove_group(groupname, opts={})
