@@ -324,6 +324,8 @@ module AutomateIt
       DIRECTORY_MASK = 040000
 
       def chperm(targets, opts={})
+        # TODO move logging inside chperm and have it generate a log based on params, e.g. if only mode is specified, "chmod", if only user/mode then "chown", if both either show both or "chperm"
+        # TODO provide options for :report => :detailed, :report => :terse, :quiet => true. The :detailed mode logs and returns list of all disk entries modified; this is the default and shows complete information. The :terse logs and reports only user-supplied targets that were modified, creating cuumulative logs like "chmod -R your_target" if anything within your_target changed rather than listing the specific files; this is useful when operating on large trees where you don't want to be drowned by output. The :quiet option turns off logging entirely. The big idea is to allow the user to choose how much to output, especially in cases where it outputs too much.
         user = \
           if opts[:user]
             if opts[:user].is_a?(String)
@@ -385,6 +387,7 @@ module AutomateIt
 
       def chmod(mode, targets, opts={})
         results = chperm(targets, {:mode => mode}.merge(opts))
+        # TODO move logging inside chperm
         log.info(PEXEC+"chmod#{opts[:recursive] ? ' -R' : ''} #{mode} #{results.is_a?(String) ? results : results.join(' ')}") if results and not results.empty?
         return results
       end
@@ -395,6 +398,7 @@ module AutomateIt
 
       def chown(user, group, targets, opts={})
         results = chperm(targets, {:user => user, :group => group}.merge(opts))
+        # TODO move logging inside chperm
         log.info(PEXEC+"chown#{opts[:recursive] ? ' -R' : ''} #{user} #{group} #{results.is_a?(String) ? results : results.join(' ')}") if results and not results.empty?
         return results
       end
