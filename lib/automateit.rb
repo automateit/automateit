@@ -35,6 +35,7 @@ require 'automateit/common'
 require 'automateit/interpreter'
 require 'automateit/plugin'
 require 'automateit/cli'
+require 'automateit/project'
 
 # Helpers
 require 'hashcache'

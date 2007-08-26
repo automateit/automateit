@@ -20,6 +20,7 @@ module AutomateIt
     class Manager < Base
       collect_registrations
 
+      # List of aliased methods for this manager, populated by ::alias_methods.
       class_inheritable_accessor :aliased_methods
 
       # Methods to alias into the Interpreter, specified as an array of symbols.
@@ -32,6 +33,8 @@ module AutomateIt
         end
       end
 
+      # Drivers for this manager as a hash of driver tokens to driver
+      # instances.
       attr_accessor :drivers
 
       # Driver classes used by this Manager.

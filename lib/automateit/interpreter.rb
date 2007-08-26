@@ -1,6 +1,115 @@
 require 'automateit'
 
 module AutomateIt #:main: AutomateIt
+  # == Interpreter
+  #
+  # The AutomateIt Interpreter is the class you'll use to create your
+  # automation recipes.
+  #
+  # You can run a recipe from the command-line by running:
+  #
+  #   automateit your_recipe_file.rb
+  #
+  # Or start an interactive shell from the command-line by running:
+  #
+  #   automateit
+  #
+  # You can put commands into the recipe file or enter them into the
+  # interpreter shell. You can enter any valid Ruby code, plus the special
+  # methods offered by the interpreter. When you have enough code, you should
+  # create a Project that contains your recipes and provides you with
+  # additional convenience features, but you can read about that later.
+  #
+  # The best way to discover AutomateIt's methods is to start the interactive
+  # shell and run commands from it. You can find out what commands the
+  # interpreter offers by entering:
+  #
+  #   unique_methods
+  #
+  # This will display an array of strings, each one is the name of an
+  # Interpreter method.  For example, there's a method called #superuser? that
+  # tells you if you're running the interpreter with superuser (root)
+  # privileges. You can run this by entering:
+  #
+  #   superuser?
+  #
+  # Most of your recipes will interact with plugins, these provide
+  # functionality like installing software packages and creating users. You can
+  # see what plugins are installed by entering:
+  #
+  #   plugins.keys
+  #
+  # The above command will return an array like:
+  #
+  #   [:field_manager, :shell_manager, :edit_manager, :address_manager,
+  #   :account_manager, :package_manager, :tag_manager, :platform_manager,
+  #   :template_manager, :service_manager]
+  #
+  # Each of these names represents a plugin. Remember when you ran the
+  # <tt>unique_methods</tt> command earlier? You probably saw these managers
+  # listed among the methods. Calling these managers will return an object you
+  # can call methods on.
+  #
+  # For example, in the array we got above, we saw <tt>:shell_manager</tt>,
+  # which corresponds to the ShellManager plugin. If you look at the
+  # ShellManager documentation, you can see that it provides an +sh+ command
+  # that executes shell commands. You can run this by entering:
+  #
+  #   shell_manager.sh "ls"
+  #
+  # You can also query the plugin object interactively by entering:
+  #
+  #   shell_manager.unique_methods
+  #
+  # You'll get an array of ShellManager's methods and see the #sh method
+  # amongst them.
+  #
+  # For your convenience, the most common plugin methods are available by a
+  # second, shorter name called an alias. For example, the
+  # <tt>shell_manager.sh</tt> method is also available directly from the
+  # interpreter as <tt>sh</tt>.
+  #
+  # A complete set of aliased methods includes:
+  #
+  # * cd => AutomateIt::ShellManager#cd
+  # * chmod => AutomateIt::ShellManager#chmod
+  # * chmod_R => AutomateIt::ShellManager#chmod_R
+  # * chown => AutomateIt::ShellManager#chown
+  # * chown_R => AutomateIt::ShellManager#chown_R
+  # * chperm => AutomateIt::ShellManager#chperm
+  # * cp => AutomateIt::ShellManager#cp
+  # * cp_r => AutomateIt::ShellManager#cp_r
+  # * edit => AutomateIt::EditManager#edit
+  # * hosts_tagged_with => AutomateIt::TagManager#hosts_tagged_with
+  # * install => AutomateIt::ShellManager#install
+  # * ln => AutomateIt::ShellManager#ln
+  # * ln_s => AutomateIt::ShellManager#ln_s
+  # * ln_sf => AutomateIt::ShellManager#ln_sf
+  # * lookup => AutomateIt::FieldManager#lookup
+  # * mkdir => AutomateIt::ShellManager#mkdir
+  # * mkdir_p => AutomateIt::ShellManager#mkdir_p
+  # * mktemp => AutomateIt::ShellManager#mktemp
+  # * mktempdir => AutomateIt::ShellManager#mktempdir
+  # * mktempdircd => AutomateIt::ShellManager#mktempdircd
+  # * mv => AutomateIt::ShellManager#mv
+  # * pwd => AutomateIt::ShellManager#pwd
+  # * render => AutomateIt::TemplateManager#render
+  # * rm => AutomateIt::ShellManager#rm
+  # * rm_r => AutomateIt::ShellManager#rm_r
+  # * rm_rf => AutomateIt::ShellManager#rm_rf
+  # * rmdir => AutomateIt::ShellManager#rmdir
+  # * sh => AutomateIt::ShellManager#sh
+  # * tagged? => AutomateIt::TagManager#tagged?
+  # * tags => AutomateIt::TagManager#tags
+  # * tags_for => AutomateIt::TagManager#tags_for
+  # * touch => AutomateIt::ShellManager#touch
+  # * umask => AutomateIt::ShellManager#umask
+  # * which => AutomateIt::ShellManager#which
+  # * which! => AutomateIt::ShellManager#which!
+  #
+  # Please read about the different methods available in the Interpreter and
+  # the different plugins (e.g. ShellManager) to learn more about what you can
+  # use AutomateIt for.
   class Interpreter < Common
     # Plugin instance that instantiated the Interpreter.
     attr_accessor :parent
@@ -85,10 +194,6 @@ module AutomateIt #:main: AutomateIt
     end
 
     # Hash of plugin tokens to plugin instances for this Interpreter.
-    #
-    # Example:
-    #   interpreter.plugins
-    #   # => {:account_manager => #<AccountManager...>}
     attr_accessor :plugins
 
     def _instantiate_plugins
