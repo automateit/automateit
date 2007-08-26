@@ -6,7 +6,7 @@ module AutomateIt
   # The AutomateIt Interpreter is the class you'll use to create your
   # automation recipes.
   #
-  # You can run a recipe from the command-line by running:
+  # You can have it run a recipe from the command-line by running:
   #
   #   automateit your_recipe_file.rb
   #
@@ -14,11 +14,8 @@ module AutomateIt
   #
   #   automateit
   #
-  # You can put commands into the recipe file or enter them into the
-  # interpreter shell. You can enter any valid Ruby code, plus the special
-  # methods offered by the interpreter. When you have enough code, you should
-  # create a Project that contains your recipes and provides you with
-  # additional convenience features, but you can read about that later.
+  # You can enter any valid Ruby code into the recipe file or interpreter
+  # shell, plus the special methods offered by the interpreter.
   #
   # The best way to discover AutomateIt's methods is to start the interactive
   # shell and run commands from it. You can find out what commands the
@@ -111,6 +108,10 @@ module AutomateIt
   # the different plugins (e.g. ShellManager) to learn more about what you can
   # use AutomateIt for.
   #
+  # When you have enough code, you should create a Project that contains your
+  # recipes and provides you with additional convenience features, but you can
+  # read about that later.
+  #
   # You can also embed the AutomateIt interpreter inside an existing Ruby
   # program like this:
   #
@@ -118,7 +119,7 @@ module AutomateIt
   #   interpreter = AutomateIt.new
   #
   #   # Use the interpreter as an object:
-  #   interpreter.sh "ls -la" 
+  #   interpreter.sh "ls -la"
   #
   #   # Have it execute a recipe:
   #   interpreter.invoke "myrecipe.rb"
@@ -131,7 +132,7 @@ module AutomateIt
   #
   # Anyway, I hope you enjoy working with AutomateIt and look forward to
   # hearing about your experiences with it. Drivers, patches, documentation and
-  # ideas are welcome. 
+  # ideas are welcome.
   #
   # --Igal Koshevoy
   class Interpreter < Common

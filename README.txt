@@ -1,4 +1,12 @@
-== AutomateIt: It's System Administration 2.0
+= AutomateIt: It's System Administration 2.0
+
+=== Getting started
+
+1. Read INSTALL.txt[link:files/INSTALL_txt.html] for installation instructions.
+2. Read AutomateIt::Interpreter to learn to use the toolkit.
+3. Profit!
+
+=== What is AutomateIt and why should you care?
 
 Manual system administration processes are expensive and put your business at risk. AutomateIt is a new open-source tool for automating the setup and maintenance of UNIX-like systems. It helps your company speed up development, deliver high-quality application and network services, reduce errors and downtime, and can rebuild entire clusters with a single command.
 
@@ -6,6 +14,10 @@ AutomateIt lets you write recipes that encapsulate your system setup and mainten
 
 Unlike many competing products, AutomateIt is built to solve real-world problems. It's design is the result of over a decade of hard-won lessons administering sites with multiple clusters in distributed data-centers, hundreds of servers, dozens of OSes and countless configuration permutations. AutomateIt gives you all the features of industry leading products like cfengine, but is more powerful, flexible and easier-to-use.
 
-Check out AutomateIt today! Read the INSTALL.txt[files/INSTALL.txt] and learn to use the AutomateIt::Interpreter.
+Check out AutomateIt today!
 
-Professional services and free consultation are available from <b>Pragmaticraft[http://pragmaticraft.com]</b>.
+Professional services are available for AutomateIt are available through <b>Pragmaticraft[http://pragmaticraft.com]</b>.
+
+Author:: Igal Koshevoy (igal@pragmaticraft.com)
+Copyright:: Copyright (c) 2007 Pragmaticraft
+License:: Distributes under the same terms as Ruby
