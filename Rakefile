@@ -1,6 +1,13 @@
 require 'spec/rake/spectask'
 
+# TODO reoganize this messy Rakefile
+
 task :default => :spec
+
+def load_automateit
+  $LOAD_PATH.unshift('lib')
+  require 'automateit'
+end
 
 #---[ run specs ]-------------------------------------------------------
 
@@ -74,7 +81,7 @@ end
 #---[ misc ]------------------------------------------------------------
 
 task :rdoc do
-  sh "rdoc --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt"
+  sh "rdoc --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt"
 end
 
 task :prof do
@@ -83,8 +90,7 @@ end
 
 desc "List aliased_methods for inclusion into rdoc"
 task :am do
-  $LOAD_PATH << "lib"
-  require 'automateit'
+  load_automateit
   AutomateIt.new.instance_eval do
     methods_and_plugins = []
     plugins.values.each{|plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| methods_and_plugins << [method.to_s, plugin.class.to_s]}}
@@ -93,6 +99,52 @@ task :am do
       puts "  # * %s for %s#%s" % [method, plugin, method]
     end
   end
+end
+
+#---[ RubyGems ]--------------------------------------------------------
+
+# TODO figure out certificates and signing
+# FIXME executables are left behind after uninstall :(
+=begin
+rm -rf /usr/lib/ruby/gems/*/gems/automateit-*/ /usr/bin/{automateit,field_lookup} /usr/lib/ruby/gems/*/doc/automateit-*/
+gem install -y pkg/automateit-*.gem --no-ri --no-rdoc
+gem install -y pkg/automateit-*.gem
+gem uninstall -a -x automateit
+=end
+Gem::manage_gems
+require 'rake/gempackagetask'
+spec = Gem::Specification.new do |s|
+  load_automateit
+  s.add_dependency("activesupport", ">= 1.4")
+  s.add_dependency("open4", ">= 0.9")
+  s.author = "Igal Koshevoy"
+  s.autorequire = "automateit"
+  s.bindir = 'bin'
+  s.date = File.mtime('lib/automateit/root.rb')
+  s.email = "igal@pragmaticraft.org"
+  s.executables << 'automateit' << 'field_lookup'
+  s.extra_rdoc_files = ["README.txt", "INSTALL.txt"]
+  s.files = FileList["{bin,lib}/**/*"].to_a
+  s.has_rdoc = true
+  s.homepage = "http://AutomateIt.org/"
+  s.name = "automateit"
+  s.platform = Gem::Platform::RUBY
+  s.rdoc_options << %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << 'Documentation for AutomateIt, an open-source tool for automating the setup and maintenance of UNIX-like systems.' << %w(lib)
+  s.require_path = "lib"
+  s.rubyforge_project = 'automateit'
+  s.summary = "Toolkit for automating the setup and maintenance of UNIX-like systems"
+  s.test_files = FileList["{spec}/**/*_spec.rb"].to_a
+  s.version = AutomateIt::VERSION
+end
+
+Rake::GemPackageTask.new(spec) do |pkg|
+  pkg.need_tar = true
+end
+
+desc "Recreate Gem"
+task :regem do
+  rm Dir["pkg/*"]
+  Rake::Task[:gem].invoke
 end
 
 #===[ fin ]=============================================================

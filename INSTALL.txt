@@ -1,0 +1,10 @@
+== Installing AutomateIt
+
+There are a number of different ways to install AutomateIt.
+
+= Install via RubyGems 
+
+1. Install Ruby (http://www.ruby-lang.org/en/) 
+2. Rubygems (http://rubyforge.org/frs/?group_id=126)
+3. Install the gem:
+    sudo gem install -y automateit

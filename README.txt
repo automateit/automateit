@@ -6,10 +6,6 @@ AutomateIt lets you write recipes that encapsulate your system setup and mainten
 
 Unlike many competing products, AutomateIt is built to solve real-world problems. It's design is the result of over a decade of hard-won lessons administering sites with multiple clusters in distributed data-centers, hundreds of servers, dozens of OSes and countless configuration permutations. AutomateIt gives you all the features of industry leading products like cfengine, but is more powerful, flexible and easier-to-use.
 
-Check out AutomateIt today!
-
-To get started, install AutomateIt and read about the AutomateIt::Interpreter:
-
-  gem install -y automateit
+Check out AutomateIt today! Read the INSTALL.txt[files/INSTALL.txt] and learn to use the AutomateIt::Interpreter.
 
 Professional services and free consultation are available from <b>Pragmaticraft[http://pragmaticraft.com]</b>.
