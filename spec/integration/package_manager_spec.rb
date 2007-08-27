@@ -25,10 +25,9 @@ else
     # the performance boost is worth it.
 
     it "should not install an invalid package" do
-      # Temporarily quiet down logging so we don't get warnings during the test
-      @d.log.level = Logger::FATAL
-      lambda{ @d.install(@fake_package, :quiet => true) }.should raise_error(ArgumentError)
-      @d.log.level = @level
+      @d.log.silence(Logger::FATAL) do
+        lambda{ @d.install(@fake_package, :quiet => true) }.should raise_error(ArgumentError)
+      end
     end
 
     it "should install a package" do
