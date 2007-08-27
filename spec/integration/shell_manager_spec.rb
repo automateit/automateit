@@ -21,7 +21,7 @@ describe "AutomateIt::ShellManager" do
     end
 
     it "should throw exception if command isn't in path (which!)" do
-      lambda{ @m.which!("not_a_real_program") }.should raise_error(NotImplementedError, /not_a_real_program/)
+      lambda{ @m.which!("not_a_real_program") }.should raise_error(ArgumentError, /not_a_real_program/)
     end
   else
     puts "NOTE: Can't use 'which' on this platform in #{__FILE__}"

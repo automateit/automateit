@@ -26,7 +26,7 @@ class Tempster
   ARMOR_CHARACTERS = ["A".."Z","a".."z","0".."9"].collect{|r| r.to_a}.join
 
   # Options:
-  # * :name - TODO
+  # * :name - name to use for file, defaults to "tempster".
   # * :kind - :file or :directory, required.
   # * :dir - directory to create temporary entries in, uses system-wide temporary directory (e.g. <tt>/tmp</tt>) by default.
   # * :cd - change into the newly directory created using +ch+ within the block, and then switch back to the previous directory. Only used when a block is given and the :kind is :directory. Default is false.

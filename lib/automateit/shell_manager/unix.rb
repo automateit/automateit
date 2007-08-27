@@ -2,9 +2,11 @@ module AutomateIt
   class ShellManager
     # == ShellManager::UNIX
     #
-    # A ShellManager driver for proving shell commands on UNIX-like systems.
-    # Subclasses the Portable driver and provides some additional
-    # functionality.
+    # A ShellManager driver for providing shell commands for manipulating files
+    # and executing commands on UNIX-like systems.
+    #
+    # It includes all the functionality of the ShellManager::Portable driver
+    # plus additional commands.
     class UNIX < Portable
       depends_on :programs => %w(which)
 
@@ -22,7 +24,7 @@ module AutomateIt
       # See ShellManager#which!
       def which!(command)
         if which(command).nil?
-          raise NotImplementedError.new("command not found: #{command}")
+          raise ArgumentError.new("command not found: #{command}")
         end
       end
     end
