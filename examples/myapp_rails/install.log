@@ -1,0 +1,20 @@
+** apt-get install -y -q build-essential swig libsqlite3-dev pen < /dev/null 2>&1
+=> Installing Gems, this will take a while...
+** gem install -y rails mongrel mongrel_cluster sqlite3-ruby 2>&1
+** useradd --comment myuser --create-home --shell /bin/bash myuser < /dev/null
+** nscd --invalidate passwd
+** groupadd myuser
+** nscd --invalidate group
+** usermod -a -G myuser myuser
+** nscd --invalidate group
+** mkdir -p /home/myuser/myapp
+** cd /home/myuser/myapp
+** chown myuser  .
+** su myuser -c 'rails --database=sqlite3 . > /dev/null'
+=> Rendering 'config/mongrel_cluster.yml' because of it doesn't exist
+** su myuser -c 'rake db:migrate'
+=> Edited 'public/index.html'
+=> Rendering '/etc/init.d/myapp' because of it doesn't exist
+** sysvconfig --enable myapp < /dev/null > /dev/null
+** "/etc/init.d/myapp" "start"
+** cd -
