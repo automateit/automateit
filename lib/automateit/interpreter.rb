@@ -206,25 +206,6 @@ module AutomateIt
       Process.euid.zero?
     end
 
-=begin
-    def run_nonblocking(command, callback)
-      data = ""
-      IO.popen(command) do |handle|
-        begin
-          while true
-            sleep 0.1
-            latest = handle.readpartial(4048)
-            data << latest
-            callback.call(latest)
-          end
-        rescue EOFError
-          # Expected error that indicates there's nothing to read
-        end
-      end
-      return data
-    end
-=end
-
     # Create an Interpreter with the specified +opts+ and invoke
     # the +recipe+. The opts are passed to #setup for parsing.
     def self.invoke(recipe, opts={})
