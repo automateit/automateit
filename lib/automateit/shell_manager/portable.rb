@@ -2,8 +2,8 @@ module AutomateIt
   class ShellManager
     # == ShellManager::Portable
     #
-    # A pure-Ruby, portable driver for ShellManager provides common shell
-    # commands.
+    # Pure-Ruby, portable driver for ShellManager provides UNIX-like shell
+    # commands for manipulating files and executing commands.
     #
     # It does not provide commands for:
     # * #which
@@ -26,6 +26,7 @@ module AutomateIt
       end
       private :_fileutils_opts
 
+      # See ShellManager#sh
       def sh(*commands)
         args, opts = args_and_opts(*commands)
         log.info(PEXEC+"#{args.join(' ')}")
@@ -52,19 +53,24 @@ module AutomateIt
         opts = {:name => name}.merge(opts)
         ::Tempster.send(kind, opts, &block)
       end
+      private :_mktemp_helper
 
+      # See ShellManager#mktemp
       def mktemp(name=nil, &block)
         _mktemp_helper(:mktemp, name, &block)
       end
 
+      # See ShellManager#mktempdir
       def mktempdir(name=nil, &block)
         _mktemp_helper(:mktempdir, name, &block)
       end
 
+      # See ShellManager#mktempdircd
       def mktempdircd(name=nil, &block)
         _mktemp_helper(:mktempdircd, name, &block)
       end
 
+      # See ShellManager#umask
       def umask(mode=nil, &block)
         if mode
           old = File::umask
@@ -85,6 +91,7 @@ module AutomateIt
 
       #...[ FileUtils wrappers ]...............................................
 
+      # See ShellManager#cd
       def cd(dir, opts={}, &block)
         if block
           log.enqueue(:info, PEXEC+"cd #{dir}")
@@ -108,10 +115,12 @@ module AutomateIt
         end
       end
 
+      # See ShellManager#pwd
       def pwd()
         FileUtils.pwd()
       end
 
+      # See ShellManager#mkdir
       def mkdir(dirs, opts={}, &block)
         kind = if opts[:parents]
                  :mkdir_p
@@ -141,10 +150,12 @@ module AutomateIt
         return result
       end
 
+      # See ShellManager#mkdir_p
       def mkdir_p(dirs, opts={}, &block)
         mkdir(dirs, {:parents => true}.merge(opts), &block)
       end
 
+      # See ShellManager#rmdir
       def rmdir(dirs)
         present = [dirs].flatten.select{|dir| File.directory?(dir)}
         return false if present.empty?
@@ -152,6 +163,7 @@ module AutomateIt
         FileUtils.rmdir(present, _fileutils_opts)
       end
 
+      # See ShellManager#ln
       def ln(sources, target, opts={})
         kind = if opts[:symbolic] and opts[:force]
                  :ln_sf
@@ -195,14 +207,17 @@ module AutomateIt
         end
       end
 
+      # See ShellManager#ln_s
       def ln_s(sources, target, opts={})
         ln(sources, target, {:symbolic => true}.merge(opts))
       end
 
+      # See ShellManager#ln_sf
       def ln_sf(sources, target, opts={})
         ln(sources, target, {:symbolic => true, :force => true}.merge(opts))
       end
 
+      # See ShellManager#install
       def install(source, target, mode)
         raise NotImplementedError
         # TODO needs more sophisticated algorithm, maybe combine with copy
@@ -217,6 +232,7 @@ module AutomateIt
         end
       end
 
+      # See ShellManager#cp
       def cp(sources, target, opts={})
         raise NotImplementedError
         # TODO needs much more sophisticated algorithm
@@ -224,10 +240,12 @@ module AutomateIt
         FileUtils.cp(sources, target, _fileutils_opts)
       end
 
+      # See ShellManager#cp_r
       def cp_r(sources, target, opts={})
         cp(sources, target, {:recursive => true}.merge(opts))
       end
 
+      # See ShellManager#mv
       def mv(sources, target)
         present = [sources].flatten.select{|entry| File.exists?(entry)}
         return false if present.empty?
@@ -235,6 +253,7 @@ module AutomateIt
         FileUtils.mv(present, target, _fileutils_opts) && present
       end
 
+      # See ShellManager#rm
       def rm(targets, opts={})
         kind = if opts[:recursive] and opts[:force]
                  :rm_rf
@@ -250,10 +269,12 @@ module AutomateIt
         FileUtils.send(kind, present, _fileutils_opts) && present
       end
 
+      # See ShellManager#rm_r
       def rm_r(targets, opts={})
         rm(targets, {:recursive => true}.merge(opt))
       end
 
+      # See ShellManager#rm_rf
       def rm_rf(targets, opts={})
         rm(targets, {:recursive => true, :force => true}.merge(opts))
       end
@@ -261,9 +282,8 @@ module AutomateIt
       FILE_MASK = 0100000
       DIRECTORY_MASK = 040000
 
+      # See ShellManager#chperm
       def chperm(targets, opts={})
-        # TODO move logging inside chperm and have it generate a log based on params, e.g. if only mode is specified, "chmod", if only user/mode then "chown", if both either show both or "chperm"
-        # TODO provide options for :report => :detailed, :report => :terse, :quiet => true. The :detailed mode logs and returns list of all disk entries modified; this is the default and shows complete information. The :terse logs and reports only user-supplied targets that were modified, creating cuumulative logs like "chmod -R your_target" if anything within your_target changed rather than listing the specific files; this is useful when operating on large trees where you don't want to be drowned by output. The :quiet option turns off logging entirely. The big idea is to allow the user to choose how much to output, especially in cases where it outputs too much.
         user = \
           if opts[:user]
             if opts[:user].is_a?(String)
@@ -314,37 +334,50 @@ module AutomateIt
           Find.prune if not opts[:recursive] and File.directory?(path)
         end
 
-        if modified_entries.empty?
-          return false
-        elsif targets.is_a?(String)
-          return modified_entries.first
-        else
-          return modified_entries
+        return false if modified_entries.empty?
+
+        display_entries = \
+          if opts[:report] == :details
+            modified_entries
+          else
+            targets
+          end
+        display_entries = [display_entries].flatten
+
+        if opts[:mode]
+          log.info(PEXEC+"chmod%s 0%o %s" % [opts[:recursive] ? ' -R' : '',
+                   opts[:mode], display_entries.join(' ')])
         end
+        if opts[:user] or opts[:group]
+          log.info(PEXEC+"chown%s%s%s %s" % [opts[:recursive] ? ' -R' : '',
+                   opts[:user] ? ' %s'%opts[:user] : '',
+                   opts[:group] ? ' %s'%opts[:group] : '',
+                   display_entries.join(' ')])
+        end
+        return targets.is_a?(String) ? modified_entries.first : modified_entries
       end
 
+      # See ShellManager#chmod
       def chmod(mode, targets, opts={})
-        results = chperm(targets, {:mode => mode}.merge(opts))
-        # TODO move logging inside chperm
-        log.info(PEXEC+"chmod#{opts[:recursive] ? ' -R' : ''} #{mode} #{results.is_a?(String) ? results : results.join(' ')}") if results and not results.empty?
-        return results
+        chperm(targets, {:mode => mode}.merge(opts))
       end
 
+      # See ShellManager#chmod_R
       def chmod_R(mode, targets, opts={})
         chmod(mode, targets, {:recursive => true}.merge(opts))
       end
 
+      # See ShellManager#chown
       def chown(user, group, targets, opts={})
-        results = chperm(targets, {:user => user, :group => group}.merge(opts))
-        # TODO move logging inside chperm
-        log.info(PEXEC+"chown#{opts[:recursive] ? ' -R' : ''} #{user} #{group} #{results.is_a?(String) ? results : results.join(' ')}") if results and not results.empty?
-        return results
+        chperm(targets, {:user => user, :group => group}.merge(opts))
       end
 
+      # See ShellManager#chown_R
       def chown_R(user, group, targets, opts={})
         chown(user, group, targets, {:recursive => true}.merge(opts))
       end
 
+      # See ShellManager#touch
       def touch(targets)
         log.info(PEXEC+"touch #{String === targets ? targets : targets.join(' ')}")
         FileUtils.touch(targets, _fileutils_opts)
