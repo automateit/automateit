@@ -1,5 +1,3 @@
-require 'automateit'
-
 module AutomateIt
   class Plugin # :nodoc:
     require 'automateit/plugin/base'

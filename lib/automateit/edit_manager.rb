@@ -1,7 +1,4 @@
-require 'automateit'
-
 module AutomateIt
-
   # == EditManager
   #
   # The EditManager provides a way of editing files and strings
@@ -142,7 +139,7 @@ module AutomateIt
           @contents.gsub!(query, "")
         end
 
-        # Specify the comment style's +prefix+ and +suffix+. 
+        # Specify the comment style's +prefix+ and +suffix+.
         #
         # Example:
         #   # C style comments
@@ -173,7 +170,7 @@ module AutomateIt
         end
 
         # Manipulate the buffer. The result of your block will replace the
-        # buffer. This is very useful for complex edits. 
+        # buffer. This is very useful for complex edits.
         #
         # Example:
         #   manipulate do |buffer|

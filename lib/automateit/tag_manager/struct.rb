@@ -33,7 +33,6 @@ module AutomateIt
         @tags.merge(tags_for(hostnames))
 
         begin
-          # SLOW 1.3s incurred by PlatformManager::LSB#setup
           @tags.add(interpreter.platform_manager.query("os")) rescue IndexError
           @tags.add(interpreter.platform_manager.query("arch")) rescue IndexError
           @tags.add(interpreter.platform_manager.query("distro")) rescue IndexError

@@ -1,5 +1,3 @@
-require 'automateit'
-
 module AutomateIt
   # == PlatformManager
   #
