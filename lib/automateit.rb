@@ -17,13 +17,23 @@ require 'socket'
 
 # Gems
 require 'rubygems'
-require 'active_support' # SLOW 0.5s
 require 'open4'
 begin
   require 'eruby'
 rescue LoadError
   require 'erb'
 end
+
+# Load ActiveSupport pieces individually to save ~0.5s
+### require 'active_support'
+require 'active_support/core_ext/blank'
+require 'active_support/core_ext/hash'
+require 'active_support/core_ext/array'
+require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/core_ext/class/inheritable_attributes'
+require 'active_support/core_ext/module/aliasing'
+require 'active_support/core_ext/string'
+require 'active_support/clean_logger'
 
 # Patches
 require 'patches/object.rb'
