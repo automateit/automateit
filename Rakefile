@@ -123,7 +123,7 @@ spec = Gem::Specification.new do |s|
   s.bindir = 'bin'
   s.date = File.mtime('lib/automateit/root.rb')
   s.email = "igal@pragmaticraft.org"
-  s.executables << 'automateit' << 'field_lookup'
+  s.executables = Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)}
   s.extra_rdoc_files = ["README.txt", "INSTALL.txt", "USAGE.txt"]
   s.files = FileList["{bin,lib}/**/*"].to_a
   s.has_rdoc = true
