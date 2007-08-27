@@ -2,7 +2,7 @@ module AutomateIt
   # = Project
   #
   # An AutomateIt Project is a collection of related recipes, tags, fields and
-  # custom plugins. 
+  # custom plugins.
   #
   # === Create a project
   #
@@ -27,6 +27,124 @@ module AutomateIt
   #   directory. Using this method will save you from having to type paths for
   #   files you intend to distribute from recipes, e.g.:
   #     cp(dist+"/source.txt", "/tmp/target.txt")
+  #
+  # === Using a project
+  #
+  # For example, create a new project:
+  #
+  #   automateit --create hello_project
+  #
+  # Inside this project, edit its fields, which are stored in the
+  # <tt>config/fields.yml</tt> file, and make it look like this:
+  #
+  #   greeting: Hello world!
+  #
+  # Then create a recipe in the <tt>recipes/greet.rb</tt> file:
+  #
+  #   puts lookup(:greeting)
+  #
+  # You can run the recipe:
+  #
+  #   automateit recipes/greet.rb
+  #
+  # And you should get the following output:
+  #
+  #   Hello world!
+  #
+  # === Using project libraries
+  #
+  # Any files ending with <tt>.rb</tt> that you put into the project's
+  # <tt>lib</tt> directory will be loaded before your recipe starts executing.
+  # This is a good way to add common features, custom plugins and such.
+  #
+  # For example, put the following into a new <tt>lib/meow.rb</tt> file:
+  #
+  #   def meow
+  #     "MEOW!"
+  #   end
+  #
+  # Now create a new recipe that uses this nethod in <tt>recipes/speak.rb</tt>
+  #
+  #   puts meow
+  #
+  # Now you can run it:
+  #
+  #   automateit recipes/speak.rb
+  #
+  # And you'll get this:
+  #
+  #   MEOW!
+  #
+  # === Specifying project paths on the command-line
+  #
+  # AutomateIt will load the project automatically if you're executing a recipe
+  # that's inside a project's +recipes+ directory.
+  #
+  # For example, assume that you've create your project as
+  # <tt>/tmp/hello_project</tt> and have a recipe at
+  # <tt>/tmp/hello_project/recipes/greet.rb</tt>.
+  #
+  # You can execute the recipe with a full path:
+  #
+  #   automateit /tmp/hello_project/recipes/greet.rb
+  #
+  # Or execute it with a relative path:
+  #
+  #   cd /tmp/hello_project/recipes
+  #   automateit greet.rb
+  #
+  # Or you can prepend a header to the <tt>greet.rb</tt> recipe so it looks like this
+  #
+  #   #!/usr/bin/env automateit
+  #
+  #   puts lookup(:greeting)
+  #
+  # And then make the file executable:
+  #
+  #   chmod a+X /tmp/hello_project/recipes/greet.rb
+  #
+  # And execute the recipe directly:
+  #
+  #   /tmp/hello_project/recipes/greet.rb
+  #
+  # === Specifying project paths for embedded programs
+  #
+  # If you're embedding the Interpreter into another Ruby program, you can run recipes and they'll automatically load the project if applicable. For example:
+  #
+  #   require 'rubygems'
+  #   require 'automateit'
+  #   AutomateIt.invoke("/tmp/hello_project/recipes/greet.rb")
+  #
+  # Or if you may specify the project path explicitly:
+  #
+  #   require 'rubygems'
+  #   require 'automateit'
+  #   interpreter = AutomateIt.new(:project => "/tmp/hello_project")
+  #   puts interpreter.lookup("greeting")
+  #
+  # === Tag and field command-line helpers
+  #
+  # You can access a project's tags and fields from the UNIX command-line. This
+  # helps other programs access configuration data and make use of your roles.
+  #
+  # For example, with the <tt>hello_project</tt> we've created, we can lookup
+  # fields from the UNIX command-line like this:
+  #
+  #   aifield -p /tmp/hello_project greeting
+  #
+  # The <tt>-p</tt> specifies the project path (its an alias for
+  # <tt>--project</tt>). More commands are available. You can see the
+  # documentation and examples for these commands by running:
+  #
+  #   aifield --help
+  #   aitag --help
+  #
+  # Sometimes it's convenient to set a default project path so you don't need
+  # to type as much by specifing the <tt>AUTOMATEIT_PROJECT</tt> environmental
+  # variable (or <tt>AIP</tt> if you want a shortcut) and use it like this:
+  #
+  #   export AUTOMATEIT_PROJECT=/tmp/hello_project
+  #   aifield greeting
   #
   # === Curios
   #
