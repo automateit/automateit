@@ -19,8 +19,7 @@ module AutomateIt
       if opts[:create]
         Project::create(opts)
       elsif opts[:recipe]
-        interpreter = AutomateIt.new(opts)
-        interpreter.invoke(opts[:recipe])
+        AutomateIt.invoke(opts[:recipe], opts)
       elsif code = opts.delete(:eval)
         interpreter = AutomateIt.new(opts)
         interpreter.instance_eval(code)

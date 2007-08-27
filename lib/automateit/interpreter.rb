@@ -51,7 +51,7 @@ module AutomateIt
       # Instantiate core plugins so they're available to the project
       _instantiate_plugins
 
-      if project_path = opts[:project] || ENV["AUTOMATEIT_PROJECT"]
+      if project_path = opts[:project] || ENV["AUTOMATEIT_PROJECT"] || ENV["AIP"]
         # Only load a project if we find its env file
         env_file = File.join(project_path, "config", "automateit_env.rb")
         if File.exists?(env_file)
@@ -224,6 +224,13 @@ module AutomateIt
       return data
     end
 =end
+
+    # Create an Interpreter with the specified +opts+ and invoke
+    # the +recipe+. The opts are passed to #setup for parsing.
+    def self.invoke(recipe, opts={})
+      opts[:project] ||= File.join(File.dirname(recipe), "..")
+      AutomateIt.new(opts).invoke(recipe)
+    end
 
     # Invoke the +recipe+ at the given path.
     def invoke(recipe)

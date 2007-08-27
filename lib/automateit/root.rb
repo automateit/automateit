@@ -23,8 +23,15 @@ module AutomateIt # :nodoc:
 #
 "
 
-  # Instantiate an +Interpreter+.
-  def self.new(*options)
-    Interpreter.new(*options)
+  # Instantiates a new Interpreter. See documentation for
+  # Interpreter#setup.
+  def self.new(opts={})
+    Interpreter.new(opts)
+  end
+
+  # Invokes an Interpreter on the recipe. See documentation for
+  # Interpreter::invoke.
+  def self.invoke(recipe, opts)
+    Interpreter.invoke(recipe, opts)
   end
 end
