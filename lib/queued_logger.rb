@@ -1,6 +1,4 @@
 require 'logger'
-require 'rubygems'
-require 'active_support'
 
 class QueuedLogger < Logger
   def initialize(*args)
