@@ -85,7 +85,7 @@ describe "AutomateIt::ShellManager" do
     @m.mktempdircd do
       source = "foo"
       target = "bar"
-      @m.touch(source).should == [source]
+      @m.touch(source)
       File.exists?(source).should be_true
       File.exists?(target).should be_false
 
@@ -100,7 +100,7 @@ describe "AutomateIt::ShellManager" do
     @m.mktempdircd do
       source = "foo"
       target = "bar"
-      @m.touch(source).should == [source]
+      @m.touch(source)
       File.exists?(source).should be_true
       File.exists?(target).should be_false
 
@@ -116,7 +116,7 @@ describe "AutomateIt::ShellManager" do
       source = "foo"
       intermediate = "baz"
       target = "bar"
-      @m.touch(source).should == [source]
+      @m.touch(source)
       File.exists?(source).should be_true
       File.exists?(target).should be_false
 
