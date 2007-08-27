@@ -185,7 +185,7 @@ module AutomateIt
           @contents != @original_contents
         end
 
-        # Read contents from +#filename+.
+        # Read contents from #filename.
         def read
           @contents = \
             if writing? or (noop? and @filename and File.exists?(@filename))
@@ -195,7 +195,7 @@ module AutomateIt
             end
         end
 
-        # Write contents to +#filename+.
+        # Write contents to #filename.
         def write
           log.info(PNOTE+"Edited '#{@filename}'")
           if writing?
