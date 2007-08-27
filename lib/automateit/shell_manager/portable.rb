@@ -113,11 +113,12 @@ module AutomateIt
         else
           FileUtils.cd(dir) if writing?
         end
+        return dir
       end
 
       # See ShellManager#pwd
       def pwd()
-        FileUtils.pwd()
+        return FileUtils.pwd()
       end
 
       # See ShellManager#mkdir
@@ -161,6 +162,7 @@ module AutomateIt
         return false if present.empty?
         log.info(PEXEC+"rmdir #{String === dirs ? dirs : dirs.join(' ')}")
         FileUtils.rmdir(present, _fileutils_opts)
+        return present
       end
 
       # See ShellManager#ln
@@ -205,6 +207,7 @@ module AutomateIt
           log.info(PEXEC+"#{kind} #{String === missing ? missing : missing.join(' ')} #{target}")
           FileUtils.send(kind, missing, target, _fileutils_opts) && missing
         end
+        return missing
       end
 
       # See ShellManager#ln_s
@@ -251,6 +254,7 @@ module AutomateIt
         return false if present.empty?
         present = present.first if present.size == 1
         FileUtils.mv(present, target, _fileutils_opts) && present
+        return present
       end
 
       # See ShellManager#rm
@@ -266,7 +270,8 @@ module AutomateIt
         return false if present.empty?
         present = present.first if present.size == 0
         log.info(PEXEC+"#{kind} #{String === present ? present : present.join(' ')}")
-        FileUtils.send(kind, present, _fileutils_opts) && present
+        FileUtils.send(kind, present, _fileutils_opts)
+        return present
       end
 
       # See ShellManager#rm_r
@@ -381,6 +386,7 @@ module AutomateIt
       def touch(targets)
         log.info(PEXEC+"touch #{String === targets ? targets : targets.join(' ')}")
         FileUtils.touch(targets, _fileutils_opts)
+        return targets
       end
     end # Portable
   end
