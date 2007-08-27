@@ -52,7 +52,6 @@ servers: <%=backends%>",
     end
 
     # Create service by rendering a template file, if needed
-    # FIXME dryrun isn't showing this file being rendered
     restart_needed |= render(
       :file => dist+"/etc/init.d/"+lookup("myapp#name")+".erb",
       :to => "/etc/init.d/"+lookup("myapp#name"),
@@ -74,7 +73,7 @@ servers: <%=backends%>",
 
     # Start or restart service, if needed
     if service_manager.running?(lookup("myapp#name")) and restart_needed
-      # FIXME it's always restarting it even if it's not running
+      # Use mongrel service's built-in graceful "restart" action
       service_manager.tell(lookup("myapp#name"), "restart")
     else
       service_manager.start(lookup("myapp#name"))
