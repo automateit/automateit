@@ -120,8 +120,10 @@ module AutomateIt
       # See PackageManager#uninstall
       def uninstall(*packages)
         return _uninstall_helper(*packages) do |list, opts|
-          # FIXME idiotic program MAY prompt you like this on uninstall:
+          # TODO PackageManager::gem#uninstall -- add logic to handle prompts during removal
 =begin
+# idiotic program MAY prompt you like this on uninstall:
+
 Gem 0.9.4 generates prompts like this:
 ** gem uninstall -x mongrel < /dev/null 2>&1
 

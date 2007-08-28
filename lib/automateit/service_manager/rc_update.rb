@@ -5,7 +5,9 @@ module AutomateIt
     # RC_Update implements the #enabled?, #enable and #disable features of the
     # ServiceManager on Gentoo-like systems.
     class RC_Update < SYSV
-      # FIXME Implement ServiceManager::RC_Update, the commands in the comments are merely hints at how to do this.
+      # TODO ServiceManager::RC_Update -- implement
+
+      # XXX Commands in the comments are merely hints at how to do this.
       ### depends_on :programs => %w(rc-update)
 
       def suitability(method, *args) # :nodoc:

@@ -156,7 +156,7 @@ class Tempster
 end
 
 if __FILE__ == $0
-  # FIXME do a proper test
+  # TODO Tempster -- write a spec
 
   # Show a temp file created
   x = Tempster.mktemp(:verbose => true)

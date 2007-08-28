@@ -172,7 +172,7 @@ describe "AutomateIt::ShellManager" do
       File.exists?(file).should be_true
       File.exists?(dir).should be_true
 
-      @m.rm_rf(dir) == [dir, file]
+      @m.rm_r(dir) == [dir, file]
       File.exists?(file).should be_false
       File.exists?(dir).should be_false
     end
@@ -186,7 +186,6 @@ describe "AutomateIt::ShellManager" do
       @m.touch(file)
       File.exists?(file).should be_true
       File.exists?(dir).should be_true
-      # FIXME chmod a file so that rm_r will fail
 
       @m.rm_rf(dir) == [file, dir]
       File.exists?(file).should be_false

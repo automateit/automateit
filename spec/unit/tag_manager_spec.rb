@@ -118,7 +118,7 @@ describe "AutomateIt::TagManager", :shared => true do
   end
 
 =begin
-  # FIXME add tests for @group and !negation
+  # FIXME TagManager spec -- add examples for @group and its !negation
 =end
 end
 

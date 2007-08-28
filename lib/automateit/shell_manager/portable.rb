@@ -34,8 +34,8 @@ module AutomateIt
       end
 
       def rbsync(sources, target)
-        # FIXME Reimplment as call to generalized +cp+ method
-        raise NotImplementedError 
+        # FIXME ShellManager::Portable#rbsync -- reimplement using generalized +cp+ command
+        raise NotImplementedError
 
         if File.exists?(target)
           cmd = "diff -qr"
@@ -223,8 +223,8 @@ module AutomateIt
 
       # See ShellManager#install
       def install(source, target, mode)
-        # FIXME Reimplment as call to generalized +cp+ method
-        raise NotImplementedError 
+        # FIXME ShellManager::Portable#install -- reimplement as call to generalized +cp+ method
+        raise NotImplementedError
 
         source_stat = File.stat(source)
         target_file = (File.directory?(target) || File.stat(target).symlink?) ?
@@ -238,16 +238,16 @@ module AutomateIt
 
       # See ShellManager#cp
       def cp(sources, target, opts={})
-        # FIXME Reimplment as call to generalized +cp+ method
-        raise NotImplementedError 
+        # FIXME ShellManager::Portable#cp -- reimplement as call to generalized +cp+ method
+        raise NotImplementedError
 
         FileUtils.cp(sources, target, _fileutils_opts)
       end
 
       # See ShellManager#cp_r
       def cp_r(sources, target, opts={})
-        # FIXME Reimplment as call to generalized +cp+ method
-        raise NotImplementedError 
+        # FIXME ShellManager::Portable#cp_r -- reimplement as call to generalized +cp+ method
+        raise NotImplementedError
 
         cp(sources, target, {:recursive => true}.merge(opts))
       end
@@ -280,7 +280,7 @@ module AutomateIt
 
       # See ShellManager#rm_r
       def rm_r(targets, opts={})
-        rm(targets, {:recursive => true}.merge(opt))
+        rm(targets, {:recursive => true}.merge(opts))
       end
 
       # See ShellManager#rm_rf

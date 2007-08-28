@@ -70,7 +70,6 @@ module AutomateIt
         block.call(missing, opts)
         return true if noop?
         unless (failed = not_installed?(missing, :list => true)).empty?
-          # FIXME Write spec to test failure
           raise ArgumentError.new("couldn't install: #{failed.join(' ')}")
         else
           return true
@@ -99,7 +98,6 @@ module AutomateIt
         block.call(present, opts)
         return true if noop?
         unless (failed = installed?(present, :list => true)).empty?
-          # FIXME Write spec to test failure
           raise ArgumentError.new("couldn't uninstall: #{failed.join(' ')}")
         else
           return true

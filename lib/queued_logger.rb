@@ -52,7 +52,7 @@ class QueuedLogger < Logger
 end
 
 if __FILE__ == $0
-  # FIXME write spec
+  # TODO QueuedLogger -- write a spec
 
   q = QueuedLogger.new($stdout)
   q.level = Logger::INFO

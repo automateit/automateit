@@ -31,14 +31,13 @@ module AutomateIt
         cmd << " #{username} < /dev/null"
         cmd << " > /dev/null" if opts[:quiet]
         # --password CRYPT(3)ENCRYPTED
-        # FIXME set password
+        # TODO AccountManager#add_user -- set password
         interpreter.sh(cmd)
         interpreter.sh("nscd --invalidate passwd") if @nscd
 
         unless opts[:group] == false
           groupname = opts[:group] || username
           unless has_group?(groupname)
-            # FIXME gid isn't available because user hasn't been created
             opts = {:members => [username]}
             opts[:gid] = users[username].uid if writing?
             add_group(groupname, opts)
@@ -48,13 +47,13 @@ module AutomateIt
         return users[username]
       end
 
-      # FIXME implement AccountManager#update_user
+      # TODO AccountManager#update_user -- implement
       ### def update_user(username, opts={}) dispatch(username, opts) end
 
       # See AccountManager#remove_user
       def remove_user(username, opts={})
         return false unless has_user?(username)
-        # Options: -r -- remove the homedirectory and mail spool
+        # Options: -r -- remove the home directory and mail spool
         cmd = "userdel"
         cmd << " -r" unless opts[:remove_home] == false
         cmd << " #{username}"
@@ -105,7 +104,7 @@ module AutomateIt
         return groups[groupname]
       end
 
-      # FIXME implement AccountManager#update_group
+      # TODO AccountManager#update_group -- implement
       ### def update_group(groupname, opts={}) dispatch(groupname, opts) end
 
       # See AccountManager#remove_group
@@ -120,7 +119,7 @@ module AutomateIt
       # See AccountManager#add_users_to_group
       def add_users_to_group(users, groupname)
         users = [users].flatten
-        # FIXME must include pwent.gid
+        # XXX Include pwent.gid?
         grent = groups[groupname]
         missing = \
           if writing? and not grent
