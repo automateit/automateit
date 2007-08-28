@@ -1,6 +1,6 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-# TODO Split PlatformManager into uname and an lsb subclass, this way I can have one set of tests check that "os" works on most platforms, while a more specific test checks for "distro". Also, I should catch errors in the Tags code so that only tags we know about will be injected, e.g. if "distro" isn't known, it shouldn't be added to tags -- currently it'll cause the tags setup process to fail with an IndexError.
+# TODO PlatformManager spec -- split entire spec into multiple, driver-specific ones.
 
 begin
   raise IndexError unless String === INTERPRETER.platform_manager.query("os")
