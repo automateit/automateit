@@ -5,7 +5,7 @@ module AutomateIt
   # stopping UNIX daemons.
   class ServiceManager < Plugin::Manager
     require 'automateit/service_manager/sysv'
-    require 'automateit/service_manager/sysvconfig'
+    require 'automateit/service_manager/update_rcd'
     require 'automateit/service_manager/chkconfig'
     require 'automateit/service_manager/rc_update'
 
