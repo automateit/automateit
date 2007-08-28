@@ -215,7 +215,6 @@ module AutomateIt
 
     # Invoke the +recipe+ at the given path.
     def invoke(recipe)
-      # FIXME doing eval breaks the exception backtraces
       # TODO lookup partial names
       data = File.read(recipe)
       eval(data, binding, recipe, 0)
