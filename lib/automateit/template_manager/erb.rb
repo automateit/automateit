@@ -86,14 +86,15 @@ module AutomateIt
           if opts[:locals]
             # Create a binding that the template can get variables from without
             # polluting the Driver's namespace.
-            binder = lambda{
+            callback = lambda{
               code = ""
               for key in opts[:locals].keys
                 code << "#{key} = opts[:locals][:#{key}]\n"
               end
               eval code
               binding
-            }.call
+            }
+            binder = callback.call
           end
           output = ::ERB.new(source_contents, nil, '-').result(binder)
 
@@ -144,7 +145,8 @@ module AutomateIt
 
       # Write +contents+ to +filename+.
       def _write(filename, contents)
-        return writing? ? File.open(filename, "w+"){|writer| writer.write(contents)} : true
+        File.open(filename, "w+"){|writer| writer.write(contents)}
+        return true
       end
       private :_write
 
