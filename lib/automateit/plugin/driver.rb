@@ -57,7 +57,7 @@ module AutomateIt
 
         is_available = self.class._is_available
         if is_available.nil? and opts.nil?
-          log.debug("don't know if driver #{self.class} is available, maybe it doesn't state what it +depends_on+")
+          #log.debug(PNOTE+"don't know if driver #{self.class} is available, maybe it doesn't state what it +depends_on+")
           return false
         elsif is_available.nil?
           all_present = true
