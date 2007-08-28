@@ -5,7 +5,8 @@ describe "AutomateIt::TemplateManager::ERB" do
     @a = AutomateIt.new(:verbosity => Logger::WARN)
     @m = @a.template_manager
     @d = @m[:erb]
-    @d.default_check = :exists
+    @d.setup(:default_check => :mtime)
+    @d.available?.should be_true
   end
 
   it "should set mode when rendering" do
