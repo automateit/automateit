@@ -21,7 +21,7 @@ describe "AutomateIt::TemplateManager::ERB" do
     @d.should_receive(:_exists?).once.with(@target).and_return(false)
     @d.should_receive(:_write).once.with(@target, "my template content").and_return(true)
 
-    @a.render(:string => "my template content", :to => @target).should be_true
+    @a.render(:text => "my template content", :to => @target).should be_true
   end
 
   it "should render a file template" do

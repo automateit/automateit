@@ -169,21 +169,21 @@ module AutomateIt
           puts PNOTE+"#{created ? 'Creating' : 'Updating'} AutomateIt project at: #{path}"
 
           mkdir("config") do
-            render(:string => TAGS_CONTENT, :to => "tags.yml")
-            render(:string => FIELDS_CONTENT, :to => "fields.yml")
-            render(:string => ENV_CONTENT, :to => "automateit_env.rb")
+            render(:text => TAGS_CONTENT, :to => "tags.yml")
+            render(:text => FIELDS_CONTENT, :to => "fields.yml")
+            render(:text => ENV_CONTENT, :to => "automateit_env.rb")
           end
 
           mkdir("dist") do
-            render(:string => DIST_README_CONTENT, :to => "README.txt")
+            render(:text => DIST_README_CONTENT, :to => "README.txt")
           end
 
           mkdir("lib") do
-            render(:string => BASE_README_CONTENT, :to => "README.txt")
+            render(:text => BASE_README_CONTENT, :to => "README.txt")
           end
 
           mkdir("recipes") do
-            render(:string => RECIPE_README_CONTENT, :to => "README.txt")
+            render(:text => RECIPE_README_CONTENT, :to => "README.txt")
           end
         end
         puts PNOTE+"DONE!"

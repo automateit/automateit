@@ -10,25 +10,25 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should pass contents" do
-    @a.edit(:string => @input) do
+    @a.edit(:text => @input) do
       contents.should == "This\nis\n\a\nstring."
     end
   end
 
   it "should pass params" do
-    @a.edit(:string => @input, :params => {:hello => "world"}) do
+    @a.edit(:text => @input, :params => {:hello => "world"}) do
       params[:hello].should == "world"
     end
   end
 
   it "should find contained lines" do
-    @a.edit(:string => @input) do
+    @a.edit(:text => @input) do
       contains?(/This/).should == true
     end
   end
 
   it "should prepend lines to the top" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       prepend "PREPEND"
       prepend "PREPEND" # Duplicate line will be ignored.
     end
@@ -36,7 +36,7 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should prepend lines to the top unless they match an expression" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       prepend "PREPEND", :unless => /PR.+ND/
       prepend "PRETENDER", :unless => /PR.+ND/ # Regexp matches.
     end
@@ -44,7 +44,7 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should append lines to the bottom" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       append "APPEND"
       append "APPEND" # Duplicate line will be ignored.
     end
@@ -52,7 +52,7 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should append lines to the bottom unless they match an expression" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       append "APPEND", :unless => /^APP/
       append "APPENDIX", :unless => /^APP/ # Regexp matches.
     end
@@ -60,7 +60,7 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should delete lines" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       delete "This"
     end
     # output.should !~ /This/ # XXX !~ is broken in rspec?
@@ -68,7 +68,7 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should comment lines" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       comment_style "<", ">"
       comment "This"
     end
@@ -76,7 +76,7 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should uncomment lines" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       comment_style "T", "s"
       uncomment "hi"
     end
@@ -84,14 +84,14 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should replace strings" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       replace "This", "That"
     end
     output.should =~ /^That\nis\n/s
   end
 
   it "should manipulate contents" do
-    output = @a.edit(:string => @input) do
+    output = @a.edit(:text => @input) do
       manipulate do |buffer|
         buffer.gsub(/i/, "@")
       end
@@ -100,7 +100,7 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   it "should tell if content is different after an edit" do
-    @a.edit(:string => @input) do
+    @a.edit(:text => @input) do
       different?.should == false
       append "changing"
       different?.should == true

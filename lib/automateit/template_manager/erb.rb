@@ -51,7 +51,7 @@ module AutomateIt
         args, opts = args_and_opts(*options)
         source_filename = args[0] || opts[:file]
         target_filename = args[1] || opts[:to]
-        source_contents = opts[:string]
+        source_contents = opts[:text]
 
         begin
           # source_filename, target_filename, opts={}

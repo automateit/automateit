@@ -17,7 +17,7 @@ if tagged?("myapp_servers")
 
     # Create mongrel cluster configuration from template string, if needed
     render(
-      :string => \
+      :text => \
 "<%=WARNING_BOILERPLATE%>
 
 cwd: <%=path%>

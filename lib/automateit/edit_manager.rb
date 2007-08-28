@@ -36,18 +36,18 @@ module AutomateIt
       # EditSession provides a way to edit files and strings.
       #
       # Example:
-      #   edit(:string => "# hello") do
+      #   edit(:text => "# hello") do
       #     uncomment "llo"
       #     append "world"
       #   end
       #   # => "hello\nworld"
       class EditSession < AutomateIt::Common
-        # Edit a file or string. You must specify either the :file or :string
+        # Edit a file or string. You must specify either the :file or :text
         # options.
         #
         # Options:
         # * :file -- File to edit.
-        # * :string -- String to edit.
+        # * :text -- String to edit.
         # * :params -- Hash to make available to editor session. Optional.
         #
         # Example:
@@ -57,7 +57,7 @@ module AutomateIt
         #   end
         def edit(opts, &block)
           @filename = opts.delete(:file)
-          @contents = opts.delete(:string)
+          @contents = opts.delete(:text)
           @params = opts.delete(:params) || {}
           @comment_prefix = "# "
           @comment_suffix = ""
