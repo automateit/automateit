@@ -215,7 +215,7 @@ module AutomateIt
 
     # Invoke the +recipe+ at the given path.
     def invoke(recipe)
-      # TODO lookup partial names
+      # TODO Interpreter#invoke -- lookup unqualified names in the project's 'recipes' directory
       data = File.read(recipe)
       eval(data, binding, recipe, 0)
     end

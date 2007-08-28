@@ -18,16 +18,15 @@ module AutomateIt
       # Options:
       # * :struct -- Hash to use for queries.
       def setup(opts={})
+        # XXX Consider refactoring tags using lazy-loading.
         super(opts)
 
         @struct ||= {}
         @struct = opts[:struct] if opts[:struct]
-        # TODO parse @group and !negation
+        # TODO TagManager#setup -- parse @groups and their !negations
 
-        # TODO Refactor tags using lazy-loading to improve performance.
         @tags ||= Set.new
 
-        # AddressManager::Portable is available everywhere, no need to rescue
         hostnames = interpreter.address_manager.hostnames.to_a # SLOW 0.4s
         @tags.merge(hostnames)
         @tags.merge(tags_for(hostnames))

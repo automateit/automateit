@@ -34,8 +34,9 @@ module AutomateIt
       end
 
       def rbsync(sources, target)
-        # FIXME replace with new version
-        # TODO generalize with cp, cp_r, install
+        # FIXME Reimplment as call to generalized +cp+ method
+        raise NotImplementedError 
+
         if File.exists?(target)
           cmd = "diff -qr"
           for t in [sources, target].flatten
@@ -222,9 +223,9 @@ module AutomateIt
 
       # See ShellManager#install
       def install(source, target, mode)
-        raise NotImplementedError
-        # TODO needs more sophisticated algorithm, maybe combine with copy
-        # TODO log
+        # FIXME Reimplment as call to generalized +cp+ method
+        raise NotImplementedError 
+
         source_stat = File.stat(source)
         target_file = (File.directory?(target) || File.stat(target).symlink?) ?
           File.join(target, File.basename(source)) : target
@@ -237,14 +238,17 @@ module AutomateIt
 
       # See ShellManager#cp
       def cp(sources, target, opts={})
-        raise NotImplementedError
-        # TODO needs much more sophisticated algorithm
-        # TODO log
+        # FIXME Reimplment as call to generalized +cp+ method
+        raise NotImplementedError 
+
         FileUtils.cp(sources, target, _fileutils_opts)
       end
 
       # See ShellManager#cp_r
       def cp_r(sources, target, opts={})
+        # FIXME Reimplment as call to generalized +cp+ method
+        raise NotImplementedError 
+
         cp(sources, target, {:recursive => true}.merge(opts))
       end
 
@@ -320,7 +324,7 @@ module AutomateIt
           modified = false
           stat = writing? || File.exists?(path) ? File.stat(path) : nil
           if opts[:mode]
-            # TODO process mode strings [ugoa...][[+-=][rwxXstugo...]...][,...]
+            # TODO ShellManager::Portable#chperm -- process chmod symbolic strings, e.g. [ugoa...][[+-=][rwxXstugo...]...][,...]
             mode = opts[:mode] | (stat.directory? ? DIRECTORY_MASK : FILE_MASK) if stat
             unless stat and (mode ^ stat.mode).zero?
               modified = true

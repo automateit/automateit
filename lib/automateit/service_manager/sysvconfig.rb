@@ -19,8 +19,7 @@ module AutomateIt
 
 =begin
       def enabled?(service)
-        # TODO Allow user to request the wrapped version of this method if they
-        # want correctness rather than speed?
+        # TODO ServiceManager::Sysconfig#enabled? -- Allow user to request this disabled method which is more correct but very slow
         #
         # "sysconfig --listlinks" output looks like this, note how there's no
         # space between the name and run-level when displaying a long name:
