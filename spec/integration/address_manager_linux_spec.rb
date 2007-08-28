@@ -26,31 +26,70 @@ else
       end
     end
 
-    before(:each) do
+    after(:all) do
       @m.remove(@properties)
     end
 
-    after do
-      @m.remove(@properties)
-    end
-
-    # TODO Split this block up into multiple, inter-dependant specs?
-    it "should be able to add and remove addresses, check their ownership and presence" do
+    it "should find interfaces for top-level device" do
       @m.interfaces.include?(@properties[:device]).should be_true
+    end
+
+    it "should not find non-existent device-label" do
       @m.interfaces.include?(@device_and_label).should be_false
+    end
+
+    it "should not find non-existant IP address" do
       @m.addresses.include?(@properties[:address]).should be_false
+    end
+
+    it "should not have non-existent address bundles" do
       @m.has?(@properties).should be_false
+    end
 
+    it "should add an address" do
       @m.add(@properties).should be_true
-      @m.interfaces.include?(@device_and_label).should be_true
-      @m.addresses.include?(@properties[:address]).should be_true
-      @m.has?(@properties).should be_true
-      @m.has?(:address => @properties[:address]).should be_true
-      @m.has?(:device => @properties[:device], :label => @properties[:label]).should be_true
+      # Leaves active interface behind for other tests
+    end
 
+    it "should find added interface" do
+      # Depends on active interface being created by earlier test
+      @m.interfaces.include?(@device_and_label).should be_true
+    end
+
+    it "should find added IP address" do
+      # Depends on active interface being created by earlier test
+      @m.addresses.include?(@properties[:address]).should be_true
+    end
+
+    it "should find added address using a properties bundle" do
+      # Depends on user to be created by previous tests
+      @m.has?(@properties).should be_true
+    end
+
+    it "should find added address using the IP address" do
+      # Depends on user to be created by previous tests
+      @m.has?(:address => @properties[:address]).should be_true
+    end
+
+    it "should find added address using device and lable" do
+      # Depends on user to be created by previous tests
+      @m.has?(:device => @properties[:device], :label => @properties[:label]).should be_true
+    end
+
+    it "should remove an address" do
+      # Depends on active interface being created by earlier test
       @m.remove(@properties).should be_true
+    end
+
+    it "should not have an interface after removing it" do
       @m.interfaces.include?(@device_and_label).should be_false
+    end
+
+    it "should not have an address after removing it" do
       @m.addresses.include?(@properties[:address]).should be_false
+    end
+
+    it "should not have an address match a properties bundle after removing it" do
       @m.has?(@properties).should be_false
     end
 
@@ -61,6 +100,9 @@ else
     it "should not re-add an existing address" do
       @m.add(@properties).should be_true
       @m.add(@properties).should be_false
+
+      # Cleanup
+      @m.remove(@properties).should be_true
     end
 
     it "should have hostnames" do
