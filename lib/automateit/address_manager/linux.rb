@@ -31,12 +31,10 @@ module AutomateIt
         raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
         return false if has?(opts)
         #run(%{ip address add #{ip}/#{mask} brd + dev #{device} label #{device}:#{label}})
-        if interpreter.sh(_add_or_remove_command(:add, opts))
-          #run(%{arping -q -c 3 -A -I #{device} #{ip} &})
-          return interpreter.sh("arping -q -c #{announcements} -A -I #{opts[:device]} #{opts[:address]}")
-        else
-          return false
-        end
+        interpreter.sh(_add_or_remove_command(:add, opts))
+        #run(%{arping -q -c 3 -A -I #{device} #{ip} &})
+        interpreter.sh("arping -q -c #{announcements} -A -I #{opts[:device]} #{opts[:address]}")
+        return true
       end
 
       # See AddressManager#remove
@@ -49,15 +47,7 @@ module AutomateIt
 
       def _add_or_remove_command(action, opts)
         _raise_unless_available
-        case action.to_sym
-        when :add
-          # Accept
-        when :remove
-          # Rename
-          action = :del
-        else
-          raise ArgumentError.new("action must be :add or :remove")
-        end
+        action = :del if action.to_sym == :remove
 
         # Accept common alternative names
         opts[:mask] ||= opts[:netmask] if opts[:netmask]
