@@ -1,6 +1,6 @@
 module AutomateIt
   class ServiceManager
-    # == Chkconfig
+    # == ServiceManager::Chkconfig
     #
     # The Chkconfig driver implements the ServiceManager methods for #enabled?,
     # #enable and #disable on RedHat-like platforms. It uses the SYSV driver
