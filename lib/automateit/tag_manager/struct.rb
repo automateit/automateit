@@ -22,8 +22,7 @@ module AutomateIt
         super(opts)
 
         @struct ||= {}
-        @struct = opts[:struct] if opts[:struct]
-        # TODO TagManager#setup -- parse @groups and their !negations
+        @struct = _resolve_groups_and_negations(opts[:struct]) if opts[:struct]
 
         @tags ||= Set.new
 
@@ -42,6 +41,56 @@ module AutomateIt
           log.debug("this platform doesn't have a PlatformManager driver")
         end
       end
+
+      def _resolve_groups_and_negations(struct)
+        # TODO TagManager::Struct#_resolve_groups_and_negations - write a less awful algorithm.
+        def restruct(input)
+          def trace(msg)
+            puts msg if false
+          end
+          output = {}
+          trace "in %s" % input.inspect
+          for tag, hosts in input
+            trace "tag %s" % tag
+            for host in hosts
+              trace " host %s" % host
+              output[tag] ||= []
+              if host.is_a?(::YAML::DomainType) and host.value.empty?
+                # Negations get parsed as symbols in YAML, replace them
+                output[tag].delete(host.type_id)
+                output[tag] << "!%s"%host.type_id
+                trace "  replaced YAML host %s" % host.type_id
+              elsif host.match(/!@(\w+)/)
+                # Group subtract with !@group
+                output[tag].delete("@%s"%$1)
+                output[tag] -= input[$1]
+                trace "  negated group %s" % $1
+              elsif host.match(/@(\w+)/)
+                # Group add with @group
+                output[tag] += input[$1]
+                trace "  added group %s" % $1
+              elsif host.match(/!(\w+)/)
+                # Host negation with !host
+                output[tag].delete($1)
+                trace "  negated struct host %s" % $1
+              else
+                output[tag] << host
+              end
+            end
+          end
+          trace "out %s" % output.inspect
+          return output
+        end
+
+        while ! struct.values.flatten.grep(/@|\!/).empty?
+          before = struct
+          struct = restruct(struct)
+          #puts "outputuring %s to %s" % [before.inspect, struct.inspect]
+          #sleep 1
+        end
+        return struct
+      end
+      private :_resolve_groups_and_negations
 
       # See TagManager#hosts_tagged_with
       def hosts_tagged_with(query)

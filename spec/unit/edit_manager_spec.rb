@@ -63,8 +63,7 @@ describe "AutomateIt::EditManager for strings" do
     output = @a.edit(:text => @input) do
       delete "This"
     end
-    # output.should !~ /This/ # XXX !~ is broken in rspec?
-    (output !~ /This/).should == true
+    output.should_not =~ /This/
   end
 
   it "should comment lines" do

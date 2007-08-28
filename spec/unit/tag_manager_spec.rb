@@ -117,9 +117,17 @@ describe "AutomateIt::TagManager", :shared => true do
     @a.tagged?("!akane && !proxy_servers").should be_true
   end
 
-=begin
-  # FIXME TagManager spec -- add examples for @group and its !negation
-=end
+  it "should include group aliases" do
+    @a.hosts_tagged_with("all_servers").sort.should == ["kurou", "shirou", "akane.foo"].sort
+  end
+
+  it "should exclude hosts from groups" do
+    @a.hosts_tagged_with("apache_servers_except_kurou").should == ["shirou"]
+  end
+
+  it "should exclude groups from groups" do
+    @a.hosts_tagged_with("all_servers_except_proxy_servers").sort.should == ["kurou", "shirou"].sort
+  end
 end
 
 describe "AutomateIt::TagManager::Struct" do
@@ -136,6 +144,18 @@ describe "AutomateIt::TagManager::Struct" do
         "proxy_servers" => [
           "akane.foo",
         ],
+        "all_servers" => [
+          "@apache_servers",
+          "@proxy_servers",
+        ],
+        "apache_servers_except_kurou" => [
+          "@apache_servers",
+          "!kurou",
+        ],
+        "all_servers_except_proxy_servers" => [
+          "@all_servers",
+          "!@proxy_servers",
+        ],
       }
     )
   end
@@ -150,7 +170,16 @@ describe "AutomateIt::TagManager::YAML" do
         - kurou
         - shirou
       proxy_servers:
-        akane.foo
+        - akane.foo
+      all_servers:
+        - @apache_servers
+        - @proxy_servers
+      apache_servers_except_kurou:
+        - @apache_servers
+        - !kurou
+      all_servers_except_proxy_servers:
+        - @all_servers
+        - !@proxy_servers
     EOB
     @m.setup(
       :default => :yaml,
