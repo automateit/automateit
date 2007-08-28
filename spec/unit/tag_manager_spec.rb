@@ -112,9 +112,9 @@ describe "AutomateIt::TagManager", :shared => true do
   end
 
   it "should find using negative queries" do
-    # TODO fails because single word queries aren't tokenized
     @a.tagged?("akane").should be_false
     @a.tagged?("!akane").should be_true
+    @a.tagged?("!akane && !proxy_servers").should be_true
   end
 
 =begin
