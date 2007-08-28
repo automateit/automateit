@@ -89,6 +89,33 @@ Community support and release notifications are available at the http://Automate
 
 AutomateIt is beta-quality software. It's feature-complete, exceeds the capabilities of other major products, and ensures its quality with a test suite that provides nearly-complete code coverage. However, this is a young, product and early users should have a high-degree of technical understanding, be willing to accept rough spots and work through problems. Driver support for some operating systems is limited, although users are encouraged to write and submit drivers or provide access to their platforms so the product's authors can write these. Users are expected to sign up at the http://AutomateIt.org website so they can be notified of releases and apply these updates regularly to take advantage of bugfixes and new features.
 
+The 1.0 release of AutomateIt will provide 100% code coverage and complete drivers for:
+- Ubuntu
+- Debian
+- Fedora Core
+- CentOS
+- Red Hat
+- Gentoo
+- FreeBSD
+- OpenBSD
+- Solaris
+- Darwin
+
+=== Driver support issues
+
+Most of AutomateIt's features will work on any system that can run Ruby. Ubuntu and Fedora Core are currently the only fully-supported and tested platforms, but others will be included with time. You can see what drivers are supported on your platform by running the integration test suite and it'll complain when it can't test a driver.
+
+If no driver is available for your platform or tool, you can probably write one in 30 minutes, it's really that easy. Just find an included driver that's similar to what you need, look at its code, and create your own derivative. You'll want to put your new driver code into an file that ends with ".rb" into your project's "lib" directory so it'll be loaded automatically when you run the Interpreter. Please contribute your drivers back so others can benefit. If you don't want to write your own driver, please provide access to a system so AutomateIt's author can write it for you.
+
+If you don't want to write drivers, there are workarounds. For example, if you need to tag machines by operating system and release versions but AutomateIt doesn't have a driver to get this information on your platform, just edit the tags.yml file manually to create the appropriate tags. Or if you need to install packages using an unsupported package manager, you can just use the +sh+ command to execute the system-level tool yourself. This isn't pretty, but it'll get the job done.
+
+=== Future plugins
+
+Plugins that might be implemented in the future:
+* ScheduleManager -- Manipulates regular command execution schedules, e.g. cron.
+* TransferManager -- Transfers files from some source, e.g. rsync, sftp, http.
+* SourceManager -- Manipulates source control systems, e.g. svn, cvs, hg.
+
 === Legal
 
 Author:: Igal Koshevoy (igal@pragmaticraft.com)
