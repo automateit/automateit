@@ -146,6 +146,32 @@ module AutomateIt
   #   export AUTOMATEIT_PROJECT=/tmp/hello_project
   #   aifield greeting
   #
+  # === Sharing a project between systems
+  #
+  # If you want to share a project between different hosts, you're responsible for distributing the files between them. This isn't a big deal though because these are just text files and your OS has dozens of excellent ways to distribute these.
+  #
+  # Common approaches to distribution:
+  # * *Shared directory*: Your hosts mount a shared network directory (e.g. +nfs+ or +smb+) with your project. This is very easy if your hosts already have a shared directory, but can be a nuisance otherwise because it opens potential security holes and risks having you hosts hang if the master goes offline.
+  # * *Client pull*: Your hosts download the latest copy of your project from a master repository using a remote copy tool (e.g. +rsync+) or a revision control system (e.g. +cvs+, +svn+, +hg+). This is a safe, simple and secure option.
+  # * *Server push*: You have a master push out the project files to clients using a remote copy tool. This can be awkward and time-consuming because the server must go through a list of all hosts and copy files to them individually.
+  #
+  # An example of a complete solution for distributing system configuration management files:
+  # * Setup an +svn+ or +hg+ repository to store your project and create a special account for the hosts to use to checkout code.
+  # * Write a wrapper script for running the recipes, for example, write a "/usr/bin/myautomateit" shell script like:
+  #
+  #     #!/bin/sh
+  #     cd /var/local/myautomateit
+  #     svn update --quiet
+  #     automateit recipe/default.rb
+  # * Run this wrapper once an hour using cron so that your systems are always up to date. AutomateIt only prints output when it makes a change, so cron will only email you when you commit new code to the repository and the hosts make changes.
+  # * If you need to run a recipe on the machine right now, SSH into it and run the wrapper.
+  # * If you need to run the script early on a bunch of machines and don't want to manually SSH into each one, you can leverage the +aitag+ (see <tt>aitag --help</tt>) to execute a UNIX command across multiple systems. For example, you could use a UNIX shell command like this to execute the wrapper on all hosts tagged with +apache_servers+:
+  #
+  #     for host in `aitag -p /var/local/myautomateit -w apache_server`; do
+  #         echo "# $host"
+  #         ssh $host myautomateit
+  #     done
+  #
   # === Curios
   #
   # In case you're interested, the project creator is actually an AutomateIt
