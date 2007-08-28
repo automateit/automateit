@@ -131,6 +131,10 @@ module AutomateIt
 
     # Copy the +sources+ to the +target+. Returns an array of sources copied or
     # +false+ if all are present.
+    #
+    # Options:
+    # * :preserve -- preserve file modification time and ownership, boolean.
+    # * :recursive -- copy files and directories recursively, boolean.
     def cp(sources, target, opts={}) dispatch(sources, target, opts) end
 
     # Copy the +sources+ to the +target+ recursively. Returns an array of

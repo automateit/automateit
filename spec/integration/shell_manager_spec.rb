@@ -129,6 +129,94 @@ describe "AutomateIt::ShellManager" do
     end
   end
 
+  it "should install a file to a file (install)" do
+    @m.mktempdircd do
+      source = "foo"
+      target = "bar"
+
+      @a.render(:text => "Hello", :to => source)
+      File.exists?(source).should be_true
+      File.exists?(target).should be_false
+
+      @a.install(source, target, 0640).should == source
+      File.exists?(target).should be_true
+      File.stat(target).mode.should == 0100640
+
+      @a.install(source, target, 0640).should be_false
+    end
+  end
+
+  it "should copy a file to file (cp)" do
+    @m.mktempdircd do
+      source = "foo"
+      target = "bar"
+
+      @a.render(:text => "Hello", :to => source)
+      File.exists?(source).should be_true
+      File.exists?(target).should be_false
+
+      @a.cp(source, target).should == source
+      File.exists?(target).should be_true
+
+      @a.cp(source, target).should be_false
+    end
+  end
+
+  it "should copy a file to a directory (cp)" do
+    @m.mktempdircd do
+      source = "foo"
+      target = "bar"
+
+      @a.render(:text => "Hello", :to => source)
+      @a.mkdir(target)
+      File.exists?(source).should be_true
+      File.exists?(target).should be_true
+
+      @a.cp(source, target).should == source
+      File.exists?("bar/foo").should be_true
+
+      @a.cp(source, target).should be_false
+    end
+  end
+
+  it "should copy files to a directory (cp)" do
+    @m.mktempdircd do
+      source1 = "foo"
+      source2 = "bar"
+      target = "baz"
+
+      @a.render(:text => "Hello", :to => source1)
+      @a.render(:text => "Hello", :to => source2)
+      @a.mkdir(target)
+
+      @a.cp([source1, source2], target).should == [source1, source2]
+      File.exists?("baz/foo").should be_true
+      File.exists?("baz/bar").should be_true
+
+      @a.cp([source1, source2], target).should be_false
+    end
+  end
+
+  it "should copy directory to a directory (cp)" do
+    @m.mktempdircd do
+      source_dir = "feh"
+      source_file1 = "feh/file1"
+      source_file2 = "feh/file2"
+      target_dir = "meh"
+
+      @a.mkdir(source_dir)
+      @a.render(:text => "Hello", :to => source_file1)
+      @a.render(:text => "Hello", :to => source_file2)
+      @a.mkdir(target_dir)
+
+      @a.cp(source_dir, target_dir).should == source_dir
+      File.exists?("meh/feh/file1").should be_true
+      File.exists?("meh/feh/file2").should be_true
+
+      @a.cp(source_dir, target_dir).should be_false
+    end
+  end
+
   # TODO implement umask spec
 
   # TODO implement gap

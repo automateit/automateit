@@ -33,22 +33,6 @@ module AutomateIt
         return writing? ? system(*args) : true
       end
 
-      def rbsync(sources, target)
-        # FIXME ShellManager::Portable#rbsync -- reimplement using generalized +cp+ command
-        raise NotImplementedError
-
-        if File.exists?(target)
-          cmd = "diff -qr"
-          for t in [sources, target].flatten
-            cmd << %{ "#{t}"}
-          end
-          cmd << " < /dev/null > /dev/null"
-          log.debug(PEXEC+cmd)
-          return false if system(cmd)
-        end
-        cp(sources, target, _fileutils_opts)
-      end
-
       def _mktemp_helper(kind, name=nil, opts={}, &block)
         # Tempster takes care of rethrowing exceptions
         opts = {:name => name}.merge(opts)
@@ -222,33 +206,108 @@ module AutomateIt
       end
 
       # See ShellManager#install
-      def install(source, target, mode)
-        # FIXME ShellManager::Portable#install -- reimplement as call to generalized +cp+ method
-        raise NotImplementedError
-
-        source_stat = File.stat(source)
-        target_file = (File.directory?(target) || File.stat(target).symlink?) ?
-          File.join(target, File.basename(source)) : target
-        target_stat = File.exists?(target_file) ? File.stat(target) : nil
-        unless target_stat and FileUtils.identical?(source, target_file)
-          FileUtils.install(source, target, mode,
-                            {:preserve => true}.merge(_fileutils_opts))
+      def install(source, target, mode=nil)
+        cp_rv = nil
+        chmod_rv = nil
+        log.silence(Logger::WARN) do
+          cp_rv = cp(source, target)
+          chmod_rv = chmod(mode, target) if mode
         end
+
+        return false unless cp_rv or chmod_rv
+
+        log.info(PEXEC+"install%s %s %s" %
+                 [mode ? ' -m 0%o' % mode : '', source, target])
+        return source
       end
 
       # See ShellManager#cp
       def cp(sources, target, opts={})
-        # FIXME ShellManager::Portable#cp -- reimplement as call to generalized +cp+ method
-        raise NotImplementedError
+        # TODO ShellManager::Portable#cp -- rather funky, needs a code review
+        fu_opts = _fileutils_opts.merge(:noop => opts[:noop], :verbose => opts[:verbose])
+        #fu_opts[:verbose] = true
+        fu_opts_with_preserve = {:preserve => opts[:preserve]}.merge(fu_opts)
+        changed = []
+        sources_a = [sources].flatten
+        sources_a.each do |parent|
+          Find.find(parent) do |child|
+            source_fn = File.directory?(child) ? child+"/" : child
+            target_dir = File.directory?(target)
+            target_fn = \
+              if target_dir
+                #File.join(target, source_fn.match(/#{parent}\/?(.*)$/)[1])
+                File.join(target, source_fn)
+              else
+                target
+              end
+            log.debug(PNOTE+"comparing %s => %s" % [source_fn, target_fn])
+            source_st = File.stat(source_fn)
+            is_copy = false
+            begin
+              begin
+                target_st = File.stat(target_fn)
 
-        FileUtils.cp(sources, target, _fileutils_opts)
+                unless target_dir
+                  # Is the file obviously different?
+                  if source_st.file?
+                    for kind in %w(size mtime)
+                      unless source_st.send(kind) == target_st.send(kind)
+                        log.debug(PNOTE+"%s not same %s" % [target_fn, kind])
+                        raise EOFError.new
+                      end
+                    end
+
+                    unless FileUtils.identical?(source_fn, target_fn)
+                      log.debug(PNOTE+"%s not identical" % target_fn)
+                      raise EOFError.new
+                    end
+                  end
+
+                  # File just needs to be altered
+                  if opts[:preserve]
+                    unless source_st.mode == target_st.mode
+                      changed << child
+                      log.debug(PNOTE+"%s not same mode" % target_fn)
+                      chmod(source_st.mode, target_fn, fu_opts)
+                    end
+                    unless source_st.uid == target_st.uid and source_st.gid == target_st.gid
+                      changed << child
+                      log.debug(PNOTE+"%s not same uid/gid" % target_fn)
+                      chown(source_st.uid, source_st.gid, target_fn, fu_opts)
+                    end
+                  end
+                end
+              rescue EOFError
+                changed << child
+                is_copy = true
+              end
+            rescue Errno::ENOENT
+              changed << child
+              log.debug(PNOTE+"%s not present" % target_fn)
+              is_copy = true
+            end
+            if is_copy
+              log.info(PEXEC+"cp%s %s %s" % [opts[:recursive] ? ' -r' : '', source_fn, target_fn])
+              FileUtils.cp_r(source_fn, target_fn, fu_opts_with_preserve)
+            end
+          end
+        end
+
+        result = \
+          if changed.empty?
+            false
+          else
+            if sources_a.size == 1
+              changed.first
+            else
+              changed.uniq
+            end
+          end
+        return result
       end
 
       # See ShellManager#cp_r
       def cp_r(sources, target, opts={})
-        # FIXME ShellManager::Portable#cp_r -- reimplement as call to generalized +cp+ method
-        raise NotImplementedError
-
         cp(sources, target, {:recursive => true}.merge(opts))
       end
 
