@@ -131,7 +131,7 @@ describe "MyManager" do
     AutomateIt::Interpreter.should === @m.interpreter
   end
 
-  # TODO Creating a Plugin before the Interpreter makes objects get different references
+  # XXX Plugins spec -- Instantiating a Plugin outside of an Interpreter should retain consistent object references
 #  it "should inject interpreter instance into drivers" do
 #    @m.interpreter.object_id.should == m[:my_first_driver].interpreter.object_id
 #  end
