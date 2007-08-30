@@ -1,4 +1,4 @@
-= Installing AutomateIt
+== Installing AutomateIt
 
 1. Install Ruby (http://www.ruby-lang.org/en/)
 2. Install Rubygems (http://rubyforge.org/frs/?group_id=126)

@@ -1,4 +1,4 @@
-= AutomateIt
+== AutomateIt
 
 <em>AutomateIt is an open-source tool for automating the setup and maintenance of UNIX systems.</em>
 

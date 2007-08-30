@@ -1,4 +1,4 @@
-= Using AutomateIt
+== Using AutomateIt
 
 === Executing commands and invoking recipe files
 
