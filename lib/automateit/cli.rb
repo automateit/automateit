@@ -18,11 +18,11 @@ module AutomateIt
       opts[:project] ||= opts[:recipe] ? File.join(File.dirname(opts[:recipe]), "..") : "."
       if opts[:create]
         Project::create(opts)
-      elsif opts[:recipe]
-        AutomateIt.invoke(opts[:recipe], opts)
       elsif code = opts.delete(:eval)
         interpreter = AutomateIt.new(opts)
         interpreter.instance_eval(code)
+      elsif opts[:recipe]
+        AutomateIt.invoke(opts[:recipe], opts)
       else
         require "irb"
         unless opts[:quiet]
