@@ -31,9 +31,16 @@ module AutomateIt
         end
         IRB.setup(__FILE__)
         irb = IRB::Irb.new
-        IRB.instance_variable_get(:@CONF)[:MAIN_CONTEXT] = irb.context
+        opts[:irb] = irb
+        IRB.conf[:MAIN_CONTEXT] = irb.context
         interpreter = AutomateIt.new(opts)
         irb.context.workspace.instance_variable_set(:@binding, interpreter.send(:binding))
+        unless opts[:custom_prompt] == false
+          irb.context.prompt_i = "ai> "
+          irb.context.prompt_s = "ai%l "
+          irb.context.prompt_c = "ai* "
+          irb.context.prompt_n = "ai%i "
+        end
         irb.eval_input
       end
     end

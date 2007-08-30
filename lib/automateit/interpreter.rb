@@ -10,6 +10,9 @@ module AutomateIt
     private :parent
     private :parent=
 
+    # Access IRB instance from an interactive shell.
+    attr_accessor :irb
+
     # Project path for this Interpreter. If no path is available, nil.
     attr_accessor :project
 
@@ -26,6 +29,10 @@ module AutomateIt
     # * :log -- QueuedLogger instance.
     def setup(opts={})
       super(opts.merge(:interpreter => self))
+
+      if opts[:irb]
+        @irb = opts[:irb]
+      end
 
       if opts[:parent]
         @parent = opts[:parent]
