@@ -3,6 +3,6 @@
 1. Install Ruby (http://www.ruby-lang.org/en/)
 2. Install Rubygems (http://rubyforge.org/frs/?group_id=126)
 3. Install the toolkit:
-    sudo gem install -y automateit
+    sudo gem install -y -r --source http://automateit.org/pub automateit
 
 When you've finished installing the software, read USAGE.txt[link:files/USAGE_txt.html] to learn how to use the toolkit.
