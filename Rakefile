@@ -82,7 +82,7 @@ end
 
 task :rdoc do
   # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-  sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt USAGE.txt"
+  sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt USAGE.txt TESTING.txt"
 end
 
 task :prof do
@@ -124,7 +124,7 @@ spec = Gem::Specification.new do |s|
   s.date = File.mtime('lib/automateit/root.rb')
   s.email = "igal@pragmaticraft.org"
   s.executables = Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)}
-  s.extra_rdoc_files = ["README.txt", "INSTALL.txt", "USAGE.txt"]
+  s.extra_rdoc_files = %w(README.txt INSTALL.txt USAGE.txt TESTING.txt)
   s.files = FileList["{bin,lib}/**/*"].to_a
   s.has_rdoc = true
   s.homepage = "http://AutomateIt.org/"
@@ -144,8 +144,13 @@ end
 
 desc "Recreate Gem"
 task :regem do
-  rm Dir["pkg/*"]
+  raise "Can't recreate gems unless a directory with all previous gems is available at ../gems" unless File.directory?("../gems")
+  rm_r Dir["pkg/*"]
+  mkdir_p "pkg/pub/gems"
+  cp "../gems/*.gem", "pkg/pub/gems" unless Dir["../gem/*.gem"].empty?
   Rake::Task[:gem].invoke
+  cp Dir["pkg/*.gem"], "pkg/pub/gems"
+  sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb"
 end
 
 #===[ fin ]=============================================================

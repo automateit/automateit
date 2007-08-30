@@ -1,0 +1,55 @@
+= AutomateIt's self-test
+
+AutomateIt ensures that it works correctly, and stays working, by using a rigorous self-test suite. This suite is written using the RSpec tool and its files are stored in the software installation's +spec+ directory. You must install the +rspec+ Gem to run the tests.
+
+== Types of tests
+
+*Unit* tests are quick and safe because they don't write to the disk or alter your system.
+
+For example, <tt>spec/unit/template_manager_erb_spec.rb</tt> exercises AutomateIt::TemplateManager::ERB by rendering templates to memory. Because it doesn't write to the disk, you can safely run this without worrying that it'll damage your system.
+
+*Integration* tests are slow and potentially-dangerous because they write to disk and alter your system. Great care is taken to make sure these don't cause damage, but because they modify the system, there is a potential risk. These tests are designed to fail before doing anything if they detect that they might cause damage. The tests will clean up after themselves when done to remove any changes made to the system.
+
+For example, the <tt>spec/integration/account_manager_spec.rb</tt> exercises the AutomateIt::AccountManager by adding and deleting users and groups. To make sure it doesn't cause harm, it tests using dummy users with names like +asdfasdf+ and makes sure they're not present so that in the unlikely event that you have a user with that name, it won't destroy their account.
+
+== Understanding warnings
+
+When the tests can't check something, they'll print warning messages. These warnings are normal and expected. They are not errors and don't imply that something is broken.
+
+For example, if you run the integration test suite as a non-root user, it will warn you that it can't test some commands because you don't have the necessary privileges, e.g.:
+
+ NOTE: Must be root to check 'chown' in ./spec/integration/shell_manager_spec.rb
+
+You will also get warnings about drivers that are not available on your platform. For example, Ubuntu systems don't include the YUM package manager, so there's no way to test it on an Ubuntu system. So if you run the integration tests on an Ubuntu system, you'll get a warning like:
+
+ NOTE: AutomateIt::PackageManager::YUM is not available for testing on this platform ./spec/integration/package_manager_spec.rb
+
+== Running an individual test
+
+Run an individual test, like <tt>spec/unit/template_manager_erb_spec.rb</tt>, by executing the UNIX shell command:
+
+ spec spec/unit/template_manager_erb_spec.rb
+
+== Running test suites
+
+To run the +unit+ test suite, execute the following command from the UNIX shell:
+
+ rake spec
+
+To run all the test suites, including +unit+ and +integration+, execute the following command from the UNIX shell:
+
+ rake spec:all
+
+The integration test can take a few minutes and will pause for long periods of time while appearing to do nothing. This is normal, expected and there's nothing that can be done to "fix" this. For example, when testing the PackageManager::Gem driver, the test must wait for the +gem+ program to download fresh package indexes and this can take a long time.
+
+== Code coverage reports
+
+You can generate a code coverage report for the +unit+ test suite by running:
+
+ rake rcov
+
+Or a report for all the suites, including +unit+ and +integration+, by running:
+
+ rake rcov:all
+
+These tasks will create a +coverage+ directory with the report files.
