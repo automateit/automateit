@@ -145,7 +145,7 @@ module AutomateIt
 
       # Write +contents+ to +filename+.
       def _write(filename, contents)
-        File.open(filename, "w+"){|writer| writer.write(contents)}
+        File.open(filename, "w+"){|writer| writer.write(contents)} if writing?
         return true
       end
       private :_write
