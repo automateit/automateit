@@ -6,7 +6,7 @@ module AutomateIt
   #
   # === Create a project
   #
-  # You can create a project by running the following from the command-line:
+  # You can create a project by running the following from the UNIX shell:
   #
   #   automateit --create myproject
   #
@@ -75,7 +75,7 @@ module AutomateIt
   #
   #   MEOW!
   #
-  # === Specifying project paths on the command-line
+  # === Specifying project paths on the UNIX shell
   #
   # AutomateIt will load the project automatically if you're executing a recipe
   # that's inside a project's +recipes+ directory.
@@ -124,11 +124,11 @@ module AutomateIt
   #
   # === Tag and field command-line helpers
   #
-  # You can access a project's tags and fields from the UNIX command-line. This
+  # You can access a project's tags and fields from the UNIX shell. This
   # helps other programs access configuration data and make use of your roles.
   #
   # For example, with the <tt>hello_project</tt> we've created, we can lookup
-  # fields from the UNIX command-line like this:
+  # fields from the UNIX shell like this:
   #
   #   aifield -p /tmp/hello_project greeting
   #

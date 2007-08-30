@@ -2,11 +2,11 @@
 
 === Executing commands and invoking recipe files
 
-You can run a recipe from the UNIX command-line by running:
+You can run a recipe from the UNIX shell by running:
 
   automateit your_recipe_file.rb
 
-Or start an interactive shell from the UNIX command-line by running:
+Or start an interactive shell from the UNIX shell by running:
 
   automateit
 
@@ -14,13 +14,12 @@ You can enter any valid Ruby code into the recipe file or interpreter
 shell, plus the special methods offered by the interpreter.
 
 Or if you want to type a shorter name than <tt>automateit</tt> at the
-command-line, you can use the shortcut name <tt>ai</tt>, which means "love" in
-Japanese. Awwh.
+UNIX shell, you can use the shortcut name <tt>ai</tt>.
 
 === Discovering Interpreter features
 
 Let's explore AutomateIt by starting up an interactive shell by running the
-following command from the UNIX command-line:
+following command from the UNIX shell:
 
   automateit
 

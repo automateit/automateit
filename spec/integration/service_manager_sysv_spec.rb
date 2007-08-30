@@ -1,7 +1,7 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
 if not INTERPRETER.superuser?
-  puts "NOTE: Must be root to check in #{__FILE__}"
+  puts "NOTE: Must be root to check #{__FILE__}"
 elsif not INTERPRETER.service_manager[:sysv].available?
   puts "NOTE: This platform can't check #{__FILE__}"
 else
