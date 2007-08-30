@@ -1,8 +1,8 @@
-= AutomateIt's self-test
+== AutomateIt's self-test
 
 AutomateIt ensures that it works correctly, and stays working, by using a rigorous self-test suite. This suite is written using the RSpec tool and its files are stored in the software installation's +spec+ directory. You must install the +rspec+ Gem to run the tests.
 
-== Types of tests
+=== Types of tests
 
 *Unit* tests are quick and safe because they don't write to the disk or alter your system.
 
@@ -12,7 +12,7 @@ For example, <tt>spec/unit/template_manager_erb_spec.rb</tt> exercises AutomateI
 
 For example, the <tt>spec/integration/account_manager_spec.rb</tt> exercises the AutomateIt::AccountManager by adding and deleting users and groups. To make sure it doesn't cause harm, it tests using dummy users with names like +asdfasdf+ and makes sure they're not present so that in the unlikely event that you have a user with that name, it won't destroy their account.
 
-== Understanding warnings
+=== Understanding warnings
 
 When the tests can't check something, they'll print warning messages. These warnings are normal and expected. They are not errors and don't imply that something is broken.
 
@@ -24,13 +24,13 @@ You will also get warnings about drivers that are not available on your platform
 
  NOTE: AutomateIt::PackageManager::YUM is not available for testing on this platform ./spec/integration/package_manager_spec.rb
 
-== Running an individual test
+=== Running an individual test
 
 Run an individual test, like <tt>spec/unit/template_manager_erb_spec.rb</tt>, by executing the UNIX shell command:
 
  spec spec/unit/template_manager_erb_spec.rb
 
-== Running test suites
+=== Running test suites
 
 To run the +unit+ test suite, execute the following command from the UNIX shell:
 
@@ -42,7 +42,7 @@ To run all the test suites, including +unit+ and +integration+, execute the foll
 
 The integration test can take a few minutes and will pause for long periods of time while appearing to do nothing. This is normal, expected and there's nothing that can be done to "fix" this. For example, when testing the PackageManager::Gem driver, the test must wait for the +gem+ program to download fresh package indexes and this can take a long time.
 
-== Code coverage reports
+=== Code coverage reports
 
 You can generate a code coverage report for the +unit+ test suite by running:
 
