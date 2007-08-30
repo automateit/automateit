@@ -21,25 +21,30 @@ def specify(*files)
   Rake::Task[:spec_internal].invoke
 end
 
+desc "Run the unit test suite"
 task "spec" do
   target = ENV['F'] || ENV['FILE'] || 'spec/unit/**/*_spec.rb'
   specify(target)
 end
 
+desc "Generate a code coverage report for the unit tests in the 'coverage' directory"
 task "rcov" do
   @rcov = true
   Rake::Task["spec"].invoke
 end
 
+desc "Run all the test suites, including unit and integration"
 task "spec:all" do
   specify('spec/unit/**/*_spec.rb', 'spec/functional/**/*_spec.rb', 'spec/integration/**/*_spec.rb')
 end
 
+desc "Generate a code coverage report for the unit and integration tests"
 task "rcov:all" do
   @rcov = true
   Rake::Task["spec:all"].invoke
 end
 
+desc "Print verbose descriptions while running specs"
 task "verbose" do
   ENV["SPEC_OPTS"] = "-fs"
 end
@@ -50,9 +55,10 @@ class Numeric
   def commify() (s=self.to_s;x=s.length;s).rjust(x+(3-(x%3))).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/,'\1,').strip end
 end
 
-task :loc => [:loclines, :locdiff] do
-end
+desc "Display the lines of source code and how many lines were changed in the repository"
+task :loc => [:loclines, :locdiff]
 
+desc "Display the lines of source code"
 task :loclines do
   require 'find'
   lines = 0
@@ -70,6 +76,7 @@ task :loclines do
   puts "Bytes: "+bytes.commify
 end
 
+desc "Display the lines of code changed in the repository"
 task :locdiff do
   if File.directory?(".hg")
     puts "%s lines added and removed through SCM operations" % `hg log --no-merges --patch`.scan(/^[+-][^+-].+/).size.commify
@@ -80,11 +87,18 @@ end
 
 #---[ misc ]------------------------------------------------------------
 
+desc "Generate documentation"
 task :rdoc do
   # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
   sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt USAGE.txt TESTING.txt"
 end
 
+desc "Generate documentation for just one file"
+task :rdoc1 do
+  sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' USAGE.txt"
+end
+
+desc "Profile the specs"
 task :prof do
   sh "ruby-prof -f prof.txt `which spec` spec/unit/*.rb"
 end
@@ -142,7 +156,7 @@ Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_tar = true
 end
 
-desc "Recreate Gem"
+desc "Regenerate Gem"
 task :regem do
   raise "Can't recreate gems unless a directory with all previous gems is available at ../gems" unless File.directory?("../gems")
   rm_r Dir["pkg/*"]
