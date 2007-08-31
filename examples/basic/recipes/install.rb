@@ -7,7 +7,7 @@ if tagged? "rails_servers | myapp_servers"
     raise NotImplementedError.new("no packages specified for this platform")
   end
 
-  package_manager.install %w(rails sqlite3-ruby mongrel), 
+  package_manager.install %w(rails sqlite3-ruby mongrel),
                           :with => :gem, :docs => false
 end
 
@@ -23,18 +23,17 @@ if tagged? :myapp_servers
       replace "Welcome aboard", "This is MyAppServer"
     end
 
-    chown_R lookup(:user), nil, "." 
+    chown_R lookup(:user), nil, "."
 
-    render :file => dist+"myapp_server.erb", 
+    render :file => dist+"myapp_server.erb",
            :to => "/etc/init.d/myapp_server",
            :mode => 0555,
-           :locals => { 
-              :path => lookup(:path), 
+           :locals => {
+              :path => lookup(:path),
               :user => lookup(:user),
-              :port => lookup(:port), 
+              :port => lookup(:port),
            }
 
     service_manager.start "myapp_server"
   end
 end
-

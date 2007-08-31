@@ -8,6 +8,7 @@ pid = "mongrel.pid"
 case ARGV.first
 when "start"
   Dir.chdir(path)
+  puts "Starting MyAppServer at http://localhost:#{port}/"
   exit system("su #{user} -c 'mongrel_rails start --pid #{pid} --daemonize --port #{port} 2>&1 | grep -v cgi_multipart_eof_fix'") ? 0 : 1
 when "stop"
   Dir.chdir(path)
