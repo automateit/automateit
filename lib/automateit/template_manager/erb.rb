@@ -139,7 +139,16 @@ module AutomateIt
 
       # Return the contents of +filename+.
       def _read(filename)
-        return writing? ? File.read(filename) : ""
+        begin
+          result = File.read(filename)
+          return result
+        rescue Errno::ENOENT => e
+          if writing?
+            raise e
+          else
+            return ""
+          end
+        end
       end
       private :_read
 
