@@ -1,4 +1,4 @@
-== Get Started! A 30-minute guide to learning AutomateIt
+== Get Started! A hands-on guide to learning AutomateIt
 
 AutomateIt is an open-source tool for automating the setup and maintenance of UNIX systems.
 
