@@ -192,7 +192,11 @@ module AutomateIt
         template_manager.default_check = :exists
 
         mkdir_p(path) do |created|
-          puts PNOTE+"#{created ? 'Creating' : 'Updating'} AutomateIt project at: #{path}"
+          if created
+            puts PNOTE+"Creating AutomateIt project at: #{path}"
+          else
+            puts PNOTE+"Found AutomateIt project at: #{path}"
+          end
 
           mkdir("config") do
             render(:text => TAGS_CONTENT, :to => "tags.yml")
