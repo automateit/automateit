@@ -303,7 +303,7 @@ module AutomateIt
     # the directory doesn't exist, this will throw a NotImplementedError.
     def dist
       if @project
-        result = File.join(@project, "dist")
+        result = File.join(@project, "dist/")
         if File.directory?(result)
           return result
         else
