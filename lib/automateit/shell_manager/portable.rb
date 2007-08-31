@@ -79,7 +79,7 @@ module AutomateIt
       # See ShellManager#cd
       def cd(dir, opts={}, &block)
         if block
-          log.enqueue(:info, PEXEC+"cd #{dir}")
+          log.enqueue(:info, PEXEC+(block ? "pushd" : "cd")+" "+dir)
           begin
             if writing? or File.directory?(dir)
               FileUtils.cd(dir, &block)
@@ -93,7 +93,7 @@ module AutomateIt
           rescue Exception => e
             raise e
           ensure
-            log.dequeue(:info, PEXEC+"cd -")
+            log.dequeue(:info, PEXEC+"popd")
           end
         else
           FileUtils.cd(dir) if writing?
