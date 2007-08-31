@@ -1,21 +1,24 @@
 # Setup Rails on hosts tagged "rails_servers" or "myapp_servers"
 if tagged?("rails_servers | myapp_servers")
-  prepare_rails # See lib/prepare_rails.rb
+  # Invoke a library method, loaded from "lib/prepare_rails.rb"
+  prepare_rails
 end
 
-# Install myapp app
+# Install myapp
 if tagged?("myapp_servers")
   # Create a user login, if needed
   account_manager.add_user(lookup("myapp#user"))
 
+  # Create a directory, if needed
   mkdir_p(lookup("myapp#path")) do
+    # Change the ownership of the directory to the user, if needed
     chown(lookup("myapp#user"), nil, ".")
 
     # Create Rails application, if needed
     sh("su #{lookup('myapp#user')} -c 'rails --database=sqlite3 . " \
       +"> /dev/null'") unless File.exists?("config/routes.rb")
 
-    # Create mongrel cluster configuration from template string, if needed
+    # Create a configuration file from a string template, if needed
     render(
       :text => \
 "<%=WARNING_BOILERPLATE%>
@@ -36,11 +39,11 @@ servers: <%=backends%>",
       }
     )
 
-    # Instantiate db, if needed
+    # Instantiate application's database, if needed
     sh "su #{lookup('myapp#user')} -c 'rake db:migrate'" \
       if Dir["db/*.sqlite3"].empty?
 
-    # Track changes so we know when to restart the Rails server
+    # Watch for changes to know when to restart the Rails server
     restart_needed = false
 
     # Edit a file to set the application name, if needed
@@ -51,7 +54,8 @@ servers: <%=backends%>",
       replace("Welcome aboard", "This is "+params[:name])
     end
 
-    # Create service by rendering a template file, if needed
+    # Create service that starts a proxy server and the Rails application's
+    # mongrel cluster by rendering a template file, if needed
     restart_needed |= render(
       :file => dist+"/etc/init.d/"+lookup("myapp#name")+".erb",
       :to => "/etc/init.d/"+lookup("myapp#name"),
