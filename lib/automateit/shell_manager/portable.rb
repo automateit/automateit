@@ -251,6 +251,7 @@ module AutomateIt
                   # Is the file obviously different?
                   if source_st.file?
                     for kind in %w(size mtime)
+                      next if kind == "mtime" and ! opts[:preserve]
                       unless source_st.send(kind) == target_st.send(kind)
                         log.debug(PNOTE+"%s not same %s" % [target_fn, kind])
                         raise EOFError.new
