@@ -93,9 +93,27 @@ task :rdoc do
   sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt USAGE.txt TESTING.txt"
 end
 
-desc "Generate documentation for just one file"
-task :rdoc1 do
-  sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' USAGE.txt"
+desc "Generate documentation for specific files in an endless loop"
+task :rdocloop do
+  sources_and_targets = {
+    "doc/files/USAGE_txt.html" => "USAGE.txt"
+  }
+
+  while true
+    different = false
+    for source, target in sources_and_targets
+      if ! File.exists?(target) or (File.exists?(target) and File.mtime(target) > File.mtime(source))
+        different = true
+        break
+      end
+    end
+
+    puts "checking %s" % File.mtime(target)
+    puts "different" if different
+
+    sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' %s" % sources_and_targets.values.join(" ") if different
+    sleep 1
+  end
 end
 
 desc "Profile the specs"
