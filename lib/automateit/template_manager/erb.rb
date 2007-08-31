@@ -102,7 +102,7 @@ module AutomateIt
           when :compare
             if not target_exists
               log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
-            elsif source_contents == target_contents
+            elsif output == target_contents
               log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because contents are the same")
               return false
             else
