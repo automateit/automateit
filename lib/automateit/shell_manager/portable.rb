@@ -133,7 +133,7 @@ module AutomateIt
             block.call(result)
           end
         end
-        return result
+        return missing
       end
 
       # See ShellManager#mkdir_p
