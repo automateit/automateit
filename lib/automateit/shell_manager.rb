@@ -3,6 +3,75 @@ module AutomateIt
   #
   # The ShellManager provides UNIX-like shell commands for manipulating files
   # and executing commands.
+  #
+  # ==== Basic previews
+  #
+  # The USAGE.txt[link:files/USAGE_txt.html] describes the basic use of preview with ShellCommands.
+  #
+  # ==== Advanced previews
+  #
+  # AutomateIt only provides previewing logic for its own commands and recipe authors are responsible for providing logic for their own code.
+  #
+  # For example:
+  #
+  #  if noop?
+  #    puts "This is a preview"
+  #  end
+  #
+  #  writing?("Will run custom commands") do
+  #    puts "Custom commands"
+  #  end
+  #
+  # When run normally, it displays:
+  #
+  #  Custom commands
+  #
+  # And when in noop mode, this displays:
+  #
+  #  This is a preview
+  #  => Will run custom commands
+  #
+  # ==== WARNING: Changing directories during preview
+  #
+  # Commands that change directories will behave in a potentially surprising
+  # way when running in noop mode. These commands include #cd, #mkdir and
+  # #mktempdircd.
+  #
+  # If a recipe tries to change into a directory that doesn't exist in normal
+  # writing mode, the command will throw an exception. But when running in noop
+  # mode, these commands will appear to succeed without changing into the
+  # non-existent target directory. This is reasonable behavior because the goal
+  # is to preview the commands run.
+  #
+  # The potential surprise is that code that's using relative paths might
+  # execute in the wrong directory. 
+  #
+  # For example:
+  #
+  #   mkdir_p "/tmp/foo/bar" do
+  #     touch "myfile"
+  #     system "echo 'I'm going to do: rm -rf *'"
+  #   end
+  #
+  # If the above example was run in noop mode and the directory didn't exist,
+  # the +system+ command actually run and, if this weren't an echo, it would
+  # delete the contents of your current directory,  not the
+  # <tt>/tmp/foo/bar</tt> directory!
+  #
+  # The correct way to write that example is:
+  #
+  #   mkdir_p "/tmp/foo/bar" do
+  #     touch "myfile"
+  #     writing?("Deleting all files in directory /tmp/foo/bar") do
+  #       system "echo 'I'm going to do: rm -rf *'"
+  #     end
+  #   end
+  #
+  # The Interpreter#writing? method ensures the +system+ command is only run
+  # when writing. When running in noop mode, the code will display the text and
+  # won't execute the +system+ command:
+  #
+  #   => Deleting all files in directory /tmp/foo/bar
   class ShellManager < Plugin::Manager
     require 'automateit/shell_manager/portable.rb'
     require 'automateit/shell_manager/unix.rb'
@@ -45,6 +114,10 @@ module AutomateIt
     #
     # Without a block, returns the path of the temporary directory and you're
     # responsible for removing it when done.
+    #
+    # CAUTION: Read notes at the top of ShellManager for potentially
+    # problematic situations that may be encountered if using this command in
+    # preview mode!
     def mktempdir(name=nil, &block) # :yields: path
       dispatch(name, &block)
     end
@@ -89,6 +162,10 @@ module AutomateIt
     # Changes the directory into the specified +dir+. If called with a block,
     # changes to the directory for the duration of the block, and then changes
     # back to the previous directory at the end.
+    #
+    # CAUTION: Read notes at the top of ShellManager for potentially
+    # problematic situations that may be encountered if using this command in
+    # preview mode!
     def cd(dir, opts={}, &block) dispatch(dir, opts, &block) end
 
     # Returns the current directory.
@@ -96,6 +173,10 @@ module AutomateIt
 
     # Create a directory or directories. Returns an array of directories
     # created or +false+ if all directories are already present.
+    #
+    # CAUTION: Read notes at the top of ShellManager for potentially
+    # problematic situations that may be encountered if using this command in
+    # preview mode!
     def mkdir(dirs, opts={}, &block) dispatch(dirs, &block) end
 
     # Create a directory or directories with their parents. Returns an array of
@@ -106,6 +187,10 @@ module AutomateIt
     #   mkdir_p("/tmp/foo/bar")
     #   File.exists?("/tmp/foo") # => true
     #   File.exists?("/tmp/foo/bar") # => true
+    #
+    # CAUTION: Read notes at the top of ShellManager for potentially
+    # problematic situations that may be encountered if using this command in
+    # preview mode!
     def mkdir_p(dirs, opts={}, &block) dispatch(dirs, &block) end
 
     # Remove a directory or directories. The directories must be empty or an
