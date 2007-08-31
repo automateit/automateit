@@ -1,9 +1,79 @@
 module AutomateIt
   # == Interpreter
   #
-  # The AutomateIt Interpreter is the class you'll use to create your
-  # automation recipes. The USAGE.txt[link:files/USAGE_txt.html] file has a lot
-  # of information about how to use the Interpreter.
+  # The Interpreter runs AutomateIt commands.
+  #
+  # The USAGE.txt[link:files/USAGE_txt.html] file provides hands-on examples
+  # for using the Interpreter.
+  #
+  # === Aliased methods
+  #
+  # The Interpreter provides shortcut aliases for certain plugin commands.
+  #
+  # For example, the following commands will run the same method:
+  #
+  #   shell_manager.sh "ls"
+  #
+  #   sh "ls"
+  #
+  # The full set of aliased methods:
+  #
+  # * cd -- AutomateIt::ShellManager#cd
+  # * chmod -- AutomateIt::ShellManager#chmod
+  # * chmod_R -- AutomateIt::ShellManager#chmod_R
+  # * chown -- AutomateIt::ShellManager#chown
+  # * chown_R -- AutomateIt::ShellManager#chown_R
+  # * chperm -- AutomateIt::ShellManager#chperm
+  # * cp -- AutomateIt::ShellManager#cp
+  # * cp_r -- AutomateIt::ShellManager#cp_r
+  # * edit -- AutomateIt::EditManager#edit
+  # * hosts_tagged_with -- AutomateIt::TagManager#hosts_tagged_with
+  # * install -- AutomateIt::ShellManager#install
+  # * ln -- AutomateIt::ShellManager#ln
+  # * ln_s -- AutomateIt::ShellManager#ln_s
+  # * ln_sf -- AutomateIt::ShellManager#ln_sf
+  # * lookup -- AutomateIt::FieldManager#lookup
+  # * mkdir -- AutomateIt::ShellManager#mkdir
+  # * mkdir_p -- AutomateIt::ShellManager#mkdir_p
+  # * mktemp -- AutomateIt::ShellManager#mktemp
+  # * mktempdir -- AutomateIt::ShellManager#mktempdir
+  # * mktempdircd -- AutomateIt::ShellManager#mktempdircd
+  # * mv -- AutomateIt::ShellManager#mv
+  # * pwd -- AutomateIt::ShellManager#pwd
+  # * render -- AutomateIt::TemplateManager#render
+  # * rm -- AutomateIt::ShellManager#rm
+  # * rm_r -- AutomateIt::ShellManager#rm_r
+  # * rm_rf -- AutomateIt::ShellManager#rm_rf
+  # * rmdir -- AutomateIt::ShellManager#rmdir
+  # * sh -- AutomateIt::ShellManager#sh
+  # * tagged? -- AutomateIt::TagManager#tagged?
+  # * tags -- AutomateIt::TagManager#tags
+  # * tags_for -- AutomateIt::TagManager#tags_for
+  # * touch -- AutomateIt::ShellManager#touch
+  # * umask -- AutomateIt::ShellManager#umask
+  # * which -- AutomateIt::ShellManager#which
+  # * which! -- AutomateIt::ShellManager#which!
+  #
+  # === Embedding the Interpreter
+  #
+  # The AutomateIt Interpreter can be embedded inside a Ruby program:
+  #
+  #   require 'rubygems'
+  #   require 'automateit'
+  #
+  #   interpreter = AutomateIt.new
+  #
+  #   # Use the interpreter as an object:
+  #   interpreter.sh "ls -la"
+  #
+  #   # Have it execute a recipe:
+  #   interpreter.invoke "myrecipe.rb"
+  #
+  #   # Or execute recipes within a block
+  #   interpreter.instance_eval do
+  #     puts superuser?
+  #     sh "ls -la"
+  #   end
   class Interpreter < Common
     # Plugin instance that instantiated the Interpreter.
     attr_accessor :parent
@@ -199,6 +269,8 @@ module AutomateIt
     #
     #   # When in writing mode, won't print the message and will execute the block:
     #   ** ls -la
+    #
+    # See also the examples in ShellManager describing how to preview commands.
     def writing?(message=nil, &block)
       if block
         log.info(PNOTE+"#{message}") if message and @noop
