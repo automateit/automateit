@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+user = "<%=user%>"
+port = "<%=port%>"
+path = "<%=path%>"
+pid = "mongrel.pid"
+
+case ARGV.first
+when "start"
+  Dir.chdir(path)
+  exit system("su #{user} -c 'mongrel_rails start --pid #{pid} --daemonize --port #{port} 2>&1 | grep -v cgi_multipart_eof_fix'") ? 0 : 1
+when "stop"
+  Dir.chdir(path)
+  exit system("su #{user} -c 'mongrel_rails stop --pid #{pid} 2>&1 | grep -v cgi_multipart_eof_fix'") ? 0 : 1
+when "status"
+  begin
+    Process.kill(0, File.read(File.join(path, pid)).to_i)
+    exit 0
+  rescue Errno::ENOENT, Errno::ESRCH
+    exit -1 # File or pid not found
+  end
+else
+  puts "ERROR: expected argument -- start, stop or status"
+end
+

@@ -2,7 +2,7 @@ def prepare_rails()
   # Install system-level packages, if needed
   if tagged?("ubuntu | debian")
     package_manager.install(
-      %w(build-essential swig ruby1.8-dev libsqlite3-dev pen))
+      %w(ruby1.8-dev libsqlite3-dev pen))
   elsif tagged?("fedoracore | redhat | centos")
     package_manager.install(%w(ruby-devel sqlite-devel pen))
   else

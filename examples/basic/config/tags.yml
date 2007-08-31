@@ -1,0 +1,11 @@
+rails_servers:
+  - kagami
+  - tsukasa
+  - michiru
+  - rheya
+  - satori
+myapp_servers:
+  - kagami
+  - michiru
+  - rheya
+  - satori

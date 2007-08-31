@@ -1,0 +1,3 @@
+user: nobody
+port: 9826
+path: /tmp/myapp_server
