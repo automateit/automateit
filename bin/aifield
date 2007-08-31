@@ -62,6 +62,8 @@ EOB
   elsif opts[:yaml]
     puts result.to_yaml
   elsif opts[:xml]
+    require 'active_support/core_ext/hash'
+    require 'active_support/core_ext/array'
     puts result.to_xml
   else
     puts result.is_a?(String) ? result : result.inspect

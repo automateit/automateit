@@ -100,6 +100,8 @@ EOB
     elsif opts[:yaml]
       result.to_yaml
     elsif opts[:xml]
+      require 'active_support/core_ext/hash'
+      require 'active_support/core_ext/array'
       result.to_xml
     else
       case result
