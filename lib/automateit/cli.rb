@@ -43,9 +43,13 @@ module AutomateIt
         # Tab completion
         require 'irb/completion'
         irb.context.auto_indent_mode = true
-        irb.context.use_readline = true
         unless irb.context.load_modules.include?('irb/completion')
           irb.context.load_modules << 'irb/completion'
+        end
+        irb.context.instance_eval do
+          # Bug in IRB::Context prints useless message if you use the method
+          ### irb.context.use_readline = true
+          @use_readline = true
         end
 
         # Set prompt
