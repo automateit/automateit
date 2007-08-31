@@ -1,12 +1,15 @@
 ** apt-get install -y -q build-essential ruby1.8-dev libsqlite3-dev < /dev/null 2>&1
+[...]
 ** gem install -y --no-ri --no-rdoc rails sqlite3-ruby mongrel 2>&1
+[...]
 ** mkdir -p /tmp/myapp_server
-** cd /tmp/myapp_server
+** pushd /tmp/myapp_server
 ** rails --database=sqlite3 . > /dev/null
 ** rake db:migrate
 => Edited 'public/index.html'
 ** chown -R nobody .
 => Rendering '/etc/init.d/myapp_server' because of it doesn't exist
 ** chmod 0555 /etc/init.d/myapp_server
-** "/etc/init.d/myapp_server" "start"
-** cd -
+Starting MyAppServer at http://localhost:9826/
+** /etc/init.d/myapp_server start
+** popd

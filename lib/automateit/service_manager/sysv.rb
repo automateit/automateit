@@ -24,7 +24,7 @@ module AutomateIt
 
       def _run_command(args, opts={})
         _raise_unless_available
-        cmd = String === args ? args : args.map{|t|'"%s"'%t}.join(' ')
+        cmd = String === args ? args : args.join(' ')
         if opts[:checking]
           cmd += " > /dev/null 2>&1" # Discard STDOUT and STDERR
         elsif opts[:quiet]
