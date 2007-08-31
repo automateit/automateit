@@ -57,7 +57,7 @@ servers: <%=backends%>",
     # Create service that starts a proxy server and the Rails application's
     # mongrel cluster by rendering a template file, if needed
     restart_needed |= render(
-      :file => dist+"/etc/init.d/"+lookup("myapp#name")+".erb",
+      :file => dist+"etc/init.d/"+lookup("myapp#name")+".erb",
       :to => "/etc/init.d/"+lookup("myapp#name"),
       :user => "root",
       :group => "root",
