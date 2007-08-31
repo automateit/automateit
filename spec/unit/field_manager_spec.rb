@@ -7,6 +7,14 @@ describe "AutomateIt::FieldManager", :shared => true do
     @m = @a.field_manager
   end
 
+  it "should be able to lookup entire hash" do
+    rv = @m.lookup("*")
+    rv.keys.include?("hash").should be_true
+    Hash.should === rv["hash"]
+    rv.keys.include?("key").should be_true
+    rv["key"].should == "value"
+  end
+
   it "should lookup keys by string" do
     @m.lookup("key").should eql("value")
   end

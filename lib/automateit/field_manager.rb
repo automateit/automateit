@@ -1,9 +1,9 @@
 module AutomateIt
   # == FieldManager
   #
-  # The FieldManager provides a way of accessing a hash of constants that
-  # represent configuration data. These are typically stored in a Project's
-  # <tt>config/fields.yml</tt> file.
+  # The FieldManager provides a way of accessing a hash of constants. These are
+  # useful for storing configuration data seperately from recipes. # Fields are
+  # typically stored in a Project's <tt>config/fields.yml</tt> file.
   #
   # For example, consider a <tt>field.yml</tt> that contains YAML like:
   #   foo: bar
@@ -15,6 +15,12 @@ module AutomateIt
   #   lookup("foo") # => "bar"
   #   lookup("my_app#my_key") # => "my_value"
   #   lookup("my_app#my_branch") # => "my_value"
+  #
+  # You can get a reference to the entire hash:
+  #   lookup("*")
+  #
+  # Fields can be queried from the UNIX shell using +aifield+, run <tt>aifield
+  # --help</tt> for details.
   class FieldManager < Plugin::Manager
     alias_methods :lookup
 
@@ -48,6 +54,7 @@ module AutomateIt
 
       # See FieldManager#lookup
       def lookup(search)
+        return @struct if search == "*"
         ref = @struct
         for key in search.to_s.split("#")
           ref = ref[key]
