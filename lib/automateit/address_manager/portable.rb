@@ -23,14 +23,17 @@ module AutomateIt
 
       # See AddressManager#hostnames
       def hostnames
-        names = Set.new(Socket.gethostbyname(Socket.gethostname)[1])
+        names = Set.new
+        names << Socket.gethostname
+        names.merge(Socket.gethostbyname(Socket.gethostname)[1]) # Known aliases
         names.each{|name| names.merge(hostnames_for(name))}
+        names << "localhost"
         return names.to_a.sort
       end
 
       # See AddressManager#addresses
       def addresses
-        return [TCPSocket.gethostbyname(Socket.gethostname)[3]]
+        return ["127.0.0.1", TCPSocket.gethostbyname(Socket.gethostname)[3]]
       end
     end
   end
