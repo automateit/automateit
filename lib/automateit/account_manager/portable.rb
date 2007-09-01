@@ -110,6 +110,10 @@ module AutomateIt
         end
         Etc.passwd do |pwent|
           grent = groups[pwent.gid]
+          unless grent
+            log.fatal(PNOTE+"WARNING: User's default group doesn't exist: user %s, gid %s" % [pwent.name, pwent.gid])
+            next
+          end
           result[pwent.name] ||= Set.new
           result[pwent.name] << grent.name
         end
