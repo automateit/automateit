@@ -90,17 +90,17 @@ end
 desc "Generate documentation"
 task :rdoc do
   # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-  sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt INSTALL.txt USAGE.txt TESTING.txt"
+  sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt TUTORIAL.txt TESTING.txt"
   # Create a get_started index
   File.open("doc/get_started.html", "w+") do |writer|
-    writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'USAGE_txt.html'))
+    writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
   end
 end
 
 desc "Generate documentation for specific files in an endless loop"
 task :rdocloop do
   sources_and_targets = {
-    "doc/files/USAGE_txt.html" => "USAGE.txt"
+    "doc/files/TUTORIAL_txt.html" => "TUTORIAL.txt"
   }
 
   while true
@@ -160,7 +160,7 @@ spec = Gem::Specification.new do |s|
   s.date = File.mtime('lib/automateit/root.rb')
   s.email = "igal@pragmaticraft.org"
   s.executables = Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)}
-  s.extra_rdoc_files = %w(README.txt INSTALL.txt USAGE.txt TESTING.txt)
+  s.extra_rdoc_files = %w(README.txt TUTORIAL.txt TESTING.txt)
   s.files = FileList["{bin,lib}/**/*"].to_a
   s.has_rdoc = true
   s.homepage = "http://AutomateIt.org/"
