@@ -133,9 +133,9 @@ module AutomateIt
         list, options = args_and_opts(*args)
         driver = \
           if options and options[:with]
-            @drivers[options[:with]]
+            @drivers[options[:with].to_sym]
           elsif default
-            @drivers[default]
+            @drivers[default.to_sym]
           else
             driver_for(method, *args, &block)
           end
