@@ -66,5 +66,15 @@ EOB
 
   opts[:recipe] = args.first unless args.empty?
 
-  exit AutomateIt::CLI.run(opts) ? 0 :1
+  # Save vars because +run+ will delete opts
+  argscopy = args.clone
+  optscopy = opts.clone
+
+  rv = AutomateIt::CLI.run(opts)
+  if optscopy[:eval] or argscopy.size > 0
+    exit rv ? 0 :1
+  else
+    # CTRL-D ends the line prematurely, so add a newline
+    puts
+  end
 end

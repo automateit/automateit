@@ -14,7 +14,7 @@ module AutomateIt
     # * :recipe -- Recipe file to execute.
     # * :eval -- Evaluate this string.
     # * :quiet -- Don't print shell header.
-    def initialize(opts={})
+    def self.run(opts={})
       opts[:project] ||= opts[:recipe] ? File.join(File.dirname(opts[:recipe]), "..") : "."
       if opts[:create]
         Project::create(opts)
