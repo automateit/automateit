@@ -41,10 +41,6 @@ AutomateIt uses a number of unique terms:
 * *Plugin* -- A part of AutomateIt that describes related features.
 * *Driver* -- An implementation of a plugin, there are often multiple drivers per plugin.
 
-=== Install
-
-If you haven't already installed AutomateIt, please follow the instructions in the INSTALL.txt[link:files/INSTALL_txt.html] file.
-
 === Interactive shell
 
 AutomateIt comes with an interactive shell, which is useful for exploring commands and developing recipes.
