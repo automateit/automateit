@@ -4,6 +4,8 @@ AutomateIt is an open-source tool for automating the setup and maintenance of UN
 
 This hands-on guide will teach you how to use AutomateIt and explain where to find more detailed instructions.
 
+Please see the Screenshots[http://automateit.org/screenshots] of AutomateIt in action to get a quick idea of what AutomateIt is all about.
+
 === Ruby
 
 AutomateIt is written using the Ruby programming language. If you haven't used Ruby, you'll find it easy to learn and a pleasure to use. If you already know the basics of Perl, Python, PHP or Java, you'll be able to pick up Ruby almost instantly. Although AutomateIt provides much of the structure and commands needed, you still need to know the basic Ruby syntax to get by.
@@ -414,7 +416,7 @@ WARNING: Be sure to read the notes on changing directories during preview mode i
 === Conclusion
 
 I hope you enjoy working with AutomateIt and look forward to hearing about your
-experiences with it. Drivers, patches, documentation and ideas are welcome. 
+experiences with it. Drivers, patches, documentation and ideas are welcome.
 
 Thank you for taking the time to read this!
 
