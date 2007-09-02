@@ -91,8 +91,8 @@ desc "Generate documentation"
 task :rdoc do
   # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
   sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt TUTORIAL.txt TESTING.txt"
-  # Create a get_started index
-  File.open("doc/get_started.html", "w+") do |writer|
+  # Create a tutorial index
+  File.open("doc/tutorial.html", "w+") do |writer|
     writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
   end
 end
