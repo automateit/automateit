@@ -66,5 +66,5 @@ EOB
 
   opts[:recipe] = args.first unless args.empty?
 
-  AutomateIt::CLI.new(opts)
+  exit AutomateIt::CLI.run(opts) ? 0 :1
 end
