@@ -189,4 +189,10 @@ task :regem do
   sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb"
 end
 
+desc "RFC-822 time for right now"
+task :now do
+  require 'active_support'
+  puts DateTime.now.to_time.to_s(:rfc822)
+end
+
 #===[ fin ]=============================================================
