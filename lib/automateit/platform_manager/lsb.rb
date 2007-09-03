@@ -19,14 +19,16 @@ module AutomateIt
         super(opts) # Rely on Uname to set :os and :arch
         @struct[:distro]  ||= @@struct_cache[:distro]
         @struct[:release] ||= @@struct_cache[:release]
-        unless @struct[:distro] and @struct[:release]
-          data = _read_lsb_release_output # SLOW 0.2s
-          begin
-            yaml = YAML::load(data)
-            @struct[:distro]  ||= @@struct_cache[:distro]  ||= yaml["Distributor ID"].to_s.downcase
-            @struct[:release] ||= @@struct_cache[:release] ||= yaml["Release"].to_s.downcase
-          rescue NoMethodError, IndexError, ArgumentError => e
-            raise ArgumentError.new("invalid YAML output from '#{LSB_RELEASE}': #{data.inspect}")
+        if available?
+          unless @struct[:distro] and @struct[:release]
+            data = _read_lsb_release_output # SLOW 0.2s
+            begin
+              yaml = YAML::load(data)
+              @struct[:distro]  ||= @@struct_cache[:distro]  ||= yaml["Distributor ID"].to_s.downcase
+              @struct[:release] ||= @@struct_cache[:release] ||= yaml["Release"].to_s.downcase
+            rescue NoMethodError, IndexError, ArgumentError => e
+              raise ArgumentError.new("invalid YAML output from '#{LSB_RELEASE}': #{data.inspect}")
+            end
           end
         end
       end

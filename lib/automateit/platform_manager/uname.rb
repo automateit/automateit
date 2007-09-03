@@ -14,8 +14,10 @@ module AutomateIt
 
       def setup(opts={}) # :nodoc:
         super(opts)
-        @struct[:os]   ||= @@struct_cache[:os]   ||= `uname -s`.chomp.downcase
-        @struct[:arch] ||= @@struct_cache[:arch] ||= `uname -m`.chomp.downcase
+        if available?
+          @struct[:os]   ||= @@struct_cache[:os]   ||= `uname -s`.chomp.downcase
+          @struct[:arch] ||= @@struct_cache[:arch] ||= `uname -m`.chomp.downcase
+        end
       end
     end
   end
