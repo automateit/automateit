@@ -61,7 +61,7 @@ module AutomateIt
           return false
         elsif is_available.nil?
           all_present = true
-          missing = []
+          missing = {}
           for kind in [:files, :directories, :programs]
             next unless opts[kind]
             for item in opts[kind]
@@ -76,7 +76,7 @@ module AutomateIt
                   begin
                     interpreter.shell_manager[:unix].which!(item)
                     true
-                  rescue ArgumentError, NotImplementedError
+                  rescue ArgumentError, NotImplementedError, NoMethodError
                     false
                   end
                 else
@@ -84,7 +84,8 @@ module AutomateIt
                 end
               unless present
                 all_present = false
-                missing << item
+                missing[kind] ||= []
+                missing[kind] << item
               end
             end
           end
@@ -99,8 +100,12 @@ module AutomateIt
       # #available?.
       def _raise_unless_available
         unless available?
-          raise NotImplementedError.new(
-            %{missing dependencies: #{self.class._missing_dependencies.join(", ")}})
+          msg = ""
+          for kind, elements in self.class._missing_dependencies
+            msg << "; " unless msg == ""
+            msg << "%s: %s" % [kind, elements.sort.join(', ')]
+          end
+          raise NotImplementedError.new("Missing dependencies -- %s" % msg)
         end
       end
 
