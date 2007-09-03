@@ -12,6 +12,7 @@ module AutomateIt
       depends_on :nothing
 
       def suitability(method, *args) # :nodoc:
+        return 0 if %w(which which!).include?(method.to_s)
         return 1
       end
 
