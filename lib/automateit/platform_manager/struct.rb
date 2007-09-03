@@ -57,6 +57,10 @@ module AutomateIt
         return @struct[key]
       end
       private :_query_key
+
+      def single_vendor?
+        return false
+      end
     end
   end
 end

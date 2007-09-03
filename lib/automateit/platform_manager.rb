@@ -7,6 +7,7 @@ module AutomateIt
     require 'automateit/platform_manager/struct'
     require 'automateit/platform_manager/uname'
     require 'automateit/platform_manager/lsb'
+    require 'automateit/platform_manager/windows'
 
     # Query the +search+ field. The +search+ can either be a key or a set of
     # keys separated by "#" signs.
@@ -23,5 +24,12 @@ module AutomateIt
     # * :distro -- Operating system distribution, e.g. "ubuntu"
     # * :release -- Operating system distribution release, e.g. "6.06"
     def query(search) dispatch(search) end
+
+    # Is this a single-vendor operating system? E.g. Windows is, while Linux
+    # isn't. This method helps the TagManager determine how to name tags. A
+    # single-vendor product uses the "os#release" format (e.g. "windows_xp"),
+    # while a multi-vendor product uses a "distro#release" format
+    # ("ubuntu_6.06").
+    def single_vendor?() dispatch() end
   end
 end

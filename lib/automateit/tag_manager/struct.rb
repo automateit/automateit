@@ -34,9 +34,15 @@ module AutomateIt
           @tags.add(interpreter.platform_manager.query("distro")) rescue IndexError
           @tags.add(interpreter.platform_manager.query("release")) rescue IndexError
           @tags.add(interpreter.platform_manager.query("os#arch")) rescue IndexError
-          @tags.add(interpreter.platform_manager.query("distro#release")) rescue IndexError
-        rescue NotImplementedError
-          log.debug("this platform doesn't have a PlatformManager driver")
+          if interpreter.platform_manager.single_vendor?
+            # E.g. windows_xp
+            @tags.add(interpreter.platform_manager.query("os#release")) rescue IndexError
+          else
+            # E.g. ubuntu_6.06
+            @tags.add(interpreter.platform_manager.query("distro#release")) rescue IndexError
+          end
+        rescue NotImplementedError => e
+          log.debug("this platform doesn't have a PlatformManager driver: #{e}")
         end
       end
 
