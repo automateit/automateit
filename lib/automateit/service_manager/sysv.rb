@@ -19,6 +19,7 @@ module AutomateIt
       depends_on :directories => [ETC_INITD]
 
       def suitability(method, *args) # :nodoc:
+        return 0 if %w(enabled? enable disable).include?(method.to_s)
         return available? ? 1 : 0
       end
 
