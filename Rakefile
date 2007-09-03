@@ -186,6 +186,7 @@ task :regem do
   cp "../gems/*.gem", "pkg/pub/gems" unless Dir["../gem/*.gem"].empty?
   Rake::Task[:gem].invoke
   cp Dir["pkg/*.gem"], "pkg/pub/gems"
+  cp Dir["pkg/*.gem"], "../gems/"
   sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb"
 end
 
