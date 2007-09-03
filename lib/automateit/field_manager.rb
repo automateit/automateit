@@ -32,9 +32,7 @@ module AutomateIt
     #
     # A FileManager driver that queries a data structure.
     class Struct < Plugin::Driver
-      def available? # :nodoc:
-        return true
-      end
+      depends_on :nothing
 
       def suitability(method, *args) # :nodoc:
         return 1
@@ -69,9 +67,7 @@ module AutomateIt
     #
     # A FieldManager driver that reads its data structure from a file.
     class YAML < Struct
-      def available? # :nodoc:
-        return true
-      end
+      depends_on :nothing
 
       def suitability(method, *args) # :nodoc:
         return 5

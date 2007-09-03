@@ -5,11 +5,9 @@ module AutomateIt
     # A TagManager driver for querying a data structure. It's not useful on its
     # own, but can be subclassed by other drivers that actually load tags.
     class Struct < Plugin::Driver
-      attr_accessor :tags
+      depends_on :nothing
 
-      def available? # :nodoc:
-        true
-      end
+      attr_accessor :tags
 
       def suitability(method, *args) # :nodoc:
         return 1

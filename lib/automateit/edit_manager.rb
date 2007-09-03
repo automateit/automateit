@@ -15,10 +15,7 @@ module AutomateIt
     #
     # Provides a way to edit files and strings. See documentation for EditSession.
     class Basic < Plugin::Driver
-
-      def available? # :nodoc:
-        true
-      end
+      depends_on :nothing
 
       def suitability(method, *args) # :nodoc:
         1

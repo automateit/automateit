@@ -4,7 +4,7 @@ module AutomateIt
     #
     # Renders ERB templates for TemplateManager.
     class ERB < Plugin::Driver
-      require 'erb'
+      depends_on :nothing
 
       # The default method for performing checks, e.g. :compare
       attr_accessor :default_check
@@ -18,10 +18,6 @@ module AutomateIt
         else
           @default_check ||= :compare
         end
-      end
-
-      def available? # :nodoc:
-        return true
       end
 
       def suitability(method, *args) # :nodoc:

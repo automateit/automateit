@@ -6,12 +6,10 @@ module AutomateIt
     # not useful on its own, it's inherited by other drivers that provide
     # platform-specific methods to query the system.
     class Struct < Plugin::Driver
+      depends_on :nothing
+
       # Hash mapping of keys that have many common names, e.g. "release" and "version"
       attr_accessor :key_aliases
-
-      def available? # :nodoc:
-        return true
-      end
 
       def suitability(method, *args) # :nodoc:
         return 1

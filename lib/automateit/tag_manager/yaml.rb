@@ -4,9 +4,7 @@ module AutomateIt
     #
     # A TagManager driver that reads tags from a YAML file.
     class YAML < Struct
-      def available? # :nodoc:
-        return true
-      end
+      depends_on :nothing
 
       def suitability(method, *args) # :nodoc:
         return 5
