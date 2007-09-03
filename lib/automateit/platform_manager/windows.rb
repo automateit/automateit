@@ -10,11 +10,11 @@ module AutomateIt
 
       def suitability(method, *args) # :nodoc:
         # Must be higher than PlatformManager::Struct
-        return available? ? 2 : 0
+        return available? ? 3 : 0
       end
 
       def _prepare
-        return if @prepared
+        return if @struct[:release]
         @struct[:os] = "windows"
         @struct[:arch] = ENV["PROCESSOR_ARCHITECTURE"]
         @struct[:distro] = "microsoft"
