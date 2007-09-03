@@ -5,6 +5,12 @@ module AutomateIt
     # A Linux-specific driver for the AddressManager provides complete support
     # for querying, adding and removing addresses on platforms that feature
     # Linux-like tools.
+    #
+    # NOTE: Not all Linux distributions provide the programs needed to use this
+    # driver. you may need You may need to install additional programs for this
+    # to work:
+    # * arping -- which provides the +arping+ command (e.g. Debian package "arping")
+    # * iproute -- which provides the +ip+ command (e.g. Debian package "iproute")
     class Linux < Plugin::Driver
       include ResolvHelpers
 
@@ -30,10 +36,8 @@ module AutomateIt
         raise SecurityEror.new("you must be root") unless Process.euid.zero?
         raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
         return false if has?(opts)
-        #run(%{ip address add #{ip}/#{mask} brd + dev #{device} label #{device}:#{label}})
         interpreter.sh(_add_or_remove_command(:add, opts))
-        #run(%{arping -q -c 3 -A -I #{device} #{ip} &})
-        interpreter.sh("arping -q -c #{announcements} -A -I #{opts[:device]} #{opts[:address]}")
+        interpreter.sh("arping -q -c #{announcements} -w #{announcements} -I #{opts[:device]} #{opts[:address]}")
         return true
       end
 
