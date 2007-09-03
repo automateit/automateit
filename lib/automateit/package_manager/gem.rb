@@ -76,6 +76,7 @@ module AutomateIt
 
           uninstall_needed = false
           begin
+            require 'expect'
             exitstruct = Open4::popen4(cmd) do |pid, sin, sout, serr|
               $expect_verbose = opts[:quiet] ? false : true
 

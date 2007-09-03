@@ -1,16 +1,13 @@
 # == Dependencies
-#
-# Require AutomateIt's dependencies.
 
 # Standard libraries
 require 'etc'
-require 'expect'
 require 'fileutils'
 require 'find'
 require 'logger'
 require 'open3'
 require 'pp'
-require 'pty'
+require 'pathname'
 require 'resolv'
 require 'set'
 require 'socket'
