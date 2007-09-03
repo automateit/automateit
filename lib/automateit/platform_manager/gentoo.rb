@@ -10,11 +10,11 @@ module AutomateIt
 
       def suitability(method, *args) # :nodoc:
         # Must be higher than PlatformManager::Struct
-        return available? ? 2 : 0
+        return available? ? 3 : 0
       end
 
       def _prepare
-        return if @prepared
+        return if @struct[:distro]
         @struct[:distro] = "gentoo"
         @struct[:release] = File.read(GENTOO_RELEASE).strip.match(/\s([\d\.]+)$/)[1]
         @struct
@@ -24,10 +24,6 @@ module AutomateIt
       def query(search)
         _prepare
         super(search)
-      end
-
-      def single_vendor?
-        return false
       end
     end
   end
