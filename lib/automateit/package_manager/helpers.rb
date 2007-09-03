@@ -26,6 +26,8 @@ module AutomateIt
 
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
+        packages = packages.map{|t|t.to_s}
+
         available = block.call(packages, opts)
         truth = (packages - available).empty?
         result = opts[:list] ? available : truth
@@ -40,6 +42,8 @@ module AutomateIt
         # Requires that your PackageManager#installed? method is implemented.
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
+        packages = packages.map{|t|t.to_s}
+
         available = [installed?(packages, :list => true)].flatten
         missing = packages - available
         truth = (packages - missing).empty?
@@ -64,6 +68,7 @@ module AutomateIt
 
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
+        packages = packages.map{|t|t.to_s}
 
         missing = not_installed?(packages, :list => true)
         return false if missing.blank?
@@ -92,6 +97,7 @@ module AutomateIt
 
         packages, opts = args_and_opts(*packages)
         packages = [packages].flatten
+        packages = packages.map{|t|t.to_s}
 
         present = installed?(packages, :list => true)
         return false if present.blank?
