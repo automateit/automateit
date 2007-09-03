@@ -12,7 +12,11 @@ module AutomateIt
 
       def setup(*args) # :nodoc:
         super(*args)
-        @nscd = interpreter.which("nscd")
+      end
+
+      # Is "nscd" available on this platform?
+      def nscd?
+        @nscd ||= interpreter.which("nscd")
       end
 
       #.......................................................................
@@ -33,7 +37,7 @@ module AutomateIt
         # --password CRYPT(3)ENCRYPTED
         # TODO AccountManager#add_user -- set password
         interpreter.sh(cmd)
-        interpreter.sh("nscd --invalidate passwd") if @nscd
+        interpreter.sh("nscd --invalidate passwd") if nscd?
 
         unless opts[:group] == false
           groupname = opts[:group] || username
@@ -59,7 +63,7 @@ module AutomateIt
         cmd << " #{username}"
         cmd << " > /dev/null" if opts[:quiet]
         interpreter.sh(cmd)
-        interpreter.sh("nscd --invalidate passwd") if @nscd
+        interpreter.sh("nscd --invalidate passwd") if nscd?
         remove_group(username) if has_group?(username)
         return true
       end
@@ -73,7 +77,7 @@ module AutomateIt
 
         cmd = "usermod -a -G #{missing.join(',')} #{username}"
         interpreter.sh(cmd)
-        interpreter.sh("nscd --invalidate group") if @nscd
+        interpreter.sh("nscd --invalidate group") if nscd?
         return missing
       end
 
@@ -86,7 +90,7 @@ module AutomateIt
 
         cmd = "usermod -G #{(present-groups).join(',')} #{username}"
         interpreter.sh(cmd)
-        interpreter.sh("nscd --invalidate group") if @nscd
+        interpreter.sh("nscd --invalidate group") if nscd?
         return removeable
       end
 
@@ -99,7 +103,7 @@ module AutomateIt
         cmd << " -g #{opts[:gid]}" if opts[:gid]
         cmd << " #{groupname}"
         interpreter.sh(cmd)
-        interpreter.sh("nscd --invalidate group") if @nscd
+        interpreter.sh("nscd --invalidate group") if nscd?
         add_users_to_group(opts[:members], groupname) if opts[:members]
         return groups[groupname]
       end
@@ -112,7 +116,7 @@ module AutomateIt
         return false unless has_group?(groupname)
         cmd = "groupdel #{groupname}"
         interpreter.sh(cmd)
-        interpreter.sh("nscd --invalidate group") if @nscd
+        interpreter.sh("nscd --invalidate group") if nscd?
         return true
       end
 
@@ -135,7 +139,7 @@ module AutomateIt
           cmd = "usermod -a -G #{groupname} #{username}"
           interpreter.sh(cmd)
         end
-        interpreter.sh("nscd --invalidate group") if @nscd
+        interpreter.sh("nscd --invalidate group") if nscd?
         return missing
       end
 
@@ -159,7 +163,7 @@ module AutomateIt
           cmd = "usermod -G #{(user_groups.to_a-[groupname]).join(',')} #{username}"
           interpreter.sh(cmd)
         end
-        interpreter.sh("nscd --invalidate group") if @nscd
+        interpreter.sh("nscd --invalidate group") if nscd?
         return present
       end
     end
