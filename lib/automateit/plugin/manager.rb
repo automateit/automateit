@@ -66,8 +66,12 @@ module AutomateIt
         self.class.driver_classes.each do |driver_class|
           driver_token = driver_class.token
           unless @drivers[driver_token]
-            @drivers[driver_token] = driver_class.new(:interpreter => @interpreter)
+            @drivers[driver_token] = driver_class.allocate
           end
+        end
+        self.class.driver_classes.each do |driver_class|
+          driver_token = driver_class.token
+          @drivers[driver_token].setup(:interpreter => @interpreter)
         end
       end
 
