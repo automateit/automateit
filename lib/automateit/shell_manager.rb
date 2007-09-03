@@ -79,6 +79,15 @@ module AutomateIt
     alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch
 
+    #...[ Detection commands ]..............................................
+    def provides_mode?() dispatch() end
+
+    def provides_ownership?() dispatch() end
+
+    def provides_symlink?() dispatch() end
+
+    def provides_hard_link?() dispatch() end
+
     #...[ Custom commands ].................................................
 
     # Execute a shell command.

@@ -15,9 +15,29 @@ module AutomateIt
         return 1
       end
 
+      def broken?
+        RUBY_PLATFORM =~ /mswin/
+      end
+
+      def provides_mode?
+        ! broken?
+      end
+
+      def provides_ownership?
+        ! broken?
+      end
+
+      def provides_symlink?
+        ! broken?
+      end
+
+      def provides_hard_link?
+        ! broken?
+      end
+
       #...[ Custom commands ].................................................
 
-      # Returns hash of verbosity and noop settings for FileUtils commands.
+      # Returns providesh of verbosity and noop settings for FileUtils commands.
       def _fileutils_opts
         opts = {}
         opts[:verbose] = false # Generate our own log messages
