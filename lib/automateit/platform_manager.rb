@@ -7,6 +7,7 @@ module AutomateIt
     require 'automateit/platform_manager/struct'
     require 'automateit/platform_manager/uname'
     require 'automateit/platform_manager/lsb'
+    require 'automateit/platform_manager/debian'
     require 'automateit/platform_manager/gentoo'
     require 'automateit/platform_manager/windows'
 
