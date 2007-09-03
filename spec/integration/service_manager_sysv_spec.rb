@@ -3,7 +3,7 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 if not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
 elsif not INTERPRETER.service_manager[:sysv].available?
-  puts "NOTE: This platform can't check #{__FILE__}"
+  puts "NOTE: Can't check ServiceManager::SYSV on this platform, #{__FILE__}"
 else
   describe "AutomateIt::ServiceManager::SYSV" do
     begin
@@ -11,7 +11,7 @@ else
       @has_enable = true
     rescue NotImplementedError
       @has_enable = false
-      puts "NOTE: This platform lacks driver for +enabled?+ in #{__FILE__}"
+      puts "NOTE: Can't check 'enabled?' on this platform, #{__FILE__}"
     end
 
     before(:all) do

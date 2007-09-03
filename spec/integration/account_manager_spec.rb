@@ -3,7 +3,7 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 if not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
 elsif not INTERPRETER.account_manager.available?(:add_user)
-  puts "NOTE: Can't find AccountManager for this platform in #{__FILE__}"
+  puts "NOTE: Can't find AccountManager for this platform, #{__FILE__}"
 else
   describe "AutomateIt::AccountManager" do
     before(:all) do

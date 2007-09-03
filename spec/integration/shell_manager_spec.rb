@@ -6,12 +6,21 @@ describe "AutomateIt::ShellManager" do
     @m = @a.shell_manager
   end
 
-  it "should run shell commands and detect their exit status (sh)" do
-    @m.sh("true").should be_true
-    @m.sh("false").should be_false
+  begin 
+    INTERPRETER.which("true")
+    INTERPRETER.which("false")
+
+    it "should run shell commands and detect their exit status (sh)" do
+      @m.sh("true").should be_true
+      @m.sh("false").should be_false
+    end
+  rescue NotImplementedError
+    puts "NOTE: Can't check 'sh' on this platform, #{__FILE__}"
   end
 
-  if INTERPRETER.shell_manager[:unix].available?
+  unless INTERPRETER.shell_manager.available?(:which)
+    puts "NOTE: Can't use 'which' on this platform in #{__FILE__}"
+  else
     it "should find which program is in the path (which)" do
       @m.which("sh").match(/.\/sh$/).nil?.should be_false
     end
@@ -23,22 +32,22 @@ describe "AutomateIt::ShellManager" do
     it "should throw exception if command isn't in path (which!)" do
       lambda{ @m.which!("not_a_real_program") }.should raise_error(ArgumentError, /not_a_real_program/)
     end
-  else
-    puts "NOTE: Can't use 'which' on this platform in #{__FILE__}"
   end
 
   it "should change directories (cd)" do
     before = Dir.pwd
-    @m.cd("/")
-    Dir.pwd.should == "/"
+    target = Pathname.new("/").expand_path.to_s
+    @m.cd(target)
+    Dir.pwd.should == target
     @m.cd(before)
     Dir.pwd.should == before
   end
 
   it "should change directories using a block (cd)" do
     before = Dir.pwd
-    @m.cd("/") do
-      Dir.pwd.should == "/"
+    target = Pathname.new("/").expand_path.to_s
+    @m.cd(target) do
+      Dir.pwd.should == target
     end
     Dir.pwd.should == before
   end
@@ -81,51 +90,55 @@ describe "AutomateIt::ShellManager" do
     end
   end
 
-  it "should create hard links when needed (ln)" do
-    @m.mktempdircd do
-      source = "foo"
-      target = "bar"
-      @m.touch(source)
-      File.exists?(source).should be_true
-      File.exists?(target).should be_false
+  unless INTERPRETER.shell_manager.provides_symlink?
+    puts "NOTE: Can't check symlinks on this platform, #{__FILE__}"
+  else
+    it "should create hard links when needed (ln)" do
+      @m.mktempdircd do
+        source = "foo"
+        target = "bar"
+        @m.touch(source)
+        File.exists?(source).should be_true
+        File.exists?(target).should be_false
 
-      @m.ln(source, target).should == source
-      File.stat(target).nlink.should > 1
+        @m.ln(source, target).should == source
+        File.stat(target).nlink.should > 1
 
-      @m.ln(source, target).should be_false
+        @m.ln(source, target).should be_false
+      end
     end
-  end
 
-  it "should create symlinks when needed (ln_s)" do
-    @m.mktempdircd do
-      source = "foo"
-      target = "bar"
-      @m.touch(source)
-      File.exists?(source).should be_true
-      File.exists?(target).should be_false
+    it "should create symlinks when needed (ln_s)" do
+      @m.mktempdircd do
+        source = "foo"
+        target = "bar"
+        @m.touch(source)
+        File.exists?(source).should be_true
+        File.exists?(target).should be_false
 
-      @m.ln_s(source, target).should == source
-      File.lstat(target).symlink?.should be_true
+        @m.ln_s(source, target).should == source
+        File.lstat(target).symlink?.should be_true
 
-      @m.ln(source, target).should be_false
+        @m.ln(source, target).should be_false
+      end
     end
-  end
 
-  it "should create symlinks that replace existing entry (ln_sf)" do
-    @m.mktempdircd do
-      source = "foo"
-      intermediate = "baz"
-      target = "bar"
-      @m.touch(source)
-      File.exists?(source).should be_true
-      File.exists?(target).should be_false
+    it "should create symlinks that replace existing entry (ln_sf)" do
+      @m.mktempdircd do
+        source = "foo"
+        intermediate = "baz"
+        target = "bar"
+        @m.touch(source)
+        File.exists?(source).should be_true
+        File.exists?(target).should be_false
 
-      @m.ln_s(intermediate, target).should == intermediate
-      File.lstat(target).symlink?.should be_true
+        @m.ln_s(intermediate, target).should == intermediate
+        File.lstat(target).symlink?.should be_true
 
-      @m.ln_sf(source, target).should == source
-      File.lstat(target).symlink?.should be_true
-      File.readlink(target).should == source
+        @m.ln_sf(source, target).should == source
+        File.lstat(target).symlink?.should be_true
+        File.readlink(target).should == source
+      end
     end
   end
 
@@ -133,16 +146,18 @@ describe "AutomateIt::ShellManager" do
     @m.mktempdircd do
       source = "foo"
       target = "bar"
+      mode1 = 0640 if @m.provides_mode?
+      mode2 = 0100640
 
       @a.render(:text => "Hello", :to => source)
       File.exists?(source).should be_true
       File.exists?(target).should be_false
 
-      @a.install(source, target, 0640).should == source
+      @a.install(source, target, mode1).should == source
       File.exists?(target).should be_true
-      File.stat(target).mode.should == 0100640
+      File.stat(target).mode.should == mode2 if @m.provides_mode?
 
-      @a.install(source, target, 0640).should be_false
+      @a.install(source, target, mode1).should be_false
     end
   end
 
@@ -281,37 +296,41 @@ describe "AutomateIt::ShellManager" do
     end
   end
 
-  it "should change the permissions of files (chmod)" do
-    @m.mktempdircd do
-      target = "foo"
-      mode = 0654
-      @m.touch(target)
-      (File.stat(target).mode ^ (mode | 0100000)).zero?.should be_false
+  unless INTERPRETER.shell_manager.provides_mode?
+    puts "NOTE: Can't check permission modes on this platform, #{__FILE__}"
+  else
+    it "should change the permissions of files (chmod)" do
+      @m.mktempdircd do
+        target = "foo"
+        mode = 0654
+        @m.touch(target)
+        (File.stat(target).mode ^ (mode | 0100000)).zero?.should be_false
 
-      @m.chmod(mode, target).should == target
-      (File.stat(target).mode ^ (mode | 0100000)).zero?.should be_true
+        @m.chmod(mode, target).should == target
+        (File.stat(target).mode ^ (mode | 0100000)).zero?.should be_true
 
-      @m.chmod(mode, target).should be_false
+        @m.chmod(mode, target).should be_false
+      end
     end
-  end
 
-  it "should change the permissions of files recursively (chmod_R)" do
-    @m.mktempdircd do
-      mode = 0754
-      dir = "foo/bar"
-      file = dir+"/baz"
-      @m.mkdir_p(dir)
-      @m.touch(file)
-      File.exists?(file).should be_true
-      File.exists?(dir).should be_true
-      (File.stat(file).mode ^ (mode | 0100000)).zero?.should be_false
-      (File.stat(dir).mode ^ (mode | 040000)).zero?.should be_false
+    it "should change the permissions of files recursively (chmod_R)" do
+      @m.mktempdircd do
+        mode = 0754
+        dir = "foo/bar"
+        file = dir+"/baz"
+        @m.mkdir_p(dir)
+        @m.touch(file)
+        File.exists?(file).should be_true
+        File.exists?(dir).should be_true
+        (File.stat(file).mode ^ (mode | 0100000)).zero?.should be_false
+        (File.stat(dir).mode ^ (mode | 040000)).zero?.should be_false
 
-      @m.chmod_R(mode, dir).should == dir
-      (File.stat(file).mode ^ (mode | 0100000)).zero?.should be_true
-      (File.stat(dir).mode ^ (mode | 04000)).zero?.should be_false
+        @m.chmod_R(mode, dir).should == dir
+        (File.stat(file).mode ^ (mode | 0100000)).zero?.should be_true
+        (File.stat(dir).mode ^ (mode | 04000)).zero?.should be_false
 
-      @m.chmod_R(mode, dir).should be_false
+        @m.chmod_R(mode, dir).should be_false
+      end
     end
   end
 
@@ -330,7 +349,9 @@ describe "AutomateIt::ShellManager" do
     end
   end
 
-  if INTERPRETER.superuser?
+  if not INTERPRETER.shell_manager.provides_ownership?
+    puts "NOTE: Can't check ownership on this platform, #{__FILE__}"
+  elsif INTERPRETER.superuser?
     it "should change the ownership of files (chown)" do
       @m.mktempdircd do
         target = "foo"

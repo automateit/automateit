@@ -3,7 +3,7 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 describe "AutomateIt::TagManager", :shared => true do
   before(:all) do
     @a = AutomateIt.new
-    @a.address_manager.should_receive(:hostnames).and_return(["kurou", "kurou.foo"])
+    @a.address_manager.should_receive(:hostnames).any_number_of_times.and_return(["kurou", "kurou.foo"])
     @a.platform_manager.setup(
       :default => :struct,
       :struct => {

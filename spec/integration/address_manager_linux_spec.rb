@@ -3,7 +3,7 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 if not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
 elsif not INTERPRETER.address_manager[:linux].available?
-  puts "NOTE: This platform can't check #{__FILE__}"
+  puts "NOTE: Can't check AddressManager::Linux on this platform, #{__FILE__}"
 else
   describe "AutomateIt::AddressManager::Linux" do
     before(:all) do

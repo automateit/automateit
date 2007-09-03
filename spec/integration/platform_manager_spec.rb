@@ -56,9 +56,9 @@ begin
         end
       end
     rescue NotImplementedError, IndexError
-      puts "NOTE: This platform lacks driver to query 'distro' in #{__FILE__}"
+      puts "NOTE: Can't check 'distro' query on this platform, #{__FILE__}"
     end
   end
 rescue NotImplementedError, IndexError
-  puts "NOTE: This platform can't check #{__FILE__}"
+  puts "NOTE: Can't check 'query' on this platform, #{__FILE__}"
 end

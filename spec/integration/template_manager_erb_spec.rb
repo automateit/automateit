@@ -13,12 +13,15 @@ describe "AutomateIt::TemplateManager::ERB" do
     @a.mktempdircd do
       source = "foo"
       target = "bar"
+      mode1 = 0646 if INTERPRETER.shell_manager.provides_mode?
+      mode2 = 0100646
       File.open(source, "w+"){|h| h.write("<%=variable%>")}
 
-      @a.render(:file => source, :to => target, :mode => 0646,
-                :locals => {:variable => 42}).should be_true
+      opts = {:file => source, :to => target, :locals => {:variable => 42}}
+      opts[:mode] = mode1 if mode1
+      @a.render(opts).should be_true
       File.read(target).should == "42"
-      File.stat(target).mode.should == 0100646
+      File.stat(target).mode.should == mode2 if INTERPRETER.shell_manager.provides_mode?
     end
   end
 end
