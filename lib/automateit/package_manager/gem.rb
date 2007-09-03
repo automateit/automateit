@@ -17,26 +17,20 @@ module AutomateIt
       # See PackageManager#installed?
       def installed?(*packages)
         return _installed_helper?(*packages) do |list, opts|
-          # Sample session:
-          #   No match found for s33r (> 0)
-          #   Gem activesupport-1.4.2
-          #
-          #   Gem net-ssh-1.1.2
-          #     needle (>= 1.2.0)
-          cmd = "gem dependency "+list.join(" ")+" 2>&1"
+            cmd = "gem list --local 2>&1"
 
-          log.debug(PEXEC+cmd)
-          data = `#{cmd}`
+            log.debug(PEXEC+cmd)
+            data = `#{cmd}`
 
-          # Gem lists packages out of order, which screws up the
-          # install/uninstall sequence, so we need to put them back in the
-          # order that the user specified.
-          present = data.scan(/^Gem (.+)-.+?$/).flatten
-          available = []
-          for package in list
-            available << package if present.include?(package)
-          end
-          available
+            # Gem lists packages out of order, which screws up the
+            # install/uninstall sequence, so we need to put them back in the
+            # order that the user specified.
+            present = data.scan(/^([\w\-]+?)\s+\([\w\.\-]+\)\s*$/).flatten
+            available = []
+            for package in list
+              available << package if present.include?(package)
+            end
+            available
         end
       end
 
@@ -48,13 +42,13 @@ module AutomateIt
       # See PackageManager#install
       def install(*packages)
         return _install_helper(*packages) do |list, opts|
-          # Why is the "gem" utility such a steaming pile of offal? Problems include:
-          # - Requires interactive input to install a package
-          # - Repeatedly updates indexes even when there's no reason to and can't be told to stop
+          # Why is the "gem" utility such a steaming pile of offal? Lameness include:
+          # - Requires interactive input to install a package, with no way to prevent this
+          # - Repeatedly updates indexes even when there's no reason to, and can't be told to stop
           # - Doesn't cache packages, insists on downloading them again
           # - Installs broken packages, often without giving any indication of failure
           # - Installs broken packages and leaves you to deal with the jagged pieces
-          # - Sometimes fails through exit status, sometimes through output, but not consistently
+          # - Sometimes fails through exit status, sometimes through output, but not both and not consistently
           # - Lacks a proper "is this package installed?" feature
           # - A nightmare to deal with if you want to install your own GEMHOME/GEMPATH
 
