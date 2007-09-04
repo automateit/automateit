@@ -13,6 +13,38 @@ module AutomateIt
     # manager with an idea of when it's suitable. For example, if a platform
     # doesn't have the <tt>apt-get</tt> command, the PackageManager::APT driver
     # must tell the PackageManager class that it's not suitable.
+    #
+    # === Writing your own drivers
+    #
+    # To write a driver, find the most similar driver available for a specific
+    # plugin, copy it, and rework its code. Save the code for the new driver in
+    # a file ending with .rb into the project’s lib directory, it will be
+    # automatically loaded whenever the Interpreter for that project is run.
+    # Please test and contribute drivers so that others can benefit.
+    #
+    # IMPORTANT GOTCHAS: 
+    # * You must prefix the Automateit module name with a "::", else the driver
+    #   will be imported into the AutomateIt::Interpreter namespace and get lost. 
+    # * You must run the "setup" command for the related Manager after defining
+    #   your driver, otherwise it won't be instantiated.
+    #
+    # Here's a minimalistic PackageManager that can be dropped into "lib":
+    # 
+    #   # Note the "::" prefix
+    #   module ::AutomateIt
+    #     class PackageManager
+    #       class Foo < Plugin::Driver
+    #         depends_on :nothing
+    #
+    #         def suitability(method, *args) # :nodoc:
+    #           # Never select as default driver
+    #           return 0
+    #         end
+    #       end
+    #     end
+    #   end
+    #   # Tell the PackageManager to instantiate this
+    #   package_manager.setup
     class Driver < Base
       collect_registrations
 
