@@ -25,7 +25,8 @@ module AutomateIt
       def hostnames
         names = Set.new
         names << Socket.gethostname
-        names.merge(Socket.gethostbyname(Socket.gethostname)[1]) # Known aliases
+        names.merge(Socket.gethostbyname(Socket.gethostname)[1]) rescue SocketError
+
         names.each{|name| names.merge(hostnames_for(name))}
         names << "localhost"
         return names.to_a.sort

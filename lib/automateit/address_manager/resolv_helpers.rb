@@ -11,7 +11,11 @@ module AutomateIt
           # Some addresses can't be resolved, bummer.
           sum.merge(Resolv.getnames(address)) rescue Resolv::ResolvError; sum
         end
+        names << Socket.gethostname
+        names.merge(Socket.gethostbyname(Socket.gethostname)[1]) rescue SocketError
+
         names.each{|name| names.merge(hostnames_for(name))}
+        names << "localhost"
         return names.to_a.sort
       end
 
