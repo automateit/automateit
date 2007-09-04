@@ -176,7 +176,7 @@ spec = Gem::Specification.new do |s|
   s.require_path = "lib"
   s.rubyforge_project = 'automateit'
   s.summary = "AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems"
-  s.test_files = FileList["{spec}/**/*_spec.rb"].to_a
+  s.test_files = FileList["{spec}/**/*.rb"].to_a
   s.version = AutomateIt::VERSION.to_s
 end
 
