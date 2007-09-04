@@ -63,10 +63,10 @@ task :loclines do
   require 'find'
   lines = 0
   bytes = 0
-  Find.find(*%w(bin lib spec)) do |path|
+  Find.find(*%w(bin lib spec Rakefile ../web/Rakefile ../web/src )) do |path|
     Find.prune if path.match(/.*(\b(.hg|.svn|CVS)\b|(.sw.?|.pyc)$)/)
     next if File.directory?(path)
-    if path.match(/(\bbin\b|.*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|erb|po)$)/)
+    if path.match(/(\bbin\b|.*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|erb|po|haml|sass)$)/)
       data = File.read(path)
       bytes += data.size
       lines += data.scan(/^.+$/).size
