@@ -1,10 +1,14 @@
 == Get Started! A hands-on tutorial for learning AutomateIt
 
-AutomateIt is an open-source tool for automating the setup and maintenance of UNIX systems.
+<em>AutomateIt is an open-source tool for automating the setup and maintenance of UNIX systems.</em>
 
-This hands-on guide will teach you how to use AutomateIt and explain where to find more detailed instructions.
+This hands-on guide will teach you to use AutomateIt and explains where to find more detailed instructions.
 
-Please see the Screenshots[http://automateit.org/screenshots] of AutomateIt in action to get a quick idea of what AutomateIt is all about.
+It's recommended that you see the Screenshots[http://automateit.org/screenshots] of AutomateIt in action to get a quick idea of what AutomateIt is all about.
+
+AutomateIt is feature-complete, exceeds the capabilities of most major products, and ensures its quality with a self-test suite. However, this is a young product and users are expected to be technically proficient, be willing to accept rough spots, work through problems and upgrade frequently. 
+
+Please sign up for RSS change notifications[http://automateit.org/changes]  so you know when upgrades are available.
 
 === Ruby
 
@@ -138,7 +142,7 @@ An example can make this clearer -- again the lines starting with <tt>#</tt> are
  # Nothing happened because there is no directory to remove
  => false
 
-Notice how the second time that +mkdir+ was run in the session above, it returned +false+ and didn't create a directory? That's the conditional execution in action. Similarly, the +rmdir+ only worked the first time, but returned +false+ and took no action when the directory was already gone.
+Notice how the second time +mkdir+ was run above, it returned +false+ and didn't create a directory? That's the conditional execution in action, realizing the action has already been preformed. Similarly, the +rmdir+ only ran the first time, but returned +false+ and took no action when the directory was already gone. You can use the return values of these commands to write sophisticated logic of your own based on what actions took place.
 
 === Plugins
 
@@ -174,7 +178,7 @@ For example:
 
 === Plugins and drivers as APIs
 
-Each plugin describes a common interface to features. This provides a consistent abstraction that eliminates platform-specific issues that typically infuriate cross-platform developers.
+Each plugin describes a common interface to related features. This provides a consistent abstraction that eliminates platform-specific issues that typically infuriate cross-platform developers.
 
 For example, the UNIX command for installing packages on a Debian system is:
 
@@ -197,7 +201,7 @@ AutomateIt solves this problem by providing a common API for all package manager
 
  package_manager.install "foo"
 
-This AutomateIt checks if the package is installed, installs it if it isn't, and does nothing if the package is present. This eliminates the need for quirky, platform-specific commands and awkward conditionals.
+This AutomateIt command checks if the +foo+ package is installed, installs it if it isn't, and does nothing if the package is present. This eliminates the need for quirky, platform-specific commands and awkward conditionals.
 
 === Driver auto-detection
 
@@ -210,7 +214,7 @@ For example, the AutomateIt::PackageManager plugin has drivers called AutomateIt
 
 === Using a specific driver
 
-Sometimes it's necessary to specify the driver that will be used. The recommended way to do this is to pass a <tt>:with => :driver_name</tt> option to the plugin command.
+Sometimes it's necessary to specify the driver to use. The recommended way to do this is to pass a <tt>:with => :driver_name</tt> option to the plugin command.
 
 For example, tell the package manager to use the Gem driver:
 

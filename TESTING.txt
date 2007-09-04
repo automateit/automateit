@@ -1,20 +1,20 @@
 == AutomateIt's self-test
 
-AutomateIt ensures that it works correctly, and stays working, by using a rigorous self-test suite. This suite is written using the RSpec tool and its files are stored in the software installation's +spec+ directory. You must install the +rspec+ Gem to run the tests.
+AutomateIt ensures that it works correctly, and stays working, by using a rigorous self-test suite. This suite is written using the RSpec tool and its files are stored in the software installation's +spec+ directory. You must install the +rake+ and +rspec+ Gems to run the tests.
 
 === Types of tests
 
-*Unit* tests are quick and safe because they don't write to the disk or alter your system.
+<b>Unit tests</b> are quick and safe because they don't write to the disk or alter your system.
 
-For example, <tt>spec/unit/template_manager_erb_spec.rb</tt> exercises AutomateIt::TemplateManager::ERB by rendering templates to memory. Because it doesn't write to the disk, you can safely run this without worrying that it'll damage your system.
+For example, <tt>spec/unit/template_manager_erb_spec.rb</tt> exercises AutomateIt::TemplateManager::ERB by rendering templates to memory. Because it doesn't write to the disk, you can safely run it without worrying about it damaging your system.
 
-*Integration* tests are slow and potentially-dangerous because they write to disk and alter your system. Great care is taken to make sure these don't cause damage, but because they modify the system, there is a potential risk. These tests are designed to fail before doing anything if they detect that they might cause damage. The tests will clean up after themselves when done to remove any changes made to the system.
+<b>Integration tests</b> are slow and potentially-dangerous because they write to disk and alter your system. Great care is taken to make sure these don't cause damage, but because they modify the system, there is a potential risk. These tests are designed to fail before doing anything if they detect that they might cause damage. The tests will clean up after themselves when done to remove any changes made to the system. To put "dangerous" in context, these tests are run before every release, so the likelihood of actual damage is very low.
 
-For example, the <tt>spec/integration/account_manager_spec.rb</tt> exercises the AutomateIt::AccountManager by adding and deleting users and groups. To make sure it doesn't cause harm, it tests using dummy users with names like +asdfasdf+ and makes sure they're not present so that in the unlikely event that you have a user with that name, it won't destroy their account.
+For example, the <tt>spec/integration/account_manager_spec.rb</tt> exercises the AutomateIt::AccountManager by adding and deleting users and groups. To make sure it doesn't cause harm, it uses dummy users with silly names like +asdfasdf+. Before it starts the test, it will check for these users and fail the entire test if they're present. This ensures that it won't destroy an existing account in the unlikely event that you have a user with such a name.
 
 === Understanding warnings
 
-When the tests can't check something, they'll print warning messages. These warnings are normal and expected. They are not errors and don't imply that something is broken.
+When the tests can't check something, they'll print warning messages. These warnings are normal and expected. They are *not* errors and do not imply that something is broken.
 
 For example, if you run the integration test suite as a non-root user, it will warn you that it can't test some commands because you don't have the necessary privileges, e.g.:
 
@@ -22,7 +22,7 @@ For example, if you run the integration test suite as a non-root user, it will w
 
 You will also get warnings about drivers that are not available on your platform. For example, Ubuntu systems don't include the YUM package manager, so there's no way to test it on an Ubuntu system. So if you run the integration tests on an Ubuntu system, you'll get a warning like:
 
- NOTE: AutomateIt::PackageManager::YUM is not available for testing on this platform ./spec/integration/package_manager_spec.rb
+ NOTE: Can't check AutomateIt::PackageManager::YUM on this platform, ./spec/integration/package_manager_spec.rb
 
 === Running an individual test
 
@@ -53,3 +53,5 @@ Or a report for all the suites, including +unit+ and +integration+, by running:
  rake rcov:all
 
 These tasks will create a +coverage+ directory with the report files.
+
+Note that because no single platform can run all the code, you'll never be able to get 100% coverage.
