@@ -163,7 +163,7 @@ spec = Gem::Specification.new do |s|
   s.extra_rdoc_files = %w(README.txt TUTORIAL.txt TESTING.txt)
   s.files = FileList["{bin,lib}/**/*"].to_a
   s.has_rdoc = true
-  s.homepage = "http://AutomateIt.org/"
+  s.homepage = "http://automateit.org/"
   s.name = "automateit"
   s.platform = Gem::Platform::RUBY
   s.rdoc_options << %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' << %w(lib)
@@ -171,7 +171,7 @@ spec = Gem::Specification.new do |s|
   s.rubyforge_project = 'automateit'
   s.summary = "AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems"
   s.test_files = FileList["{spec}/**/*_spec.rb"].to_a
-  s.version = AutomateIt::VERSION
+  s.version = AutomateIt::VERSION.to_s
 end
 
 Rake::GemPackageTask.new(spec) do |pkg|
