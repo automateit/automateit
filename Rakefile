@@ -56,7 +56,7 @@ class Numeric
 end
 
 desc "Display the lines of source code and how many lines were changed in the repository"
-task :loc => [:loclines, :locdiff]
+task :loc => [:loclines, :locdiff, :locchurn]
 
 desc "Display the lines of source code"
 task :loclines do
@@ -79,10 +79,16 @@ end
 desc "Display the lines of code changed in the repository"
 task :locdiff do
   if File.directory?(".hg")
-    puts "%s lines added and removed through SCM operations" % `hg log --no-merges --patch`.scan(/^[+-][^+-].+/).size.commify
+    puts "%s lines added and removed through SCM operations" % `hg log --patch`.scan(/^[+-][^+-].+/).size.commify
   else
     raise NotImplementedError.new("Sorry, this only works for a Mercurial checkout")
   end
+end
+
+desc "Display lines of churn"
+task :locchurn do
+  require 'active_support'
+  puts "%s lines of Hg churn" % (`hg churn`.scan(/^[^\s]+\s+(\d+)\s/).flatten.map(&:to_i).sum).commify
 end
 
 #---[ misc ]------------------------------------------------------------
@@ -161,7 +167,7 @@ spec = Gem::Specification.new do |s|
   s.email = "igal@pragmaticraft.org"
   s.executables = Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)}
   s.extra_rdoc_files = %w(README.txt TUTORIAL.txt TESTING.txt)
-  s.files = FileList["{bin,lib}/**/*"].to_a
+  s.files = [FileList["{bin,lib}/**/*"].to_a, 'Rakefile'].flatten
   s.has_rdoc = true
   s.homepage = "http://automateit.org/"
   s.name = "automateit"
