@@ -1,7 +1,7 @@
 module AutomateIt
   # == ShellManager
   #
-  # The ShellManager provides UNIX-like shell commands for manipulating files
+  # The ShellManager provides Unix-like shell commands for manipulating files
   # and executing commands.
   #
   # ==== Basic previews
@@ -73,8 +73,8 @@ module AutomateIt
   #
   #   => Deleting all files in directory /tmp/foo/bar
   class ShellManager < Plugin::Manager
-    require 'automateit/shell_manager/portable.rb'
-    require 'automateit/shell_manager/unix.rb'
+    require 'automateit/shell_manager/portable'
+    require 'automateit/shell_manager/unix'
 
     alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
     alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch

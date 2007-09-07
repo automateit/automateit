@@ -1,13 +1,13 @@
 module AutomateIt
   class ShellManager
-    # == ShellManager::UNIX
+    # == ShellManager::Unix
     #
     # A ShellManager driver for providing shell commands for manipulating files
-    # and executing commands on UNIX-like systems.
+    # and executing commands on Unix-like systems.
     #
     # It includes all the functionality of the ShellManager::Portable driver
     # plus additional commands.
-    class UNIX < Portable
+    class Unix < Portable
       depends_on :programs => %w(which)
 
       def suitability(method, *args) # :nodoc:

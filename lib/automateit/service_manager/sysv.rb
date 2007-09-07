@@ -3,7 +3,7 @@ module AutomateIt
     # == ServiceManager::SYSV
     #
     # The SYSV driver implements the ServiceManager methods for #running?,
-    # #start and #stop on UNIX-like platforms that use the System V init
+    # #start and #stop on Unix-like platforms that use the System V init
     # process using a <tt>/etc/init.d</tt> directory.
     #
     # It also implements a basic #enabled? method that's very fast but may not

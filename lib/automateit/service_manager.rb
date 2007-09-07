@@ -2,7 +2,7 @@ module AutomateIt
   # == ServiceManager
   #
   # ServiceManager provides a way of managing services, such starting and
-  # stopping UNIX daemons.
+  # stopping Unix daemons.
   class ServiceManager < Plugin::Manager
     require 'automateit/service_manager/sysv'
     require 'automateit/service_manager/update_rcd'

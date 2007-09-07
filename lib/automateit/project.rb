@@ -6,7 +6,7 @@ module AutomateIt
   #
   # === Create a project
   #
-  # You can create a project by running the following from the UNIX shell:
+  # You can create a project by running the following from the Unix shell:
   #
   #   automateit --create myproject
   #
@@ -75,7 +75,7 @@ module AutomateIt
   #
   #   MEOW!
   #
-  # === Specifying project paths on the UNIX shell
+  # === Specifying project paths on the Unix shell
   #
   # AutomateIt will load the project automatically if you're executing a recipe
   # that's inside a project's +recipes+ directory.
@@ -124,11 +124,11 @@ module AutomateIt
   #
   # === Tag and field command-line helpers
   #
-  # You can access a project's tags and fields from the UNIX shell. This
+  # You can access a project's tags and fields from the Unix shell. This
   # helps other programs access configuration data and make use of your roles.
   #
   # For example, with the <tt>hello_project</tt> we've created, we can lookup
-  # fields from the UNIX shell like this:
+  # fields from the Unix shell like this:
   #
   #   aifield -p /tmp/hello_project greeting
   #
@@ -165,7 +165,7 @@ module AutomateIt
   #     automateit recipe/default.rb
   # * Run this wrapper once an hour using cron so that your systems are always up to date. AutomateIt only prints output when it makes a change, so cron will only email you when you commit new code to the repository and the hosts make changes.
   # * If you need to run a recipe on the machine right now, SSH into it and run the wrapper.
-  # * If you need to run the script early on a bunch of machines and don't want to manually SSH into each one, you can leverage the +aitag+ (see <tt>aitag --help</tt>) to execute a UNIX command across multiple systems. For example, you could use a UNIX shell command like this to execute the wrapper on all hosts tagged with +apache_servers+:
+  # * If you need to run the script early on a bunch of machines and don't want to manually SSH into each one, you can leverage the +aitag+ (see <tt>aitag --help</tt>) to execute a Unix command across multiple systems. For example, you could use a Unix shell command like this to execute the wrapper on all hosts tagged with +apache_servers+:
   #
   #     for host in `aitag -p /var/local/myautomateit -w apache_server`; do
   #         echo "# $host"
@@ -255,7 +255,7 @@ module AutomateIt
 #
 # Use this file to create a multi-level hash of key value pairs with YAML. This
 # is useful for extracting configuration-specific arguments out of your recipes
-# and make it easier to share them between recipes and command-line UNIX
+# and make it easier to share them between recipes and command-line Unix
 # programs.
 #
 # You can write lines like the following to declare these the hash with YAML:

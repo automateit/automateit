@@ -19,7 +19,7 @@ module AutomateIt
   # You can get a reference to the entire hash:
   #   lookup("*")
   #
-  # Fields can be queried from the UNIX shell using +aifield+, run <tt>aifield
+  # Fields can be queried from the Unix shell using +aifield+, run <tt>aifield
   # --help</tt> for details.
   class FieldManager < Plugin::Manager
     alias_methods :lookup

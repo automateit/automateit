@@ -26,17 +26,17 @@ You will also get warnings about drivers that are not available on your platform
 
 === Running an individual test
 
-Run an individual test, like <tt>spec/unit/template_manager_erb_spec.rb</tt>, by executing the UNIX shell command:
+Run an individual test, like <tt>spec/unit/template_manager_erb_spec.rb</tt>, by executing the Unix shell command:
 
  spec spec/unit/template_manager_erb_spec.rb
 
 === Running test suites
 
-To run the +unit+ test suite, execute the following command from the UNIX shell:
+To run the +unit+ test suite, execute the following command from the Unix shell:
 
  rake spec
 
-To run all the test suites, including +unit+ and +integration+, execute the following command from the UNIX shell:
+To run all the test suites, including +unit+ and +integration+, execute the following command from the Unix shell:
 
  rake spec:all
 

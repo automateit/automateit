@@ -2,7 +2,7 @@ module AutomateIt
   class ShellManager
     # == ShellManager::Portable
     #
-    # Pure-Ruby, portable driver for ShellManager provides UNIX-like shell
+    # Pure-Ruby, portable driver for ShellManager provides Unix-like shell
     # commands for manipulating files and executing commands.
     #
     # It does not provide commands for:

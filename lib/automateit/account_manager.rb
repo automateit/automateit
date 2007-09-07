@@ -1,7 +1,7 @@
 module AutomateIt
   # == AccountManager
   #
-  # The AccountManager provides a way of managing system accounts, such as UNIX
+  # The AccountManager provides a way of managing system accounts, such as Unix
   # users and groups.
   class AccountManager < Plugin::Manager
     require 'automateit/account_manager/portable'

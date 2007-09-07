@@ -1,6 +1,6 @@
 == Get Started! A hands-on tutorial for learning AutomateIt
 
-<em>AutomateIt is an open-source tool for automating the setup and maintenance of UNIX systems.</em>
+<em>AutomateIt is an open-source tool for automating the setup and maintenance of Unix systems.</em>
 
 This hands-on guide will teach you to use AutomateIt and explain where to find more detailed instructions.
 
@@ -32,8 +32,8 @@ AutomateIt's technical documentation uses the following typographical convention
 * AutomateIt::ShellManager#sh -- A method, with a link to its documentation. You can also find a link to this method's documentation in the "Methods" pane on the left.
 * Ruby code:
  puts "Ruby code"
-* UNIX shell command, although the prompt may be left off when obvious:
- you@host:myproject> echo "UNIX command run from the 'myproject' directory"
+* Unix shell command, although the prompt may be left off when obvious:
+ you@host:myproject> echo "Unix command run from the 'myproject' directory"
 * AutomateIt interactive shell command, although the prompt may be left off when obvious:
  ai> puts "I'm in the Interpreter"
 
@@ -61,7 +61,7 @@ Here's what an interactive shell session looks like (text following the <tt>#</t
  ai> self.class                # Prompt and another user command
  => AutomateIt::Interpreter    # Return value of "self.class"
  ai> <CTRL-D>                  # Press <CTRL-D> to exit the shell
- you@host:tmp>                 # We're back to the UNIX shell
+ you@host:tmp>                 # We're back to the Unix shell
 
 === Recipe files
 
@@ -97,7 +97,7 @@ For example, one of the commands listed is +pwd+, which can be used like this:
  ai> pwd
  => "/tmp"
 
-AutomateIt provides many commands that work just like the UNIX shell commands you already know, so you'll be productive quickly.
+AutomateIt provides many commands that work just like the Unix shell commands you already know, so you'll be productive quickly.
 
 === Conditional execution
 
@@ -132,8 +132,8 @@ AutomateIt uses an extensible plugin architecture to group together related comm
 * AutomateIt::FieldManager -- Queries configuration variables.
 * AutomateIt::PackageManager -- Manipulates software packages.
 * AutomateIt::PlatformManager -- Queries platform, such as its OS version.
-* AutomateIt::ServiceManager -- Manipulates services, such as UNIX daemons.
-* AutomateIt::ShellManager -- Manipulates files and executes UNIX commands.
+* AutomateIt::ServiceManager -- Manipulates services, such as Unix daemons.
+* AutomateIt::ShellManager -- Manipulates files and executes Unix commands.
 * AutomateIt::TagManager -- Groups hosts by role and queries membership.
 * AutomateIt::TemplateManager -- Renders templates to files.
 
@@ -152,7 +152,7 @@ For example:
 
 * AutomateIt::ShellManager -- A plugin for running shell commands.
 * AutomateIt::ShellManager::Portable -- A portable but limited-functionality driver that implements the ShellManager's methods.
-* AutomateIt::ShellManager::UNIX -- A full-featured driver implementing ShellManager's methods that only runs on UNIX-like systems.
+* AutomateIt::ShellManager::Unix -- A full-featured driver implementing ShellManager's methods that only runs on Unix-like systems.
 
 === Plugins provide APIs, drivers provide implementations
 
@@ -164,16 +164,16 @@ For example, AutomateIt provides a common API for all packaging tools: AutomateI
 
 AutomateIt will check if +foo+ is installed, install it if needed, or do nothing if the package is present. This API is the same for all packaging tools, making it easy to get work done by using high-level AutomateIt commands instead of cryptic tool-specific commands. Although AutomateIt uses the low-level tools, it uses them with best-practices approaches and hides the senseless complexity from the user.
 
-What's the big deal? Consider how one would install packages from the UNIX shell. Most packaging tools are pathologically dysfunctional and make it bafflingly difficult to programmatically install or uninstall packages, or tell if a package is installed. Many don't use exit values and require complex output parsing. Others require user-input even when it's obvious that none is needed. Almost all make it necessary to write conditional code because they'll either fail with errors if told to install an existing package, destroy an existing setup, or install duplicate packages. Writing UNIX shell code to handle all these quirks is frustrating and risky.
+What's the big deal? Consider how one would install packages from the Unix shell. Most packaging tools are pathologically dysfunctional and make it bafflingly difficult to programmatically install or uninstall packages, or tell if a package is installed. Many don't use exit values and require complex output parsing. Others require user-input even when it's obvious that none is needed. Almost all make it necessary to write conditional code because they'll either fail with errors if told to install an existing package, destroy an existing setup, or install duplicate packages. Writing Unix shell code to handle all these quirks is frustrating and risky.
 
-Here's a sample UNIX shell command for installing a package using one of the simplest, most reasonable tools available -- although note that unlike AutomateIt, this shell command can't handle multiple packages, is slower, can't be previewed, and has no consistent error handling:
+Here's a sample Unix shell command for installing a package using one of the simplest, most reasonable tools available -- although note that unlike AutomateIt, this shell command can't handle multiple packages, is slower, can't be previewed, and has no consistent error handling:
 
  if dpkg-query -W --showformat '${Status}\n' foo 2>&1 | \
      egrep -q '(^| )installed'; then
    apt-get install -y -q some_package_name < /dev/null
  done
 
-Now compare that hideous command to the simple, clear and consistent AutomateIt command before it. AutomateIt's plugins and drivers are easy to install and write. As more are written, more people will hopefully be freed from needlessly convoluted low-level commands, and able to get simple things done simply. AutomateIt's consistent API, multiple drivers, sane defaults and conditional-checking make it easier to write clear and maintainable recipes than using the low-level directly commands from the UNIX shell.
+Now compare that hideous command to the simple, clear and consistent AutomateIt command before it. AutomateIt's plugins and drivers are easy to install and write. As more are written, more people will hopefully be freed from needlessly convoluted low-level commands, and able to get simple things done simply. AutomateIt's consistent API, multiple drivers, sane defaults and conditional-checking make it easier to write clear and maintainable recipes than using the low-level directly commands from the Unix shell.
 
 === Driver auto-detection
 
@@ -254,7 +254,7 @@ The Interpreter automatically loads the project. The +project+ method contains t
 
 === Fields
 
-A project's <tt>config/fields.yml</tt> file is meant to store configuration constants, like custom paths for applications. Fields abstract configuration variables for recipes, improving maintainability by separating data and logic. Fields can also be easily queried from UNIX using the +aifield+ command. More information about fields and +aifield+ can be found in AutomateIt::FieldManager.
+A project's <tt>config/fields.yml</tt> file is meant to store configuration constants, like custom paths for applications. Fields abstract configuration variables for recipes, improving maintainability by separating data and logic. Fields can also be easily queried from Unix using the +aifield+ command. More information about fields and +aifield+ can be found in AutomateIt::FieldManager.
 
 For example, consider a fields file with the following contents:
 

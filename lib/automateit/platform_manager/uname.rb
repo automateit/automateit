@@ -2,7 +2,7 @@ module AutomateIt
   class PlatformManager
     # == PlatformManager::Uname
     #
-    # A PlatformManager driver that uses the UNIX +uname+ command to provide
+    # A PlatformManager driver that uses the Unix +uname+ command to provide
     # basic information about the platform.
     class Uname < Struct
       depends_on :programs => %w(uname)
