@@ -75,7 +75,7 @@ module AutomateIt
         end
       end
 
-      # Returns the Driver with the specified token. E.g. +:apt+ will return
+      # Returns the Driver with the specified token. E.g., +:apt+ will return
       # the +APT+ driver.
       def [](token)
         return @drivers[token]
@@ -83,7 +83,7 @@ module AutomateIt
 
       # Manipulate the default driver. Without arguments, gets the driver token
       # as a symbol. With argument, sets the default driver to the +token+,
-      # e.g. the argument <tt>:apt</tt> will make the +APT+ driver the default.
+      # e.g., the argument <tt>:apt</tt> will make the +APT+ driver the default.
       def default(token=nil)
         if token.nil?
           @default

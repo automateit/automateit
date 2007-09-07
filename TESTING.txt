@@ -8,15 +8,15 @@ AutomateIt ensures that it works correctly, and stays working, by using a rigoro
 
 For example, <tt>spec/unit/template_manager_erb_spec.rb</tt> exercises AutomateIt::TemplateManager::ERB by rendering templates to memory. Because it doesn't write to the disk, you can safely run it without worrying about it damaging your system.
 
-<b>Integration tests</b> are slow and potentially-dangerous because they write to disk and alter your system. Great care is taken to make sure these don't cause damage, but because they modify the system, there is a potential risk. These tests are designed to fail before doing anything if they detect that they might cause damage. The tests will clean up after themselves when done to remove any changes made to the system. To put "dangerous" in context, these tests are run before every release, so the likelihood of actual damage is very low.
+<b>Integration tests</b> are slow and potentially dangerous because they write to disk and alter your system. Great care is taken to make sure these don't cause damage, but because they modify the system, there is a potential risk. These tests are designed to fail before doing anything if they detect that they might cause damage. The tests will clean up after themselves when done to remove any changes made to the system. To put "dangerous" in context, these tests are run before every release, so the likelihood of actual damage is very low.
 
-For example, the <tt>spec/integration/account_manager_spec.rb</tt> exercises the AutomateIt::AccountManager by adding and deleting users and groups. To make sure it doesn't cause harm, it uses dummy users with silly names like +asdfasdf+. Before it starts the test, it will check for these users and fail the entire test if they're present. This ensures that it won't destroy an existing account in the unlikely event that you have a user with such a name.
+For example, the <tt>spec/integration/account_manager_spec.rb</tt> exercises the AutomateIt::AccountManager by adding and deleting users and groups. To make sure it doesn't cause harm, it uses dummy users with names like +automateit_testuser+. Before it starts the test, it will check for these users and fail the entire test if they're present. This ensures that it won't destroy an existing account in the unlikely event that you have a user with such a name.
 
 === Understanding warnings
 
 When the tests can't check something, they'll print warning messages. These warnings are normal and expected. They are *not* errors and do not imply that something is broken.
 
-For example, if you run the integration test suite as a non-root user, it will warn you that it can't test some commands because you don't have the necessary privileges, e.g.:
+For example, if you run the integration test suite as a non-root user, it will warn you that it can't test some commands because you don't have the necessary privileges:
 
  NOTE: Must be root to check 'chown' in ./spec/integration/shell_manager_spec.rb
 

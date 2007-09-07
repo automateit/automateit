@@ -6,11 +6,11 @@ module AutomateIt
     class ERB < Plugin::Driver
       depends_on :nothing
 
-      # The default method for performing checks, e.g. :compare
+      # The default method for performing checks, e.g., :compare
       attr_accessor :default_check
 
       # Options:
-      # * :default_check - Set the #default_check, e.g. :compare
+      # * :default_check - Set the #default_check, e.g., :compare
       def setup(opts={})
         super(opts)
         if opts[:default_check]

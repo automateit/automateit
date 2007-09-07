@@ -1,7 +1,7 @@
 module AutomateIt
   # == PackageManager
   #
-  # The PackageManager provides a way to manage packages, e.g. install,
+  # The PackageManager provides a way to manage packages, e.g., install,
   # uninstall and query if the Apache package is installed with APT.
   #
   # Examples:

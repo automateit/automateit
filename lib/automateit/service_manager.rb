@@ -21,7 +21,7 @@ module AutomateIt
     # Restart this +service+ if it's running, or start it if it's stopped.
     def restart(service, opts={}) dispatch(service, opts) end
 
-    # Tell the +service+ to take a specific +action+, e.g. "condrestart".
+    # Tell the +service+ to take a specific +action+, e.g., "condrestart".
     def tell(service, action, opts={}) dispatch(service, action, opts={}) end
 
     # Will this +service+ start when the computer is rebooted?

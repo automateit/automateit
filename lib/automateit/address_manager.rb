@@ -9,8 +9,8 @@ module AutomateIt
     require 'automateit/address_manager/linux'
 
     # Does host have an address or interface? Arguments hash must include
-    # either a :device (e.g. "eth0") or :address (e.g. "10.0.0.10"), and an
-    # optional :label (e.g. "foo"). Note that an interface is the combination
+    # either a :device (e.g., "eth0") or :address (e.g., "10.0.0.10"), and an
+    # optional :label (e.g., "foo"). Note that an interface is the combination
     # of a :device and :label, so "eth0" isn't the same as "eth0:foo".
     #
     # Examples on a host with address "10.0.0.10" on interface "eth0:foo":
@@ -29,8 +29,8 @@ module AutomateIt
     # Add address to host if it doesn't have it. Requires root-level access.
     # Returns +true+ if action was taken and succeeded.
     #
-    # Arguments hash must include either a :device (e.g. "eth0") or :address
-    # (e.g. "10.0.0.10"), and an optional :label (e.g. "foo") and :mask (e.g.
+    # Arguments hash must include either a :device (e.g., "eth0") or :address
+    # (e.g., "10.0.0.10"), and an optional :label (e.g., "foo") and :mask (e.g.
     # "24").
     #
     # An optional number of ARP :announcements may be specified, defaulting to
@@ -48,8 +48,8 @@ module AutomateIt
     # Remove address from host if it has it. Requires root-level access.
     # Returns +true+ if action was taken and succeeded.
     #
-    # Arguments hash must include either a :device (e.g. "eth0") or :address
-    # (e.g. "10.0.0.10"), and an optional :label (e.g. "foo") and :mask (e.g.
+    # Arguments hash must include either a :device (e.g., "eth0") or :address
+    # (e.g., "10.0.0.10"), and an optional :label (e.g., "foo") and :mask (e.g.
     # "24").
     #
     # Example:

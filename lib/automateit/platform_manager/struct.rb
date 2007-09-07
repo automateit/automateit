@@ -8,7 +8,7 @@ module AutomateIt
     class Struct < Plugin::Driver
       depends_on :nothing
 
-      # Hash mapping of keys that have many common names, e.g. "release" and "version"
+      # Hash mapping of keys that have many common names, e.g., "release" and "version"
       attr_accessor :key_aliases
 
       def suitability(method, *args) # :nodoc:

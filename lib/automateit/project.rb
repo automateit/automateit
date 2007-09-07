@@ -151,8 +151,8 @@ module AutomateIt
   # If you want to share a project between different hosts, you're responsible for distributing the files between them. This isn't a big deal though because these are just text files and your OS has dozens of excellent ways to distribute these.
   #
   # Common approaches to distribution:
-  # * *Shared directory*: Your hosts mount a shared network directory (e.g. +nfs+ or +smb+) with your project. This is very easy if your hosts already have a shared directory, but can be a nuisance otherwise because it opens potential security holes and risks having you hosts hang if the master goes offline.
-  # * *Client pull*: Your hosts download the latest copy of your project from a master repository using a remote copy tool (e.g. +rsync+) or a revision control system (e.g. +cvs+, +svn+, +hg+). This is a safe, simple and secure option.
+  # * *Shared directory*: Your hosts mount a shared network directory (e.g., +nfs+ or +smb+) with your project. This is very easy if your hosts already have a shared directory, but can be a nuisance otherwise because it opens potential security holes and risks having you hosts hang if the master goes offline.
+  # * *Client pull*: Your hosts download the latest copy of your project from a master repository using a remote copy tool (e.g., +rsync+) or a revision control system (e.g., +cvs+, +svn+, +hg+). This is a safe, simple and secure option.
   # * *Server push*: You have a master push out the project files to clients using a remote copy tool. This can be awkward and time-consuming because the server must go through a list of all hosts and copy files to them individually.
   #
   # An example of a complete solution for distributing system configuration management files:

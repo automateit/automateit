@@ -2,11 +2,11 @@ module AutomateIt
   class Plugin
     # == Plugin::Driver
     #
-    # A driver provides the low-level functionality for features, e.g. the
+    # A driver provides the low-level functionality for features, e.g., the
     # PackageManager::APT driver is responsible for installing a software
     # package using the Debian <tt>apt-get</tt> command. Multiple drivers
     # providing common functionality are managed by a single Manager class,
-    # e.g. drivers that install software packages are managed by the
+    # e.g., drivers that install software packages are managed by the
     # PackageManager.
     #
     # A driver may only be available on certain platforms and provides its
@@ -18,17 +18,17 @@ module AutomateIt
     #
     # To write a driver, find the most similar driver available for a specific
     # plugin, copy it, and rework its code. Save the code for the new driver in
-    # a file ending with .rb into the project’s lib directory, it will be
+    # a file ending with .rb into the project’s +lib+ directory, it will be
     # automatically loaded whenever the Interpreter for that project is run.
     # Please test and contribute drivers so that others can benefit.
     #
     # IMPORTANT GOTCHAS: 
-    # * You must prefix the Automateit module name with a "::", else the driver
+    # * You must prefix the AutomateIt module name with a "::", else the driver
     #   will be imported into the AutomateIt::Interpreter namespace and get lost. 
     # * You must run the "setup" command for the related Manager after defining
     #   your driver, otherwise it won't be instantiated.
     #
-    # Here's a minimalistic PackageManager that can be dropped into "lib":
+    # Here's a minimalistic PackageManager that can be dropped into +lib+:
     # 
     #   # Note the "::" prefix
     #   module ::AutomateIt

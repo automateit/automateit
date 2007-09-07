@@ -21,15 +21,15 @@ module AutomateIt
     #   query("os#arch#distro#release") # => "linux_i686_ubuntu_6.06"
     #
     # Fields that may be provided by drivers:
-    # * :arch -- Hardware architecture, e.g. "i686"
-    # * :os -- Operating system, e.g. "linux"
-    # * :distro -- Operating system distribution, e.g. "ubuntu"
-    # * :release -- Operating system distribution release, e.g. "6.06"
+    # * :arch -- Hardware architecture, e.g., "i686"
+    # * :os -- Operating system, e.g., "linux"
+    # * :distro -- Operating system distribution, e.g., "ubuntu"
+    # * :release -- Operating system distribution release, e.g., "6.06"
     def query(search) dispatch(search) end
 
-    # Is this a single-vendor operating system? E.g. Windows is, while Linux
+    # Is this a single-vendor operating system? E.g., Windows is, while Linux
     # isn't. This method helps the TagManager determine how to name tags. A
-    # single-vendor product uses the "os#release" format (e.g. "windows_xp"),
+    # single-vendor product uses the "os#release" format (e.g., "windows_xp"),
     # while a multi-vendor product uses a "distro#release" format
     # ("ubuntu_6.06").
     def single_vendor?() dispatch() end

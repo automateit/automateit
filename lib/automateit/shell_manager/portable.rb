@@ -405,7 +405,7 @@ module AutomateIt
           modified = false
           stat = writing? || File.exists?(path) ? File.stat(path) : nil
           if opts[:mode]
-            # TODO ShellManager::Portable#chperm -- process chmod symbolic strings, e.g. [ugoa...][[+-=][rwxXstugo...]...][,...]
+            # TODO ShellManager::Portable#chperm -- process chmod symbolic strings, e.g., [ugoa...][[+-=][rwxXstugo...]...][,...]
             mode = opts[:mode] | (stat.directory? ? DIRECTORY_MASK : FILE_MASK) if stat
             unless stat and (mode ^ stat.mode).zero?
               modified = true

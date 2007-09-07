@@ -12,7 +12,7 @@ module AutomateIt
     #
     # It does not implement the #enable and #disable methods because these are
     # not standardized and must be implemented using platform-specific drivers,
-    # e.g. Chkconfig on RedHat-like platforms.
+    # e.g., Chkconfig on RedHat-like platforms.
     class SYSV < Plugin::Driver
       ETC_INITD = "/etc/init.d"
 

@@ -83,10 +83,10 @@ module AutomateIt
         # Hash of parameters to make available to the editing session.
         attr_accessor :params
 
-        # Comment prefix, e.g. "/*"
+        # Comment prefix, e.g., "/*"
         attr_accessor :comment_prefix
 
-        # Comment suffix, e.g. "*/"
+        # Comment suffix, e.g., "*/"
         attr_accessor :comment_suffix
 
         # Prepend +line+ to the top of the buffer, but only if it's not in this

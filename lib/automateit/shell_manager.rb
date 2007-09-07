@@ -103,7 +103,7 @@ module AutomateIt
     def which!(command) dispatch(command) end
 
     # Creates a temporary file. Optionally takes a +name+ argument which is
-    # purely cosmetic, e.g. if the +name+ is "foo", the routine may create a temporary file named <tt>/tmp/foo_qeKo7nJk1s</tt>.
+    # purely cosmetic, e.g., if the +name+ is "foo", the routine may create a temporary file named <tt>/tmp/foo_qeKo7nJk1s</tt>.
     #
     # When called with a block, invokes the block with the path of the
     # temporary file and deletes the file at the end of the block.
@@ -153,7 +153,7 @@ module AutomateIt
     # * :recursive -- change files and directories recursively, boolean.
     # * :user -- user name to change ownership to.
     # * :group -- group name to change ownership to.
-    # * :mode -- mode to use as octal, e.g. <tt>0400</tt> to make a file
+    # * :mode -- mode to use as octal, e.g., <tt>0400</tt> to make a file
     #   readable only to its owner.
     # * :report -- if set to <tt>:details</tt>, the log shows all files modified, which
     #   may be useful when only changing a few files. Without arguments, only

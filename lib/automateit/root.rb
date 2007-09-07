@@ -3,13 +3,13 @@ module AutomateIt # :nodoc:
   # AutomateIt version
   VERSION=Gem::Version.new("0.70903")
 
-  # Output prefix for command execution, e.g. "** ls -la"
+  # Output prefix for command execution, e.g., "** ls -la"
   PEXEC = "** "
 
-  # Output prefix for notes, e.g. "=> Something happened"
+  # Output prefix for notes, e.g., "=> Something happened"
   PNOTE = "=> "
 
-  # Output prefix for errors, e.g. "!! Something bad happened"
+  # Output prefix for errors, e.g., "!! Something bad happened"
   PERROR = "!! "
 
   # Boilerplate to add to tops of generated files, warning people not to edit

@@ -2,11 +2,11 @@
 
 <em>AutomateIt is an open-source tool for automating the setup and maintenance of UNIX systems.</em>
 
-This hands-on guide will teach you to use AutomateIt and explains where to find more detailed instructions.
+This hands-on guide will teach you to use AutomateIt and explain where to find more detailed instructions.
 
 It's recommended that you see the Screenshots[http://automateit.org/screenshots] of AutomateIt in action to get a quick idea of what AutomateIt is all about.
 
-AutomateIt is feature-complete, exceeds the capabilities of most major products, and ensures its quality with a self-test suite. However, this is a young product and users are expected to be technically proficient, be willing to accept rough spots, work through problems and upgrade frequently. 
+AutomateIt is feature-complete, exceeds the capabilities of similar products, and ensures its quality with a self-test suite. However, this is a young product and users are expected to be technically proficient, willing to accept rough spots, to work through problems and upgrade frequently.
 
 Please sign up for RSS change notifications[http://automateit.org/changes]  so you know when upgrades are available.
 
@@ -19,7 +19,7 @@ Some Ruby resources:
 * The online "Ruby user's guide" is a gentle introduction to the Ruby language: http://www.ruby-doc.org/docs/UsersGuide/rg/
 * The online "Ruby syntax" is a condensed, one-page reference of the language's syntax: http://www.ruby-doc.org/docs/ruby-doc-bundle/Manual/man-1.4/syntax.html
 * The online "Programming Ruby" site provides a fairly detailed walk-through of the language: http://www.ruby-doc.org/docs/ProgrammingRuby/
-* The "Practical Ruby for System Administration" book is a gentle introduction for sysadmins, which may be much easier for them to understand than a book aimed at software engineers, and it covers many system administration automation topics that'll be of use for Automateit recipes: http://www.pragmaticprogrammer.com/title/ruby/index.html
+* The "Practical Ruby for System Administration" book is a gentle introduction for sysadmins, which may be much easier for them to understand than a book aimed at software engineers, and it covers many system administration automation topics that'll be of use for Automateit recipes: http://www.apress.com/book/view/1590598210
 * The "Programming Ruby" book provides a much more complete language reference than any online reference: http://www.pragmaticprogrammer.com/titles/ruby/index.html
 
 === Typographical conventions
@@ -28,8 +28,8 @@ AutomateIt's technical documentation uses the following typographical convention
 
 * +automateit+ -- A file, command or variable.
 * <tt>:verbosity</tt> -- A symbol, usually used in an options hash.
-* AutomateIt::ShellManager -- A class, with a link to its documentation. You can also find a link to this class' documentation in the "Classes" pane on the left.
-* AutomateIt::ShellManager#sh -- An method, with a link to its documentation. You can also find a link to this method's documentation in the "Methods" pane on the left.
+* AutomateIt::ShellManager -- A class, with a link to its documentation. You can also find a link to this class's documentation in the "Classes" pane on the left.
+* AutomateIt::ShellManager#sh -- A method, with a link to its documentation. You can also find a link to this method's documentation in the "Methods" pane on the left.
 * Ruby code:
  puts "Ruby code"
 * UNIX shell command, although the prompt may be left off when obvious:
@@ -45,33 +45,23 @@ AutomateIt uses a number of unique terms:
 * *Project* -- A special directory that contains related recipes and helper files.
 * *Interpreter* -- The part of AutomateIt that runs commands.
 * *Plugin* -- A part of AutomateIt that describes related features.
-* *Driver* -- An implementation of a plugin, there are often multiple drivers per plugin.
+* *Driver* -- An implementation of a plugin. There are often multiple drivers per plugin.
 
 === Interactive shell
 
 AutomateIt comes with an interactive shell, which is useful for exploring commands and developing recipes.
 
-Here's what an interactive shell session looks like -- however, the lines starting with the <tt>#</tt> symbol are added annotations explaining what's going on and are not actually part of the session:
+Here's what an interactive shell session looks like (text following the <tt>#</tt> symbol explains the line and is not actually part of the session):
 
- # Run the AutomateIt interactive shell
- you@host:tmp> automateit
- # Welcome message from AutomateIt
- => AutomateIt Shell v0.5.0
- => <CTRL-D> to quit, <Tab> to auto-complete
- # AutomateIt's prompt and a command
- ai> puts "Hello world!"
- # Output from the "puts" command
- Hello world!
- # The return value of the "puts" command
- => nil
- # Prompt and another command
- ai> self.class
- # Another return value
- => AutomateIt::Interpreter
- # Press <CTRL-D> to exit the shell
- ai> <CTRL-D>
- # We're back to the UNIX shell
- you@host:tmp>
+ you@host:tmp> automateit      # Start the AutomateIt interactive shell
+ => AutomateIt Shell v0.5.0    # Welcome message from AutomateIt
+ ai> puts "Hello world!"       # AutomateIt's prompt and a user command
+ Hello world!                  # Output from the "puts" command
+ => nil                        # Return value of the "puts" command
+ ai> self.class                # Prompt and another user command
+ => AutomateIt::Interpreter    # Return value of "self.class"
+ ai> <CTRL-D>                  # Press <CTRL-D> to exit the shell
+ you@host:tmp>                 # We're back to the UNIX shell
 
 === Recipe files
 
@@ -115,34 +105,22 @@ AutomateIt executes only the commands needed to achieve a desired state, which m
 
 Eliminating the distinction between setup and maintenance means the same command can perform both tasks without concern for the host's condition. A properly-written recipe can be run and re-run immediately afterwards, and it will do nothing the second time because all changes have already been applied.
 
-An example can make this clearer -- again the lines starting with <tt>#</tt> are annotations and aren't part of the session:
+An example can make this clearer -- again the text following the <tt>#</tt> symbol explains the commands and is not part of the session:
 
- # Start the AutomateIt interactive shell
- you@host:tmp> automateit
+ you@host:tmp> automateit   # Start the AutomateIt interactive shell
  => AutomateIt Shell v0.5.0
- => <CTRL-D> to quit, <Tab> to auto-complete
- # Create a directory called "asdfasdf"
- ai> mkdir "asdfasdf"
- # AutomateIt output showing that it's creating this directory
- ** mkdir asdfasdf
- # Return value of directories created
- => ["asdfasdf"]
- # Let's try creating the same directory again
- ai> mkdir "asdfasdf"
- # Nothing happened because the directory already exists
- => false
- # Remove the directory
- ai> rmdir "asdfasdf"
- # Output indicating that the directory is being removed
- ** rmdir asdfasdf
- # Return value with directories removed
- => ["asdfasdf"]
- # Try to remove the directory again
- ai> rmdir "asdfasdf"
- # Nothing happened because there is no directory to remove
- => false
+ ai> mkdir "asdfasdf"       # Create a directory called "asdfasdf"
+ ** mkdir asdfasdf          # Message showing that directory was created
+ => ["asdfasdf"]            # Return value with array of directories created
+ ai> mkdir "asdfasdf"       # Try to create the same directory again
+ => false                   # Nothing happened, the directory already exists
+ ai> rmdir "asdfasdf"       # Remove the directory
+ ** rmdir asdfasdf          # Message showing that directory was removed
+ => ["asdfasdf"]            # Return value with array of directories removed
+ ai> rmdir "asdfasdf"       # Try to remove the directory again
+ => false                   # Nothing happened, there's no directory to remove
 
-Notice how the second time +mkdir+ was run above, it returned +false+ and didn't create a directory? That's the conditional execution in action, realizing the action has already been preformed. Similarly, the +rmdir+ only ran the first time, but returned +false+ and took no action when the directory was already gone. You can use the return values of these commands to write sophisticated logic of your own based on what actions took place.
+Notice how the second time +mkdir+ was run above, it returned +false+ and didn't create a directory? That's the conditional execution in action, realizing the action has already been performed. Similarly, the +rmdir+ only ran the first time, but returned +false+ and took no action when the directory was already gone. You can use the return values of these commands to write sophisticated logic of your own based on what actions took place.
 
 === Plugins
 
@@ -153,8 +131,8 @@ AutomateIt uses an extensible plugin architecture to group together related comm
 * AutomateIt::EditManager -- Edits files and strings.
 * AutomateIt::FieldManager -- Queries configuration variables.
 * AutomateIt::PackageManager -- Manipulates software packages.
-* AutomateIt::PlatformManager -- Queries platform, e.g. its OS version.
-* AutomateIt::ServiceManager -- Manipulates services, e.g. UNIX daemons.
+* AutomateIt::PlatformManager -- Queries platform, such as its OS version.
+* AutomateIt::ServiceManager -- Manipulates services, such as UNIX daemons.
 * AutomateIt::ShellManager -- Manipulates files and executes UNIX commands.
 * AutomateIt::TagManager -- Groups hosts by role and queries membership.
 * AutomateIt::TemplateManager -- Renders templates to files.
@@ -164,7 +142,7 @@ Plugins can be accessed from the Interpreter like this:
  ai> shell_manager.pwd
  => "/tmp"
 
-The most common plugin methods have aliased shortcuts, e.g. +pwd+ is the alias for <tt>shell_manager.pwd</tt>. These are documented in AutomateIt::Interpreter's "Aliased methods".
+The most common plugin methods have aliased shortcuts. For example, +pwd+ is the alias for <tt>shell_manager.pwd</tt>. These are documented in AutomateIt::Interpreter's "Aliased methods."
 
 === Drivers
 
@@ -176,38 +154,32 @@ For example:
 * AutomateIt::ShellManager::Portable -- A portable but limited-functionality driver that implements the ShellManager's methods.
 * AutomateIt::ShellManager::UNIX -- A full-featured driver implementing ShellManager's methods that only runs on UNIX-like systems.
 
-=== Plugins and drivers as APIs
+=== Plugins provide APIs, drivers provide implementations
 
-Each plugin describes a common interface to related features. This provides a consistent abstraction that eliminates platform-specific issues that typically infuriate cross-platform developers.
+Plugins describe consistent interfaces for related features, and drivers implement this API for different tools.
 
-For example, the UNIX command for installing packages on a Debian system is:
+For example, AutomateIt provides a common API for all packaging tools: AutomateIt::PackageManager. It provides drivers for packaging tools like APT, YUM, Gem, Egg and others. To install a package called +foo+ with the +apt+ driver:
 
- apt-get install -y -q some_package_name < /dev/null
+ ai> package_manager.install "foo", :with => :apt
 
-While on a Fedora system, it's:
+AutomateIt will check if +foo+ is installed, install it if needed, or do nothing if the package is present. This API is the same for all packaging tools, making it easy to get work done by using high-level AutomateIt commands instead of cryptic tool-specific commands. Although AutomateIt uses the low-level tools, it uses them with best-practices approaches and hides the senseless complexity from the user.
 
- yum -y -d 0 -e 0 install some_package_name < /dev/null
+What's the big deal? Consider how one would install packages from the UNIX shell. Most packaging tools are pathologically dysfunctional and make it bafflingly difficult to programmatically install or uninstall packages, or tell if a package is installed. Many don't use exit values and require complex output parsing. Others require user-input even when it's obvious that none is needed. Almost all make it necessary to write conditional code because they'll either fail with errors if told to install an existing package, destroy an existing setup, or install duplicate packages. Writing UNIX shell code to handle all these quirks is frustrating and risky.
 
-However, you don't want to run the installer if the package is already present, so you need to write conditional code like:
+Here's a sample UNIX shell command for installing a package using one of the simplest, most reasonable tools available -- although note that unlike AutomateIt, this shell command can't handle multiple packages, is slower, can't be previewed, and has no consistent error handling:
 
- if dpkg --status some_package_name 2>&1 | \
-     egrep '^Status: .*?\binstalled\b' > /dev/null; then
+ if dpkg-query -W --showformat '${Status}\n' foo 2>&1 | \
+     egrep -q '(^| )installed'; then
    apt-get install -y -q some_package_name < /dev/null
  done
 
-Yuck. Worse still, many package managers require multiple commands, make you parse tricky output because they don't use sensible return values, and a few demand user interaction even when there's no need for it. Having to remember platform-specific commands and struggle with their quirks is a pain.
-
-AutomateIt solves this problem by providing a common API for all package managers. The AutomateIt::PackageManager class provides an abstract installer command that works the same way for APT, YUM, Gem, Egg and so on using this format:
-
- package_manager.install "foo"
-
-This AutomateIt command checks if the +foo+ package is installed, installs it if it isn't, and does nothing if the package is present. This eliminates the need for quirky, platform-specific commands and awkward conditionals.
+Now compare that hideous command to the simple, clear and consistent AutomateIt command before it. AutomateIt's plugins and drivers are easy to install and write. As more are written, more people will hopefully be freed from needlessly convoluted low-level commands, and able to get simple things done simply. AutomateIt's consistent API, multiple drivers, sane defaults and conditional-checking make it easier to write clear and maintainable recipes than using the low-level directly commands from the UNIX shell.
 
 === Driver auto-detection
 
 AutomateIt can automatically detect the most suitable driver for each plugin command.
 
-For example, the AutomateIt::PackageManager plugin has drivers called AutomateIt::PackageManager::APT and AutomateIt::PackageManager::YUM. On a Debian system, which uses the <tt>apt-get</tt> packaging tool, AutomateIt will detect this and use the AutomateIt::PackageManager::APT driver to do the actual work:
+For example, the AutomateIt::PackageManager plugin has drivers called AutomateIt::PackageManager::APT and AutomateIt::PackageManager::YUM. On a Debian system, which uses the <tt>apt-get</tt> packaging tool, AutomateIt will default to using the AutomateIt::PackageManager::APT driver:
 
  ai> package_manager.installed? "apache2"
  => true
@@ -228,7 +200,7 @@ You can also completely bypass the plugin and its auto-detection to directly int
 
 === Projects
 
-A project is a special directory that contains related recipes and helper files. Although its possible to run recipe files without a project, a project provides many useful features, described in the AutomateIt::Project documentation.
+A project is a special directory that contains related recipes and helper files. Although it's possible to run recipe files without a project, a project provides many useful features, described in the AutomateIt::Project documentation.
 
 A project is created by specifying the directory to create:
 
@@ -282,35 +254,34 @@ The Interpreter automatically loads the project. The +project+ method contains t
 
 === Fields
 
-A project's <tt>config/fields.yml</tt> file is meant to store configuration constants, like custom paths for applications. Fields are useful because they keeps configuration variables separate from recipes and can be easily queried from UNIX using the +aifield+ command. More information about fields can be found in AutomateIt::FieldManager.
+A project's <tt>config/fields.yml</tt> file is meant to store configuration constants, like custom paths for applications. Fields abstract configuration variables for recipes, improving maintainability by separating data and logic. Fields can also be easily queried from UNIX using the +aifield+ command. More information about fields and +aifield+ can be found in AutomateIt::FieldManager.
 
-For example, consider a fields file like this:
+For example, consider a fields file with the following contents:
 
  myuser: dhh
  myapp:
    path: /var/www/rails
 
-Use these from the interactive shell:
+These fields can be used from the interactive shell like this:
 
  you@host:myproject> pwd
  /tmp/myproject
- you@host:myproject> automateit -p .
+ you@host:myproject> automateit -p .    # (1) Load project from current directory
  => AutomateIt Shell v0.5.0
- => <CTRL-D> to quit, <Tab> to auto-complete
- ai> lookup :myuser
+ ai> lookup :myuser                     # (2) Lookup string value by symbol key
  => "dhh"
- ai> lookup "myuser"
+ ai> lookup "myuser"                    # (3) Lookup string value by string key
  => "dhh"
- ai> lookup "myapp"
+ ai> lookup "myapp"                     # (4) Lookup hash value by string key
  => {"path"=>"/var/www/rails"}
- ai> lookup "myapp#path"
+ ai> lookup "myapp#path"                # (5) Lookup string value by compound key
  => "/var/www/rails"
 
-In the example above, the <tt>-p .</tt> argument to +automateit+ causes the Interpreter to load the project in the current directory. The argument can be an absolute or relative paths. Loading the project is necessary so the shell can find the fields. More command-line arguments are available, run <tt>automateit --help</tt> for details.
+To load a project's fields, the AutomateIt interactive shell needs to know which project to load. On the line annotated (1), <tt>automateit -p .</tt> tells it to load the project from the "." directory, the current directory. The argument can be an absolute or relative path. The command accepts other arguments and environmental options, run <tt>automateit --help</tt> for details.
 
-Fields are queried by strings or symbols. A convenience syntax is provided for looking up hash subkeys. For example, <tt>lookup "myapp#path"</tt> is a shortcut for <tt>lookup("myapp")["path"]. Both of these commands query the +myapp+ hash and return the value of its +path+ key.
+Fields can be queried by string (2) or symbol (3) keys. The +lookup+ command can return any associated data, usually a string, but it can be a complex type, such as a hash (4). The compound-key (5) syntax is a convenient syntax for looking up nested keys in a hash. For example, <tt>lookup "myapp#path"</tt> is a shortcut for <tt>lookup("myapp")["path"] -- these query the +myapp+ hash and return the value of its +path+ key.
 
-The Interpreter loads a project and its fields automatically for recipes. For example, a project recipe file <tt>recipes/hello_fields.rb</tt> contains:
+The Interpreter loads a project and its fields automatically for recipes, so there is no need to specify the <tt>-p</tt> option. For example, a project recipe file <tt>recipes/hello_fields.rb</tt> contains:
 
  puts lookup("myapp#path")
 
@@ -336,18 +307,18 @@ The tags can be accessed like this when run on a host named "satori":
 
  you@satori:myproject> automateit -p .
  ai> tags
- => ["satori", "desktops", "localhost", ...]
- ai> tagged?("desktops")
+ => ["satori", "desktops", "localhost", ...]        # Tags for this host
+ ai> tagged?("desktops")                            # Is this host tagged with "desktops"?
  => true
  ai> tagged?("notebooks")
  => false
- ai> tagged?(:satori)
+ ai> tagged?(:satori)                               # Strings and symbols are treated the same.
  => true
  ai> tagged?("satori")
  => true
- ai> tagged?("satori || desktops")
+ ai> tagged?("satori || desktops")                  # Query by simple boolean expression
  => true
- ai> tagged?("(satori || desktops) && !notebooks")
+ ai> tagged?("(satori || desktops) && !notebooks")  # Query by complex boolean expression
  => true
 
 Role-based behavior can be demonstrated by creating a file called <tt>recipes/hello_tags.rb</tt>:
@@ -381,26 +352,16 @@ The Interpreter has a boolean that determines if it'll make changes to your syst
 
 Here's an example with the interactive shell, with comments for annotations:
 
- # Enter the noop mode
- ai> noop true
- # Are we in noop mode?
- ai> noop?
- # Yes, we are in noop mode
- => true
- # Are we writing? This is the opposite of noop
- ai> writing?
- # No, we're not writing
- => false
- # Try to create a directory
- ai> mkdir "foo"
- # AutomateIt prints preview output showing that it needs to create it
- ** mkdir foo
- # Return value from 'mkdir' says the 'foo' directory needed to be created
- => ["foo"]
- # So was the directory actually made?
- ai> File.directory? "foo"
- # No, because we're in noop mode.
- => false
+ ai> noop true                # Enter noop mode
+ ai> noop?                    # Currently in noop mode?
+ => true                      # Yes, in noop mode
+ ai> writing?                 # Writing to disk? The opposite of noop
+ => false                     # No, not writing
+ ai> mkdir "foo"              # Try to create a directory
+ ** mkdir foo                 # Message showing directory will be creating
+ => ["foo"]                   # Return value with directories to create
+ ai> File.directory? "foo"    # Was the directory actually made?
+ => false                     # No, noop mode prevents changes
 
 Recipes can take advantage of the noop mode as well, consider a <tt>mkdir_example.rb</tt> recipe:
 
@@ -415,7 +376,7 @@ To run this recipe with noop mode, pass the <tt>-n</tt> option to the Interprete
 
 Notice how the directory wasn't actually created?
 
-WARNING: Be sure to read the notes on changing directories during preview mode in the ShellManager.
+WARNING: Be careful about how you write code that relies on relative paths when changing directories using commands like +cd+, +mkdir+ and +mktempdir+. In preview mode, these will not change into non-existent directories and will not raise exceptions. Your custom commands must detect that they're running in preview mode or they may executing in the wrong directory. Read the details for how to deal with this in the AutomateIt::ShellManager .
 
 === Conclusion
 

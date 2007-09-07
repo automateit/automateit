@@ -9,8 +9,8 @@ module AutomateIt
     # NOTE: Not all Linux distributions provide the programs needed to use this
     # driver. you may need You may need to install additional programs for this
     # to work:
-    # * arping -- which provides the +arping+ command (e.g. Debian package "arping")
-    # * iproute -- which provides the +ip+ command (e.g. Debian package "iproute")
+    # * arping -- which provides the +arping+ command (e.g., Debian package "arping")
+    # * iproute -- which provides the +ip+ command (e.g., Debian package "iproute")
     class Linux < Plugin::Driver
       include ResolvHelpers
 

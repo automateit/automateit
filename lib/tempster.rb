@@ -28,14 +28,14 @@ class Tempster
   # Options:
   # * :name - name to use for file, defaults to "tempster".
   # * :kind - :file or :directory, required.
-  # * :dir - directory to create temporary entries in, uses system-wide temporary directory (e.g. <tt>/tmp</tt>) by default.
+  # * :dir - directory to create temporary entries in, uses system-wide temporary directory (e.g., <tt>/tmp</tt>) by default.
   # * :cd - change into the newly directory created using +ch+ within the block, and then switch back to the previous directory. Only used when a block is given and the :kind is :directory. Default is false.
   # * :verbose - print status messages about creating and deleting the temporary entries. Default is false.
   # * :delete - delete the temporary file or directory when finished. Only works when given a block. Default is true if given a block, false otherwise. So if you don't use a block, you're responsible for deleting the files yourself.
   # * :tries - number of tries to come up with a temporary entry, usually it'll succeed on the first try. Default is 10.
   # * :armor - length of armor to add to the name, these are random characters padding out the temporary entry names to prevent them from using existing files. If you have a very short armor, you're likely to get a collision and the algorithm will have to try again for the specified number of +tries+.
-  # * :message_callback - lambda called when there's a message, e.g. <tt>lambda{|message| puts message}</tt>, regardless of :verbose state. By default :messaging is nil and messages are printed to STDOUT only when :verbose is true.
-  # * :message_prefix - string to put in front of messages, e.g. "# "
+  # * :message_callback - lambda called when there's a message, e.g., <tt>lambda{|message| puts message}</tt>, regardless of :verbose state. By default :messaging is nil and messages are printed to STDOUT only when :verbose is true.
+  # * :message_prefix - string to put in front of messages, e.g., "# "
   def self._tempster(opts={}, &block)
     name = opts.delete(:name) || DEFAULT_NAME
     kind = opts.delete(:kind) or raise ArgumentError.new("'kind' option not specified")
