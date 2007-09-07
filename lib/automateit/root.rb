@@ -1,7 +1,7 @@
 # See AutomateIt::Interpreter for usage information.
 module AutomateIt # :nodoc:
   # AutomateIt version
-  VERSION=Gem::Version.new("0.70903")
+  VERSION=Gem::Version.new("0.70906")
 
   # Output prefix for command execution, e.g., "** ls -la"
   PEXEC = "** "
