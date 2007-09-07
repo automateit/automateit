@@ -10,8 +10,8 @@ else
       @a = AutomateIt.new(:verbosity => Logger::WARN)
       @m = @a.account_manager
 
-      @username = "asdfasdf"
-      @groupname = "fdsafdsa"
+      @username = "automateit_testuser"
+      @groupname = "automateit_testgroup"
 
       raise "User named '#{@username}' found. If this isn't a real user, delete it so that the test can contineu. If this is a real user, change the spec to test with a user that shouldn't exist." if @m.users[@username]
       raise "Group named '#{@groupname}' found. If this isn't a real group, delete it so that the test can contineu. If this is a real group, change the spec to test with a group that shouldn't exist." if @m.groups[@groupname]
