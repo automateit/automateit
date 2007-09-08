@@ -1,7 +1,7 @@
 0.70907:
     Date: Fri, 07 Sep 2007 23:48:55 -0700
     Desc:
-        - (!Created AbstractDriver classes for each plugin and made concrete drivers subclass these.
+        - (!) Created AbstractDriver classes for each plugin and made concrete drivers subclass these.
         - Wrote tests for CLI, which creates projects, invokes recipes, runs the interactive shell, etc.
         - Eliminated need to run #setup on a plugin instance after defining a custom driver.
 
