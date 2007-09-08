@@ -71,7 +71,7 @@ EOB
   optscopy = opts.clone
 
   rv = AutomateIt::CLI.run(opts)
-  if optscopy[:eval] or argscopy.size > 0
+  if optscopy[:create] or optscopy[:eval] or argscopy.size > 0
     exit rv ? 0 :1
   else
     # CTRL-D ends the line prematurely, so add a newline
