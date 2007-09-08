@@ -11,8 +11,8 @@ module AutomateIt
       depends_on :programs => [LSB_RELEASE]
 
       def suitability(method, *args) # :nodoc:
-        # Level must be greater than Uname's
-        return available? ? 3 : 0
+        # Level must be greater than Uname and Debian
+        return available? ? 4 : 0
       end
 
       def setup(opts={}) # :nodoc:
