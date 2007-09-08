@@ -16,6 +16,7 @@ module AutomateIt
     # * :quiet -- Don't print shell header.
     def self.run(opts={})
       opts[:project] ||= opts[:recipe] ? File.join(File.dirname(opts[:recipe]), "..") : "."
+      opts[:verbosity] ||= Logger::INFO
       if opts[:create]
         Project::create(opts)
       elsif code = opts.delete(:eval)
@@ -24,16 +25,16 @@ module AutomateIt
       elsif opts[:recipe]
         AutomateIt.invoke(opts[:recipe], opts)
       else
-        require "irb"
-
         # Welcome messages
-        unless opts[:quiet]
+        if opts[:verbosity] <= Logger::INFO
           puts PNOTE+"AutomateIt Shell v#{AutomateIt::VERSION}"
           puts PNOTE+"<CTRL-D> to quit, <Tab> to auto-complete"
         end
 
         # Create and connect instances
+        require "irb"
         IRB.setup(__FILE__)
+        # XXX irb: warn: can't alias context from irb_context.
         irb = IRB::Irb.new
         opts[:irb] = irb
         IRB.conf[:MAIN_CONTEXT] = irb.context
@@ -43,9 +44,7 @@ module AutomateIt
         # Tab completion
         require 'irb/completion'
         irb.context.auto_indent_mode = true
-        unless irb.context.load_modules.include?('irb/completion')
-          irb.context.load_modules << 'irb/completion'
-        end
+        irb.context.load_modules << 'irb/completion' unless irb.context.load_modules.include?('irb/completion')
         irb.context.instance_eval do
           # Bug in IRB::Context prints useless message if you use the method
           ### irb.context.use_readline = true

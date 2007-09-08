@@ -184,6 +184,8 @@ module AutomateIt
     # * :create -- Project path to create. Required.
     # * All other options are passed to the AutomateIt::Interpreter.
     def self.create(opts)
+      display = lambda {|message| puts message unless opts[:verbosity] && opts[:verbosity] >= Logger::INFO }
+
       path = opts.delete(:create) \
         or raise ArgumentError.new(":create option not specified")
       interpreter = AutomateIt.new(opts)
@@ -193,9 +195,9 @@ module AutomateIt
 
         mkdir_p(path) do |created|
           if created
-            puts PNOTE+"Creating AutomateIt project at: #{path}"
+            display.call PNOTE+"Creating AutomateIt project at: #{path}"
           else
-            puts PNOTE+"Found AutomateIt project at: #{path}"
+            display.call PNOTE+"Found AutomateIt project at: #{path}"
           end
 
           mkdir("config") do
@@ -216,7 +218,7 @@ module AutomateIt
             render(:text => RECIPE_README_CONTENT, :to => "README.txt")
           end
         end
-        puts PNOTE+"DONE!"
+        display.call PNOTE+"DONE!"
       end # of interpreter.instance_eval
     end
 
