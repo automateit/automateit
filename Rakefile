@@ -5,8 +5,11 @@ require 'spec/rake/spectask'
 task :default => :spec
 
 def load_automateit
-  $LOAD_PATH.unshift('lib')
-  require 'automateit'
+  @interpreter ||= begin
+    $LOAD_PATH.unshift('lib')
+    require 'automateit'
+    AutomateIt.new
+  end
 end
 
 #---[ run specs ]-------------------------------------------------------
@@ -106,7 +109,7 @@ task :chown do
     load_automateit
     stat = File.stat("..")
     #AutomateIt.new(:noop => false).chown_R(stat.uid, stat.gid, Dir["*"], :report => :details)
-    AutomateIt.new.chown_R(stat.uid, stat.gid, Dir["*"])
+    @interpreter.chown_R(stat.uid, stat.gid, Dir["*"])
   end
 end
 
@@ -151,7 +154,7 @@ end
 desc "List aliased_methods for inclusion into rdoc"
 task :am do
   load_automateit
-  AutomateIt.new.instance_eval do
+  @interpreter.instance_eval do
     methods_and_plugins = []
     plugins.values.each{|plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| methods_and_plugins << [method.to_s, plugin.class.to_s]}}
 
@@ -217,6 +220,24 @@ desc "RFC-822 time for right now"
 task :now do
   require 'active_support'
   puts DateTime.now.to_time.to_s(:rfc822)
+end
+
+#---[ Install ]---------------------------------------------------------
+
+namespace :install do
+  desc "Install Gem from 'pkg' dir without docs, removing existing Gem first"
+  task :local do
+    load_automateit
+    @interpreter.package_manager.uninstall "automateit", :with => :gem
+    sh "sudo gem install -y pkg/*.gem --no-ri --no-rdoc"
+  end
+
+  desc "Install Gem from website without docs, removing existing Gem first"
+  task :remote do
+    load_automateit
+    @interpreter.package_manager.uninstall "automateit", :with => :gem
+    sh "sudo gem install -y -r -s http://automateit.org/pub automateit --no-ri --no-rdoc"
+  end
 end
 
 #===[ fin ]=============================================================
