@@ -3,7 +3,7 @@
     Desc:
         - (!) Created AbstractDriver classes for each plugin and made concrete drivers subclass these.
         - Wrote tests for CLI, which creates projects, invokes recipes, runs the interactive shell, etc.
-        - Eliminated need to run #setup on a plugin instance after defining a custom driver.
+        - Eliminated need for custom drivers to run 'setup' on their associated plugin instance.
 
 0.70906:
     Date: Thu, 06 Sep 2007 23:55:30 -0700
