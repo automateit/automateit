@@ -41,6 +41,7 @@ end
 
 desc "Run all the test suites, including unit and integration"
 task "spec:all" do
+  puts "=> Running integration test suite. This may take a few minutes and nothing may seem to be happening for a while -- this is normal and expected."
   specify('spec/unit/**/*_spec.rb', 'spec/functional/**/*_spec.rb', 'spec/integration/**/*_spec.rb')
 end
 
