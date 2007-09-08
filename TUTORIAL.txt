@@ -108,7 +108,7 @@ Eliminating the distinction between setup and maintenance means the same command
 An example can make this clearer -- again the text following the <tt>#</tt> symbol explains the commands and is not part of the session:
 
  you@host:tmp> automateit   # Start the AutomateIt interactive shell
- => AutomateIt Shell v0.5.0
+ => AutomateIt Shell v0.5.0 # Welcome message
  ai> mkdir "asdfasdf"       # Create a directory called "asdfasdf"
  ** mkdir asdfasdf          # Message showing that directory was created
  => ["asdfasdf"]            # Return value with array of directories created
