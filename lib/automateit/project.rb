@@ -177,7 +177,7 @@ module AutomateIt
   # In case you're interested, the project creator is actually an AutomateIt
   # recipe. You can read the recipe source code by looking at the
   # AutomateIt::Project::create method.
-  class Project
+  class Project < Common
     # Create a new project.
     #
     # Options:

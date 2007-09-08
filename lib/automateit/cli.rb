@@ -5,7 +5,7 @@ module AutomateIt
   # responsible for invoking recipes from the command line, starting the
   # interactive shell and creating projects. It's run from
   # <tt>bin/automate</tt>.
-  class CLI
+  class CLI < Common
     # Create a new CLI interpreter. If no :recipe or :eval option is provided,
     # it starts an interactive IRB session for the Interpreter.
     #

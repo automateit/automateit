@@ -23,28 +23,27 @@ module AutomateIt
     # Please test and contribute drivers so that others can benefit.
     #
     # IMPORTANT GOTCHAS: 
-    # * You must prefix the AutomateIt module name with a "::", else the driver
-    #   will be imported into the AutomateIt::Interpreter namespace and get lost. 
-    # * You must run the "setup" command for the related Manager after defining
-    #   your driver, otherwise it won't be instantiated.
+    # 1. You must prefix the AutomateIt module name with a "::", else the driver
+    #    will be imported into the AutomateIt::Interpreter namespace and get lost. 
+    # 2. You must run the "setup" command for the related Manager after defining
+    #    your driver, otherwise it won't be instantiated.
     #
     # Here's a minimalistic PackageManager that can be dropped into +lib+:
     # 
-    #   # Note the "::" prefix
-    #   module ::AutomateIt
-    #     class PackageManager
-    #       class Foo < Plugin::Driver
-    #         depends_on :nothing
+    #   # (1) Define driver, note the use of "::" prefixes for names:
+    #   class ::Automateit::PackageManager::MyDriver < ::AutomateIt::PackageManager::AbstractDriver
+    #     depends_on :nothing
     #
-    #         def suitability(method, *args) # :nodoc:
-    #           # Never select as default driver
-    #           return 0
-    #         end
-    #       end
+    #     def suitability(method, *args) # :nodoc:
+    #       # Never select as default driver
+    #       return 0
     #     end
     #   end
-    #   # Tell the PackageManager to instantiate this
+    #   # (2) Tell the PackageManager to load newly defined drivers:
     #   package_manager.setup
+    #--
+    # FIXME Remove need for calling #setup again
+    # FIXME Remove need to use namespace to declare driver and instead have abstract drivers add ANYTHING that includes them, regardless of the name. However, this will be tricky because it'll require rethinking how the registration process works.
     class Driver < Base
       collect_registrations
 

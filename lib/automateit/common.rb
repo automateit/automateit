@@ -3,6 +3,8 @@ module AutomateIt
   #
   # Common is the abstract class that most AutomateIt classes inherit from.
   class Common
+    include AutomateIt::Constants
+
     # Interpreter instance for this class.
     attr_accessor :interpreter
 

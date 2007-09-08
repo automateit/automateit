@@ -33,6 +33,7 @@ require 'patches/metaclass.rb'
 
 # Core
 require 'automateit/root'
+require 'automateit/constants'
 require 'automateit/common'
 require 'automateit/interpreter'
 require 'automateit/plugin'
