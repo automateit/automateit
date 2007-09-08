@@ -37,7 +37,7 @@ module AutomateIt
     #     end
     #   end
     #--
-    # FIXME Remove need to use namespace to declare driver and instead have abstract drivers add ANYTHING that includes them, regardless of the name. However, this will be tricky because it'll require rethinking how the registration process works.
+    # TODO Remove need to use namespace to declare driver and instead have abstract drivers add ANYTHING that includes them, regardless of the name. However, this will be tricky because it'll require rethinking how the registration process works.
     class Driver < Base
       collect_registrations
 
