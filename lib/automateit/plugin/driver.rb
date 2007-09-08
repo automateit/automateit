@@ -22,16 +22,13 @@ module AutomateIt
     # automatically loaded whenever the Interpreter for that project is run.
     # Please test and contribute drivers so that others can benefit.
     #
-    # IMPORTANT GOTCHAS: 
-    # 1. You must prefix the AutomateIt module name with a "::", else the driver
-    #    will be imported into the AutomateIt::Interpreter namespace and get lost. 
-    # 2. You must run the "setup" command for the related Manager after defining
-    #    your driver, otherwise it won't be instantiated.
+    # IMPORTANT GOTCHA: You must prefix the AutomateIt module name with a "::",
+    # or the driver will be imported into the AutomateIt::Interpreter namespace
+    # and get lost. 
     #
     # Here's a minimalistic PackageManager that can be dropped into +lib+:
     # 
-    #   # (1) Define driver, note the use of "::" prefixes for names:
-    #   class ::Automateit::PackageManager::MyDriver < ::AutomateIt::PackageManager::AbstractDriver
+    #   class ::AutomateIt::PackageManager::MyDriver < ::AutomateIt::PackageManager::AbstractDriver
     #     depends_on :nothing
     #
     #     def suitability(method, *args) # :nodoc:
@@ -39,10 +36,7 @@ module AutomateIt
     #       return 0
     #     end
     #   end
-    #   # (2) Tell the PackageManager to load newly defined drivers:
-    #   package_manager.setup
     #--
-    # FIXME Remove need for calling #setup again
     # FIXME Remove need to use namespace to declare driver and instead have abstract drivers add ANYTHING that includes them, regardless of the name. However, this will be tricky because it'll require rethinking how the registration process works.
     class Driver < Base
       collect_registrations

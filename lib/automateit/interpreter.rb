@@ -182,15 +182,17 @@ module AutomateIt
 
     def _instantiate_plugin(klass)
       token = klass.token
-      return if @plugins[token]
-      plugin = @plugins[token] = klass.new(:interpreter => self)
-      #puts "!!! ip #{token}"
-      unless respond_to?(token.to_sym)
-        self.class.send(:define_method, token) do
-          @plugins[token]
+      unless plugin = @plugins[token]
+        plugin = @plugins[token] = klass.new(:interpreter => self)
+        #puts "!!! ip #{token}"
+        unless respond_to?(token.to_sym)
+          self.class.send(:define_method, token) do
+            @plugins[token]
+          end
         end
+        _expose_plugin_methods(plugin)
       end
-      _expose_plugin_methods(plugin)
+      plugin.instantiate_drivers
     end
     private :_instantiate_plugin
 
