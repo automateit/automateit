@@ -14,11 +14,17 @@ end
 def specify(*files)
   Spec::Rake::SpecTask.new(:spec_internal) do |t|
     t.rcov = @rcov
-    t.rcov_opts = ['--exclude', 'spec']
-    #t.rcov_opts = ['--exclude', 'spec', '--aggregate', 'aggregate.rcov']
+    t.rcov_opts = ['--text-summary', '--include', 'lib', '--exclude', 'spec,.irbrc']
     t.spec_files = FileList[*files]
   end
+
   Rake::Task[:spec_internal].invoke
+
+  # Change the ownership of the newly-created coverage directory back to that
+  # of the user which owns the top-level directory.
+  if @rcov 
+    Rake::Task[:chown].invoke
+  end
 end
 
 desc "Run the unit test suite"
@@ -92,6 +98,16 @@ task :locchurn do
 end
 
 #---[ misc ]------------------------------------------------------------
+
+desc "Chown files if needed"
+task :chown do
+  if Process.euid.zero?
+    load_automateit
+    stat = File.stat("..")
+    #AutomateIt.new(:noop => false).chown_R(stat.uid, stat.gid, Dir["*"], :report => :details)
+    AutomateIt.new.chown_R(stat.uid, stat.gid, Dir["*"])
+  end
+end
 
 desc "Generate documentation"
 task :rdoc do
