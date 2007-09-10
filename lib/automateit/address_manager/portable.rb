@@ -19,17 +19,19 @@ class AutomateIt::AddressManager::Portable < AutomateIt::AddressManager::Abstrac
 
   # See AddressManager#hostnames
   def hostnames
-    names = Set.new
-    names << Socket.gethostname
-    names.merge(Socket.gethostbyname(Socket.gethostname)[1]) rescue SocketError
+    results = Set.new
+    results << Socket.gethostname
+    results.merge(Socket.gethostbyname(Socket.gethostname)[1]) rescue SocketError
 
-    names.each{|name| names.merge(hostnames_for(name))}
-    names << "localhost"
-    return names.to_a.sort
+    results.each{|name| results.merge(hostnames_for(name))}
+    results << "localhost"
+    return results.to_a.sort
   end
 
   # See AddressManager#addresses
   def addresses
-    return ["127.0.0.1", TCPSocket.gethostbyname(Socket.gethostname)[3]]
+    results = Set.new("127.0.0.1")
+    results.merge(TCPSocket.gethostbyname(Socket.gethostname)[3]) rescue SocketError
+    return results.flatten
   end
 end
