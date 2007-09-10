@@ -47,9 +47,7 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::AbstractDriver
   def _resolve_groups_and_negations(struct)
     # TODO TagManager::Struct#_resolve_groups_and_negations - write a less awful algorithm.
     def restruct(input)
-      def trace(msg)
-        puts msg if false
-      end
+      def trace(msg); puts msg if false; end # Prints low-level debugging info
       output = {}
       trace "in %s" % input.inspect
       for tag, hosts in input
@@ -60,9 +58,9 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::AbstractDriver
           if host.is_a?(::YAML::DomainType) and host.value.empty?
             # Negations get parsed as symbols in YAML, replace them
             output[tag].delete(host.type_id)
-            output[tag] << "!%s"%host.type_id
+            output[tag] << "^%s"%host.type_id
             trace "  replaced YAML host %s" % host.type_id
-          elsif host.match(/!@(\w+)/)
+          elsif host.match(/[!\^]@(\w+)/)
             # Group subtract with !@group
             output[tag].delete("@%s"%$1)
             output[tag] -= input[$1]
@@ -71,7 +69,7 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::AbstractDriver
             # Group add with @group
             output[tag] += input[$1]
             trace "  added group %s" % $1
-          elsif host.match(/!(\w+)/)
+          elsif host.match(/[!\^](\w+)/)
             # Host negation with !host
             output[tag].delete($1)
             trace "  negated struct host %s" % $1
@@ -84,11 +82,10 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::AbstractDriver
       return output
     end
 
-    while ! struct.values.flatten.grep(/@|\!/).empty?
+    while not struct.values.flatten.grep(/[@\!\^]/).empty?
       before = struct
       struct = restruct(struct)
-      #puts "outputuring %s to %s" % [before.inspect, struct.inspect]
-      #sleep 1
+      #puts "%s became %s" % [before.inspect, struct.inspect]; sleep 1
     end
     return struct
   end

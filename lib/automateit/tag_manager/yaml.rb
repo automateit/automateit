@@ -13,7 +13,9 @@ class AutomateIt::TagManager::YAML < AutomateIt::TagManager::Struct
   #   must produce YAML content.
   def setup(opts={})
     if filename = opts.delete(:file)
-      opts[:struct] = ::YAML::load(ERB.new(_read(filename), nil, '-').result)
+      # Replace leading "!" with "^" so these become negations rather than YAML symbols
+      contents = _read(filename).gsub(/^(\s*-\s+)(!)/, '\1^')
+      opts[:struct] = ::YAML::load(ERB.new(contents, nil, '-').result)
     end
     super(opts)
   end
