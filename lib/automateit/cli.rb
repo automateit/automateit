@@ -26,10 +26,8 @@ module AutomateIt
         AutomateIt.invoke(opts[:recipe], opts)
       else
         # Welcome messages
-        if opts[:verbosity] <= Logger::INFO
-          puts PNOTE+"AutomateIt Shell v#{AutomateIt::VERSION}"
-          puts PNOTE+"<CTRL-D> to quit, <Tab> to auto-complete"
-        end
+        display = lambda{|msg| puts msg if opts[:verbosity] <= Logger::INFO}
+        display.call PNOTE+"AutomateIt Shell v#{AutomateIt::VERSION}"
 
         # Create and connect instances
         require "irb"
@@ -42,13 +40,14 @@ module AutomateIt
         irb.context.workspace.instance_variable_set(:@binding, interpreter.send(:binding))
 
         # Tab completion
-        require 'irb/completion'
-        irb.context.auto_indent_mode = true
-        irb.context.load_modules << 'irb/completion' unless irb.context.load_modules.include?('irb/completion')
-        irb.context.instance_eval do
-          # Bug in IRB::Context prints useless message if you use the method
-          ### irb.context.use_readline = true
-          @use_readline = true
+        begin
+          require 'irb/completion'
+          irb.context.auto_indent_mode = true
+          irb.context.load_modules << 'irb/completion' unless irb.context.load_modules.include?('irb/completion')
+          irb.context.instance_eval{ @use_readline = true }
+          display.call PNOTE+"<CTRL-D> to quit, <Tab> to auto-complete"
+        rescue LoadError
+          display.call PNOTE+"<CTRL-D> to quit"
         end
 
         # Set prompt
@@ -56,7 +55,11 @@ module AutomateIt
           irb.context.prompt_i = "ai> "
           irb.context.prompt_s = "ai%l "
           irb.context.prompt_c = "ai* "
-          irb.context.prompt_n = "ai%i "
+          begin
+            irb.context.prompt_n = "ai%i " 
+          rescue NoMethodError
+            # Not available on Ruby 1.8.2 bundled with Mac OS X 10.4 Tiger
+          end
         end
 
         # Run loop to read user input
