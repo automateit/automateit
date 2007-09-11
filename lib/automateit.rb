@@ -27,9 +27,9 @@ require 'active_support/core_ext/module/aliasing'
 require 'active_support/core_ext/string'
 require 'active_support/clean_logger'
 
-# Patches
-require 'patches/object.rb'
-require 'patches/metaclass.rb'
+# Extensions
+require 'ext/object.rb'
+require 'ext/metaclass.rb'
 
 # Core
 require 'automateit/root'
