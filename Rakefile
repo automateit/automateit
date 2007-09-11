@@ -216,10 +216,14 @@ task :regem do
   sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb"
 end
 
-desc "RFC-822 time for right now"
+desc "RFC-822 time for right now, optional D=x where x is delta like '1.day' ago"
 task :now do
   require 'active_support'
-  puts DateTime.now.to_time.to_s(:rfc822)
+  time = Time.now
+  if delta = ENV["D"]
+    time = eval "time - #{delta}"
+  end
+  puts time.to_s(:rfc822)
 end
 
 #---[ Install ]---------------------------------------------------------
