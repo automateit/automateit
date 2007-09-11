@@ -10,7 +10,15 @@ class MyManager < AutomateIt::Plugin::Manager
   end
 end
 
-class MyManager::MyUnsuitableDriver < AutomateIt::Plugin::Driver
+class MyManager::AbstractDriver < AutomateIt::Plugin::Driver
+  # Is abstract by default
+end
+
+class MyManager::AnotherAbstractDriver < MyManager::AbstractDriver
+  abstract_driver
+end
+
+class MyManager::MyUnsuitableDriver < MyManager::AbstractDriver
   # +suitability+ method deliberately not implemented to test errors
 
   depends_on \
@@ -23,7 +31,7 @@ class MyManager::MyUnsuitableDriver < AutomateIt::Plugin::Driver
   end
 end
 
-class MyManager::MyUnimplementedDriver < AutomateIt::Plugin::Driver
+class MyManager::MyUnimplementedDriver < MyManager::AbstractDriver
   def available?
     true
   end
@@ -36,7 +44,7 @@ class MyManager::MyUnimplementedDriver < AutomateIt::Plugin::Driver
 end
 
 
-class MyManager::MyFirstDriver < AutomateIt::Plugin::Driver
+class MyManager::MyFirstDriver < MyManager::AbstractDriver
   depends_on :directories => ["/"]
 
   def suitability(method, *args)
@@ -53,7 +61,7 @@ class MyManager::MyFirstDriver < AutomateIt::Plugin::Driver
   end
 end
 
-class MyManager::MySecondDriver < AutomateIt::Plugin::Driver
+class MyManager::MySecondDriver < MyManager::AbstractDriver
   def available?
     true
   end
@@ -73,7 +81,7 @@ class MyManager::MySecondDriver < AutomateIt::Plugin::Driver
 end
 
 class MyManagerSubclass < AutomateIt::Plugin::Manager
-  abstract_plugin
+  abstract_manager
 end
 
 class MyManagerSubclassImplementation < MyManagerSubclass
@@ -229,5 +237,17 @@ describe AutomateIt::Interpreter do
 
   it "should inject itself into drivers" do
     @a.my_manager[:my_first_driver].interpreter.should equal?(@a)
+  end
+
+  it "should not see abstract managers" do
+    @a.plugins.include?(MyManagerSubclass.token).should be_false
+  end
+
+  it "should not see abstract drivers" do
+    @a.my_manager.drivers.include?(MyManager::AnotherAbstractDriver.token).should be_false
+  end
+
+  it "should not see base drivers" do
+    @a.my_manager.drivers.include?(MyManager::AbstractDriver.token).should be_false
   end
 end

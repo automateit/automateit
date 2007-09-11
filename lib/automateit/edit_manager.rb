@@ -13,7 +13,6 @@ end
 #
 # Base class for all EditManager drivers.
 class AutomateIt::EditManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
 end
 
 # == EditManager::Basic

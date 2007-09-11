@@ -53,15 +53,15 @@ describe "AutomateIt::CLI" do
     end
   end
 
-  it "should provide recipes with access to a custom driver" do
+  it "should load custom driver" do
     INTERPRETER.mktempdircd do
       project = "myproject"
       recipe = File.join(project, "recipes", "recipe.rb")
       driver = File.join(project, "lib", "custom_driver.rb")
       AutomateIt::CLI.run(:create => project, :verbosity => Logger::WARN)
-      File.open(recipe, "w+"){|h| h.write("package_manager.drivers.keys.include?(:my_driver)")}
+
       # Keep this in sync with rdoc example in: lib/automateit/plugins/driver.rb
-      File.open(driver, "w+"){|h| h.write(<<-EOB)}
+      File.open(driver, "w+"){|h| h.write(<<-HERE)}
         class ::AutomateIt::PackageManager::MyDriver < ::AutomateIt::PackageManager::AbstractDriver
           depends_on :nothing
 
@@ -70,9 +70,40 @@ describe "AutomateIt::CLI" do
             return 0
           end
         end
-      EOB
-      rv = AutomateIt::CLI.run(:recipe => recipe)
-      rv.should be_true
+      HERE
+
+      File.open(recipe, "w+"){|h| h.write(<<-HERE)}
+        package_manager.drivers.keys.include?(:my_driver)
+      HERE
+
+      AutomateIt::CLI.run(:recipe => recipe).should be_true
+    end
+  end
+
+  it "should load custom driver that's in a different namespace from its manager" do
+    INTERPRETER.mktempdircd do
+      project = "myproject"
+      recipe = File.join(project, "recipes", "recipe.rb")
+      driver = File.join(project, "lib", "custom_driver.rb")
+      AutomateIt::CLI.run(:create => project, :verbosity => Logger::WARN)
+
+      # Keep this in sync with rdoc example in: lib/automateit/plugins/driver.rb
+      File.open(driver, "w+"){|h| h.write(<<-HERE)}
+        class MyOtherDriver < ::AutomateIt::PackageManager::AbstractDriver
+          depends_on :nothing
+
+          def suitability(method, *args) # :nodoc:
+            # Never select as default driver
+            return 0
+          end
+        end
+      HERE
+
+      File.open(recipe, "w+"){|h| h.write(<<-HERE)}
+        package_manager.drivers.keys.include?(:my_other_driver)
+      HERE
+
+      AutomateIt::CLI.run(:recipe => recipe).should be_true
     end
   end
 end

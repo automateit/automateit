@@ -284,7 +284,6 @@ end
 #
 # Base class for all ShellManager drivers.
 class AutomateIt::ShellManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
 end
 
 # Drivers

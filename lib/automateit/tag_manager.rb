@@ -55,7 +55,6 @@ end
 #
 # Base class for all TagManager drivers.
 class AutomateIt::TagManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
 end
 
 # Drivers

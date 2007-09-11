@@ -95,7 +95,6 @@ end # class AccountManager
 #
 # Base class for all AccountManager drivers.
 class ::AutomateIt::AccountManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
 end
 
 # Drivers

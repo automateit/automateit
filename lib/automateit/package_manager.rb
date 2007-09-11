@@ -40,8 +40,6 @@ end
 # These helpers are generic enough to be useful for all sorts of PackageManager
 # driver implementations. Read the APT driver for good usage examples.
 class AutomateIt::PackageManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
-
   protected
 
   # Are these +packages+ installed? Works like PackageManager#installed?

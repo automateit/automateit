@@ -37,9 +37,62 @@ module AutomateIt
     #     end
     #   end
     #--
-    # TODO Remove need to use namespace to declare driver and instead have abstract drivers add ANYTHING that includes them, regardless of the name. However, this will be tricky because it'll require rethinking how the registration process works.
     class Driver < Base
-      collect_registrations
+      # Driver classes. Represented as a hash of manager tokens to arrays of
+      # their driver classes, for example: 
+      #
+      #  { :package_manager => [
+      #                          AutomateIt::PackageManager::APT,
+      #                          AutomateIt::PackageManager::YUM,
+      #                          ...
+      cattr_accessor :classes
+      self.classes = {}
+
+      # Retrieve the manager token for this driver
+      def self.manager_token
+        fragments = base_driver.to_s.split(/::/)
+        return fragments[fragments.size-2].underscore.to_sym
+      end
+
+      BASE_DRIVER_NAME = "AbstractDriver"
+
+      # Is this a base driver?
+      def self.base_driver?
+        to_s =~ /::#{BASE_DRIVER_NAME}/
+      end
+
+      # Retrieve the base driver class for this driver.
+      def self.base_driver
+        ancestors.select{|t| t.to_s =~ /::#{BASE_DRIVER_NAME}/}.last
+      end
+
+      def self.inherited(subclass) # :nodoc:
+        base_driver = subclass.base_driver
+        if subclass.base_driver?
+          # Ignore, base drivers should never be registered
+        elsif base_driver
+          manager = subclass.manager_token
+          classes[manager] ||= []
+          classes[manager] << subclass unless classes[manager].include?(subclass)
+          ### puts "manager %s / driver %s" % [manager, subclass]
+        else
+          # XXX Should this really raise an exception?
+          raise TypeError.new("Can't determine manager for driver: #{subclass}")
+        end
+      end
+
+      # Declare that this driver class is abstract. It can be subclassed but
+      # will not be instantiated by the Interpreter's Managers. BaseDriver
+      # classes are automatically declared abstract.
+      def self.abstract_driver
+        if base_driver?
+          # Ignore, base drivers should never have been registered
+        elsif manager = manager_token
+          classes[manager].delete(self)
+        else
+          raise TypeError.new("Can't find manager for abstract plugin: #{self}")
+        end
+      end
 
       # Defines what this driver depends on the system for. 
       #

@@ -31,7 +31,6 @@ end
 #
 # Base class for all PlatformManager drivers.
 class AutomateIt::PlatformManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
 end
 
 # Drivers

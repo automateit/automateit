@@ -30,7 +30,6 @@ end
 #
 # Base class for all FieldManager drivers.
 class AutomateIt::FieldManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
 end
 
 # == FieldManager::Struct

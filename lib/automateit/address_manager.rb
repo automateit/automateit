@@ -82,8 +82,6 @@ end
 #
 # Base class for all AddressManager drivers.
 class AutomateIt::AddressManager::AbstractDriver< AutomateIt::Plugin::Driver
-  abstract_plugin
-
   # See AddressManager#hostnames
   def hostnames()
     # NOTE: depends on driver's implementation of addresses

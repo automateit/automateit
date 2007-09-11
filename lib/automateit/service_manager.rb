@@ -34,7 +34,6 @@ end
 #
 # Base class for all ServiceManager drivers.
 class AutomateIt::ServiceManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
 end
 
 # Drivers

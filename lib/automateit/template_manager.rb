@@ -19,7 +19,6 @@ end # class TemplateManager
 #
 # Base class for all TemplateManager drivers.
 class AutomateIt::TemplateManager::AbstractDriver < AutomateIt::Plugin::Driver
-  abstract_plugin
 end
 
 # Drivers

@@ -18,7 +18,19 @@ module AutomateIt
     # The manager subclasses typically have no functionality of their own and
     # just contain wrapper methods and documentation.
     class Manager < Base
-      collect_registrations
+      # Array of all managers.
+      cattr_accessor :classes
+      self.classes = []
+
+      def self.inherited(subclass) # :nodoc:
+        classes << subclass unless classes.include?(subclass)
+      end
+
+      # Declare that this manager class is abstract. It can be subclassed but
+      # will not be instantiated by the Interpreter.
+      def self.abstract_manager
+        classes.delete(self)
+      end
 
       # List of aliased methods for this manager, populated by ::alias_methods.
       class_inheritable_accessor :aliased_methods
@@ -39,7 +51,7 @@ module AutomateIt
 
       # Driver classes used by this Manager.
       def self.driver_classes
-        Driver.classes.select{|driver|driver.to_s.match(/^#{self}::/)}
+        Driver.classes[token] || []
       end
 
       # Options:
