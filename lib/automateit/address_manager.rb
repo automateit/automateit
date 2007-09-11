@@ -78,10 +78,10 @@ class AutomateIt::AddressManager < AutomateIt::Plugin::Manager
   def hostnames_for(hostname) dispatch(hostname) end
 end
 
-# == AddressManager::AbstractDriver
+# == AddressManager::BaseDriver
 #
 # Base class for all AddressManager drivers.
-class AutomateIt::AddressManager::AbstractDriver< AutomateIt::Plugin::Driver
+class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
   # See AddressManager#hostnames
   def hostnames()
     # NOTE: depends on driver's implementation of addresses

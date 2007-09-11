@@ -27,10 +27,10 @@ class AutomateIt::PlatformManager < AutomateIt::Plugin::Manager
   def single_vendor?() dispatch() end
 end
 
-# == PlatformManager::AbstractDriver
+# == PlatformManager::BaseDriver
 #
 # Base class for all PlatformManager drivers.
-class AutomateIt::PlatformManager::AbstractDriver < AutomateIt::Plugin::Driver
+class AutomateIt::PlatformManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # Drivers

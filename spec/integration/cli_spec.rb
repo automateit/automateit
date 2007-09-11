@@ -62,7 +62,7 @@ describe "AutomateIt::CLI" do
 
       # Keep this in sync with rdoc example in: lib/automateit/plugins/driver.rb
       File.open(driver, "w+"){|h| h.write(<<-HERE)}
-        class ::AutomateIt::PackageManager::MyDriver < ::AutomateIt::PackageManager::AbstractDriver
+        class ::AutomateIt::PackageManager::MyDriver < ::AutomateIt::PackageManager::BaseDriver
           depends_on :nothing
 
           def suitability(method, *args) # :nodoc:
@@ -89,7 +89,7 @@ describe "AutomateIt::CLI" do
 
       # Keep this in sync with rdoc example in: lib/automateit/plugins/driver.rb
       File.open(driver, "w+"){|h| h.write(<<-HERE)}
-        class MyOtherDriver < ::AutomateIt::PackageManager::AbstractDriver
+        class MyOtherDriver < ::AutomateIt::PackageManager::BaseDriver
           depends_on :nothing
 
           def suitability(method, *args) # :nodoc:

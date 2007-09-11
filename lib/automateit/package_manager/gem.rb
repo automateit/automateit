@@ -2,7 +2,7 @@
 #
 # The Gem driver for the PackageManager provides a way to manage software
 # packages for RubyGems using the +gem+ command.
-class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::AbstractDriver
+class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   depends_on :programs => %w(gem)
 
   def suitability(method, *args) # :nodoc:

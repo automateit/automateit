@@ -28,7 +28,7 @@ module AutomateIt
     #
     # Here's a minimalistic PackageManager that can be dropped into +lib+:
     # 
-    #   class ::AutomateIt::PackageManager::MyDriver < ::AutomateIt::PackageManager::AbstractDriver
+    #   class ::AutomateIt::PackageManager::MyDriver < ::AutomateIt::PackageManager::BaseDriver
     #     depends_on :nothing
     #
     #     def suitability(method, *args) # :nodoc:
@@ -54,7 +54,7 @@ module AutomateIt
         return fragments[fragments.size-2].underscore.to_sym
       end
 
-      BASE_DRIVER_NAME = "AbstractDriver"
+      BASE_DRIVER_NAME = "BaseDriver"
 
       # Is this a base driver?
       def self.base_driver?

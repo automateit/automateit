@@ -11,7 +11,7 @@
 # It does not implement the #enable and #disable methods because these are
 # not standardized and must be implemented using platform-specific drivers,
 # e.g., Chkconfig on RedHat-like platforms.
-class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::AbstractDriver
+class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
   ETC_INITD = "/etc/init.d"
 
   depends_on :directories => [ETC_INITD]

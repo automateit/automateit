@@ -3,7 +3,7 @@
 # A simple PlatformManager driver that queries a hash for results. Although
 # not useful on its own, it's inherited by other drivers that provide
 # platform-specific methods to query the system.
-class AutomateIt::PlatformManager::Struct < AutomateIt::PlatformManager::AbstractDriver
+class AutomateIt::PlatformManager::Struct < AutomateIt::PlatformManager::BaseDriver
   depends_on :nothing
 
   # Hash mapping of keys that have many common names, e.g., "release" and "version"

@@ -280,10 +280,10 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   def touch(targets) dispatch(targets) end
 end
 
-# == ShellManager::AbstractDriver
+# == ShellManager::BaseDriver
 #
 # Base class for all ShellManager drivers.
-class AutomateIt::ShellManager::AbstractDriver < AutomateIt::Plugin::Driver
+class AutomateIt::ShellManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # Drivers

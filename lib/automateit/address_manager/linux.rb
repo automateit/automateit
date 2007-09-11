@@ -9,7 +9,7 @@
 # to work:
 # * arping -- which provides the +arping+ command (e.g., Debian package "arping")
 # * iproute -- which provides the +ip+ command (e.g., Debian package "iproute")
-class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::AbstractDriver
+class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
   depends_on :programs => %w(ifconfig ip arping)
 
   def suitability(method, *args) # :nodoc:

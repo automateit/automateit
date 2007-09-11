@@ -2,7 +2,7 @@
 #
 # The YUM driver for the PackageManager provides a way to manage software
 # packages on Red Hat-style systems using +yum+ and +rpm+.
-class AutomateIt::PackageManager::YUM < AutomateIt::PackageManager::AbstractDriver
+class AutomateIt::PackageManager::YUM < AutomateIt::PackageManager::BaseDriver
   depends_on :programs => %w(yum rpm)
 
   def suitability(method, *args) # :nodoc:

@@ -91,10 +91,10 @@ class AutomateIt::AccountManager < AutomateIt::Plugin::Manager
   def users_to_groups() dispatch() end
 end # class AccountManager
 
-# == AccountManager::AbstractDriver
+# == AccountManager::BaseDriver
 #
 # Base class for all AccountManager drivers.
-class ::AutomateIt::AccountManager::AbstractDriver < AutomateIt::Plugin::Driver
+class ::AutomateIt::AccountManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # Drivers

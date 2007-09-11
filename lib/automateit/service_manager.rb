@@ -30,10 +30,10 @@ class AutomateIt::ServiceManager < AutomateIt::Plugin::Manager
   def disable(service, opts={}) dispatch(service, opts) end
 end
 
-# == ServiceManager::AbstractDriver
+# == ServiceManager::BaseDriver
 #
 # Base class for all ServiceManager drivers.
-class AutomateIt::ServiceManager::AbstractDriver < AutomateIt::Plugin::Driver
+class AutomateIt::ServiceManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # Drivers

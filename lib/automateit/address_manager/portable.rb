@@ -4,7 +4,7 @@
 # minimal support for querying the hostname using sockets. Although it
 # lacks advanced features found in other drivers, it will work on all
 # platforms.
-class AutomateIt::AddressManager::Portable < AutomateIt::AddressManager::AbstractDriver
+class AutomateIt::AddressManager::Portable < AutomateIt::AddressManager::BaseDriver
   def suitability(method, *args) # :nodoc:
     return 1
   end

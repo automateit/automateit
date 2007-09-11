@@ -15,10 +15,10 @@ class AutomateIt::TemplateManager < AutomateIt::Plugin::Manager
   def default_check=(value) dispatch(value) end
 end # class TemplateManager
 
-# == TemplateManager::AbstractDriver
+# == TemplateManager::BaseDriver
 #
 # Base class for all TemplateManager drivers.
-class AutomateIt::TemplateManager::AbstractDriver < AutomateIt::Plugin::Driver
+class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # Drivers

@@ -29,7 +29,7 @@ class AutomateIt::PackageManager < AutomateIt::Plugin::Manager
   def uninstall(*packages) dispatch(*packages) end
 end
 
-# == PackageManager::AbstractDriver
+# == PackageManager::BaseDriver
 #
 # Base class for all PackageManager drivers.
 #
@@ -39,7 +39,7 @@ end
 # functionality that would otherwise have to be duplicated in each driver.
 # These helpers are generic enough to be useful for all sorts of PackageManager
 # driver implementations. Read the APT driver for good usage examples.
-class AutomateIt::PackageManager::AbstractDriver < AutomateIt::Plugin::Driver
+class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
   protected
 
   # Are these +packages+ installed? Works like PackageManager#installed?

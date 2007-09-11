@@ -6,7 +6,7 @@
 # It does not provide commands for:
 # * #which
 # * #which!
-class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::AbstractDriver
+class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   depends_on :nothing
 
   def suitability(method, *args) # :nodoc:

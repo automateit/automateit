@@ -1,7 +1,7 @@
 # == TemplateManager::ERB
 #
 # Renders ERB templates for TemplateManager.
-class AutomateIt::TemplateManager::ERB < AutomateIt::TemplateManager::AbstractDriver
+class AutomateIt::TemplateManager::ERB < AutomateIt::TemplateManager::BaseDriver
   depends_on :nothing
 
   # The default method for performing checks, e.g., :compare

@@ -9,16 +9,16 @@ class AutomateIt::EditManager < AutomateIt::Plugin::Manager
   def edit(opts, &block) dispatch(opts, &block) end
 end
 
-# == EditManager::AbstractDriver
+# == EditManager::BaseDriver
 #
 # Base class for all EditManager drivers.
-class AutomateIt::EditManager::AbstractDriver < AutomateIt::Plugin::Driver
+class AutomateIt::EditManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # == EditManager::Basic
 #
 # Provides a way to edit files and strings. See documentation for EditSession.
-class AutomateIt::EditManager::Basic < AutomateIt::EditManager::AbstractDriver
+class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
   depends_on :nothing
 
   def suitability(method, *args) # :nodoc:

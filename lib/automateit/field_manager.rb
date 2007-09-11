@@ -26,16 +26,16 @@ class AutomateIt::FieldManager < AutomateIt::Plugin::Manager
   def lookup(search) dispatch(search) end
 end
 
-# == FieldManager::AbstractDriver
+# == FieldManager::BaseDriver
 #
 # Base class for all FieldManager drivers.
-class AutomateIt::FieldManager::AbstractDriver < AutomateIt::Plugin::Driver
+class AutomateIt::FieldManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # == FieldManager::Struct
 #
 # A FileManager driver that queries a data structure.
-class AutomateIt::FieldManager::Struct < AutomateIt::FieldManager::AbstractDriver
+class AutomateIt::FieldManager::Struct < AutomateIt::FieldManager::BaseDriver
   depends_on :nothing
 
   def suitability(method, *args) # :nodoc:

@@ -10,15 +10,15 @@ class MyManager < AutomateIt::Plugin::Manager
   end
 end
 
-class MyManager::AbstractDriver < AutomateIt::Plugin::Driver
+class MyManager::BaseDriver < AutomateIt::Plugin::Driver
   # Is abstract by default
 end
 
-class MyManager::AnotherAbstractDriver < MyManager::AbstractDriver
+class MyManager::AnotherBaseDriver < MyManager::BaseDriver
   abstract_driver
 end
 
-class MyManager::MyUnsuitableDriver < MyManager::AbstractDriver
+class MyManager::MyUnsuitableDriver < MyManager::BaseDriver
   # +suitability+ method deliberately not implemented to test errors
 
   depends_on \
@@ -31,7 +31,7 @@ class MyManager::MyUnsuitableDriver < MyManager::AbstractDriver
   end
 end
 
-class MyManager::MyUnimplementedDriver < MyManager::AbstractDriver
+class MyManager::MyUnimplementedDriver < MyManager::BaseDriver
   def available?
     true
   end
@@ -44,7 +44,7 @@ class MyManager::MyUnimplementedDriver < MyManager::AbstractDriver
 end
 
 
-class MyManager::MyFirstDriver < MyManager::AbstractDriver
+class MyManager::MyFirstDriver < MyManager::BaseDriver
   depends_on :directories => ["/"]
 
   def suitability(method, *args)
@@ -61,7 +61,7 @@ class MyManager::MyFirstDriver < MyManager::AbstractDriver
   end
 end
 
-class MyManager::MySecondDriver < MyManager::AbstractDriver
+class MyManager::MySecondDriver < MyManager::BaseDriver
   def available?
     true
   end
@@ -244,10 +244,10 @@ describe AutomateIt::Interpreter do
   end
 
   it "should not see abstract drivers" do
-    @a.my_manager.drivers.include?(MyManager::AnotherAbstractDriver.token).should be_false
+    @a.my_manager.drivers.include?(MyManager::AnotherBaseDriver.token).should be_false
   end
 
   it "should not see base drivers" do
-    @a.my_manager.drivers.include?(MyManager::AbstractDriver.token).should be_false
+    @a.my_manager.drivers.include?(MyManager::BaseDriver.token).should be_false
   end
 end

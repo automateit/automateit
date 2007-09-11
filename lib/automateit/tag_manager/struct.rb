@@ -2,7 +2,7 @@
 #
 # A TagManager driver for querying a data structure. It's not useful on its
 # own, but can be subclassed by other drivers that actually load tags.
-class AutomateIt::TagManager::Struct < AutomateIt::TagManager::AbstractDriver
+class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
   depends_on :nothing
 
   attr_accessor :tags

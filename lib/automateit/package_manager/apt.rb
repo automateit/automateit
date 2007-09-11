@@ -2,7 +2,7 @@
 #
 # The APT driver for the PackageManager provides a way to manage software
 # packages on Debian-style systems using <tt>apt-get</tt> and <tt>dpkg</tt>.
-class AutomateIt::PackageManager::APT < AutomateIt::PackageManager::AbstractDriver
+class AutomateIt::PackageManager::APT < AutomateIt::PackageManager::BaseDriver
   depends_on :programs => %w(apt-get dpkg)
 
   def suitability(method, *args) # :nodoc:

@@ -51,10 +51,10 @@ class AutomateIt::TagManager < AutomateIt::Plugin::Manager
   def tags_for(hostname) dispatch(hostname) end
 end
 
-# == TagManager::AbstractDriver
+# == TagManager::BaseDriver
 #
 # Base class for all TagManager drivers.
-class AutomateIt::TagManager::AbstractDriver < AutomateIt::Plugin::Driver
+class AutomateIt::TagManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # Drivers

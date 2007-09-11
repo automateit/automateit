@@ -3,7 +3,7 @@
 # A pure-Ruby, portable driver for the AccountManager. It is only suitable
 # for doing queries and lacks methods such as +add_user+. Platform-specific
 # drivers inherit from this class and provide these methods.
-class ::AutomateIt::AccountManager::Portable < ::AutomateIt::AccountManager::AbstractDriver
+class ::AutomateIt::AccountManager::Portable < ::AutomateIt::AccountManager::BaseDriver
   depends_on :nothing
 
   def suitability(method, *args) # :nodoc:

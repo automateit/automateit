@@ -2,7 +2,7 @@
 #
 # The Egg driver for the PackageManager provides a way to manage
 # Python software packages with the PEAK +easy_install+ tool.
-class AutomateIt::PackageManager::Egg < AutomateIt::PackageManager::AbstractDriver
+class AutomateIt::PackageManager::Egg < AutomateIt::PackageManager::BaseDriver
   depends_on :programs => %w(python easy_install)
 
   def suitability(method, *args) # :nodoc:
