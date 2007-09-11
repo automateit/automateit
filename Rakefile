@@ -109,7 +109,7 @@ task :chown do
     load_automateit
     stat = File.stat("..")
     #AutomateIt.new(:noop => false).chown_R(stat.uid, stat.gid, Dir["*"], :report => :details)
-    @interpreter.chown_R(stat.uid, stat.gid, Dir["*"])
+    @interpreter.chown_R(stat.uid, stat.gid, [Dir["*"], Dir[".*"]].flatten, :report => :details)
   end
 end
 

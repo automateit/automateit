@@ -1,16 +1,22 @@
+0.70909:
+    Date: Sun, 09 Sep 2007 16:39:58 -0700
+    Desc:
+        - Added initial support for Apple Mac OS X. Includes a PlatformManager driver for Darwin, and assorted changes needed for AutomateIt to run on the old Ruby 1.8.2 bundled with Tiger.
+        - Fixed AddressManager by eliminating exceptions raised on misconfigured systems that didn't have IPs for local hostnames.
+
 0.70907:
     Date: Fri, 07 Sep 2007 23:48:55 -0700
     Desc:
-        - (!) Created AbstractDriver classes for each plugin and made concrete drivers subclass these.
-        - Wrote tests for CLI, which creates projects, invokes recipes, runs the interactive shell, etc.
+        - (!) Created AbstractDriver classes for each plugin and made the concrete drivers subclass these.
+        - Wrote tests for CLI, which create projects, invoke recipes, run the interactive shell, etc.
         - Eliminated need for custom drivers to run 'setup' on their associated plugin instance.
 
 0.70906:
     Date: Thu, 06 Sep 2007 23:55:30 -0700
     Desc:
         - Massive improvements to documentation -- thanks Amy!
-        - Renamed "UNIX" to "Unix" to avoid trademark issues
+        - Renamed "UNIX" to "Unix" to avoid trademark issues.
 0.70903:
     Date: Sun, 03 Sep 2007 10:02:56 -0700
     Desc:
-        - Initial beta release
+        - Initial beta release.
