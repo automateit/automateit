@@ -3,7 +3,7 @@ if tagged?("rails_servers | myapp_servers")
   # Install platform-specific packages, queries system-provided tags
   if tagged?("ubuntu | debian")
     package_manager.install(%w(ruby1.8-dev libsqlite3-dev))
-  elsif tagged?("fedoracore")
+  elsif tagged?("fedoracore | fedora")
     package_manager.install(%w(ruby-devel sqlite-devel))
   else
     raise NotImplementedError.new("no packages specified for this platform")
