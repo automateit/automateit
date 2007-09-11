@@ -22,13 +22,11 @@ module AutomateIt
     # automatically loaded whenever the Interpreter for that project is run.
     # Please test and contribute drivers so that others can benefit.
     #
-    # IMPORTANT GOTCHA: You must prefix the AutomateIt module name with a "::",
-    # or the driver will be imported into the AutomateIt::Interpreter namespace
-    # and get lost. 
+    # IMPORTANT GOTCHA: You must prefix the AutomateIt module name with a "::"!
     #
     # Here's a minimalistic PackageManager that can be dropped into +lib+:
-    # 
-    #   class ::AutomateIt::PackageManager::MyDriver < ::AutomateIt::PackageManager::BaseDriver
+    #
+    #   class MyDriver < ::AutomateIt::PackageManager::BaseDriver
     #     depends_on :nothing
     #
     #     def suitability(method, *args) # :nodoc:
@@ -36,10 +34,9 @@ module AutomateIt
     #       return 0
     #     end
     #   end
-    #--
     class Driver < Base
       # Driver classes. Represented as a hash of manager tokens to arrays of
-      # their driver classes, for example: 
+      # their driver classes, for example:
       #
       #  { :package_manager => [
       #                          AutomateIt::PackageManager::APT,
@@ -66,6 +63,8 @@ module AutomateIt
         ancestors.select{|t| t.to_s =~ /::#{BASE_DRIVER_NAME}/}.last
       end
 
+      # Register drivers. Concrete drivers are added to a class-wide data
+      # structure which maps them to the manager they belong to.
       def self.inherited(subclass) # :nodoc:
         base_driver = subclass.base_driver
         if subclass.base_driver?
@@ -94,7 +93,7 @@ module AutomateIt
         end
       end
 
-      # Defines what this driver depends on the system for. 
+      # Defines resources this driver depends on.
       #
       # Options:
       # * :files -- Array of filenames that must exist.

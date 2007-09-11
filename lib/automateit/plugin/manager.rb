@@ -22,6 +22,7 @@ module AutomateIt
       cattr_accessor :classes
       self.classes = []
 
+      # Register managers.
       def self.inherited(subclass) # :nodoc:
         classes << subclass unless classes.include?(subclass)
       end
