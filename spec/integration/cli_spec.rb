@@ -52,4 +52,27 @@ describe "AutomateIt::CLI" do
       $irb_under_test = false
     end
   end
+
+  it "should provide recipes with access to a custom driver" do
+    INTERPRETER.mktempdircd do
+      project = "myproject"
+      recipe = File.join(project, "recipes", "recipe.rb")
+      driver = File.join(project, "lib", "custom_driver.rb")
+      AutomateIt::CLI.run(:create => project, :verbosity => Logger::WARN)
+      File.open(recipe, "w+"){|h| h.write("package_manager.drivers.keys.include?(:my_driver)")}
+      # Keep this in sync with rdoc example in: lib/automateit/plugins/driver.rb
+      File.open(driver, "w+"){|h| h.write(<<-EOB)}
+        class ::AutomateIt::PackageManager::MyDriver < ::AutomateIt::PackageManager::AbstractDriver
+          depends_on :nothing
+
+          def suitability(method, *args) # :nodoc:
+            # Never select as default driver
+            return 0
+          end
+        end
+      EOB
+      rv = AutomateIt::CLI.run(:recipe => recipe)
+      rv.should be_true
+    end
+  end
 end
