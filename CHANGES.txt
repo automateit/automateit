@@ -1,3 +1,8 @@
+0.70910:
+    Date: Mon, 10 Sep 2007 19:34:25 -0700
+    Desc:
+        - (!) Reworked Plugins so drivers find managers by inheritance, rather than by name. Simplifies code and allows drivers in different namespaces than their manager. Should be one of the last changes that breaks backwards-compatibility in Plugins for a while.
+
 0.70909:
     Date: Sun, 09 Sep 2007 16:39:58 -0700
     Desc:
