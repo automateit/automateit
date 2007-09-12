@@ -342,13 +342,14 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   # See ShellManager#rm
   def rm(targets, opts={})
-    kind = if opts[:recursive] and opts[:force]
-             :rm_rf
-           elsif opts[:recursive]
-             :rm_r
-           else
-             :rm
-           end
+    kind = \
+      if opts[:recursive] and opts[:force]
+        :rm_rf
+      elsif opts[:recursive]
+        :rm_r
+      else
+        :rm
+      end
     present = [targets].flatten.select{|entry| File.exists?(entry)}
     return false if present.empty?
     present = present.first if present.size == 0
