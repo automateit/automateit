@@ -106,4 +106,67 @@ describe "AutomateIt::CLI" do
       AutomateIt::CLI.run(:recipe => recipe).should be_true
     end
   end
+
+  it "should load tags in a project" do
+    INTERPRETER.mktempdircd do
+      project = "myproject"
+      recipe = File.join(project, "recipes", "recipe.rb")
+      tags_yml = File.join(project, "config", "tags.yml")
+      AutomateIt::CLI.run(:create => project, :verbosity => Logger::WARN)
+
+      File.open(tags_yml, "w+"){|h| h.write(<<-HERE)}
+        all_servers:
+          - localhost
+        all_groups:
+          - @all_servers
+        no_servers:
+          - !localhost
+        no_groups:
+          - !@all_servers
+      HERE
+
+      File.open(recipe, "w+"){|h| h.write(<<-HERE)}
+        result = true
+        result &= tagged?("localhost")
+        result &= tagged?("all_servers")
+        result &= tagged?("all_groups")
+        result &= ! tagged?("no_servers")
+        result &= ! tagged?("no_groups")
+
+        result
+      HERE
+
+      AutomateIt::CLI.run(:recipe => recipe).should be_true
+    end
+  end
+
+  it "should load fields in a project" do
+    INTERPRETER.mktempdircd do
+      project = "myproject"
+      recipe = File.join(project, "recipes", "recipe.rb")
+      fields = File.join(project, "config", "fields.yml")
+      AutomateIt::CLI.run(:create => project, :verbosity => Logger::WARN)
+
+      File.open(fields, "w+"){|h| h.write(<<-HERE)}
+        <%="key"%>: value
+        hash:
+          leafkey: leafvalue
+          branchkey:
+            deepleafkey: deepleafvalue
+      HERE
+
+      File.open(recipe, "w+"){|h| h.write(<<-HERE)}
+        lookup("*") 
+        lookup("key")
+        lookup("hash")
+        lookup("hash")["leafkey"]
+        lookup("hash#leafkey")
+        lookup("hash#branchkey#deepleafkey")
+        lookup("asdf") rescue IndexError
+        true
+      HERE
+
+      AutomateIt::CLI.run(:recipe => recipe).should be_true
+    end
+  end
 end

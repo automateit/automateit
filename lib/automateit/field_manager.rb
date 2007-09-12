@@ -4,26 +4,29 @@
 # useful for storing configuration data seperately from recipes. # Fields are
 # typically stored in a Project's <tt>config/fields.yml</tt> file.
 #
-# For example, consider a <tt>field.yml</tt> that contains YAML like:
-#   foo: bar
-#   my_app:
-#     my_key: my_value
-#
-# With the above file, we can query the fields like this:
-#   lookup(:foo) # => "bar"
-#   lookup("foo") # => "bar"
-#   lookup("my_app#my_key") # => "my_value"
-#   lookup("my_app#my_branch") # => "my_value"
-#
-# You can get a reference to the entire hash:
-#   lookup("*")
-#
-# Fields can be queried from the Unix shell using +aifield+, run <tt>aifield
-# --help</tt> for details.
+# Fields can also be queried from the Unix shell using +aifield+, run
+# <tt>aifield --help</tt> for details.
 class AutomateIt::FieldManager < AutomateIt::Plugin::Manager
   alias_methods :lookup
 
-  def lookup(search) dispatch(search) end
+  # Lookup a field.
+  #
+  # For example, consider a <tt>field.yml</tt> that contains YAML like:
+  #   foo: bar
+  #   my_app:
+  #     my_key: my_value
+  #
+  # With the above file, we can query the fields like this:
+  #   lookup(:foo) # => "bar"
+  #   lookup("foo") # => "bar"
+  #   lookup("my_app#my_key") # => "my_value"
+  #   lookup("my_app#my_branch") # => "my_value"
+  #
+  # You can get a reference to the entire hash:
+  #   lookup("*")
+  #
+  # If a field isn't found, a IndexError is raised.
+  def lookup(search=nil) dispatch(search) end
 end
 
 # == FieldManager::BaseDriver
@@ -50,18 +53,22 @@ class AutomateIt::FieldManager::Struct < AutomateIt::FieldManager::BaseDriver
     if opts[:struct]
       @struct = opts[:struct]
     else
-      @struct = {}
+      @struct ||= {}
     end
   end
 
   # See FieldManager#lookup
-  def lookup(search)
-    return @struct if search == "*"
+  def lookup(search=nil)
+    return @struct if search.nil? or search == "*"
     ref = @struct
     for key in search.to_s.split("#")
       ref = ref[key]
     end
-    ref
+    if ref
+      return ref
+    else
+      raise IndexError.new("can't find value for: #{search}")
+    end
   end
 end
 
