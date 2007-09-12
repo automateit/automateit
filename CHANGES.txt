@@ -2,6 +2,7 @@
     Date: Wed, 12 Sep 2007 14:17:10 -0700
     Desc:
         - (%) Fixed bug where a project's fields were sometimes accidentally cleared. Wrote tests to make sure this won't happen again.
+        - Added tests for examples/basic recipes.
         - Added ServiceManager started? and stopped? methods with wait timeouts.
 0.70910:
     Date: Mon, 10 Sep 2007 19:34:25 -0700
