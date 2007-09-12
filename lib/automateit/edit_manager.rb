@@ -57,6 +57,7 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
     #     append "yo "+params[:hello]
     #   end
     def edit(opts, &block)
+      raise ArgumentError.new("no file or text specified for editing") unless opts[:file] or opts[:text]
       @filename = opts.delete(:file)
       @contents = opts.delete(:text)
       @params = opts.delete(:params) || {}
