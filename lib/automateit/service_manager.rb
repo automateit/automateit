@@ -3,8 +3,24 @@
 # ServiceManager provides a way of managing services, such starting and
 # stopping Unix daemons.
 class AutomateIt::ServiceManager < AutomateIt::Plugin::Manager
-  # Is this +service+ running?
-  def running?(service) dispatch(service) end
+  # Is this +service+ started?
+  #
+  # Options:
+  # * :wait -- Maximum number of seconds to wait until service starts. Useful
+  #   when a service accepts a #start and returns immediately before the service
+  #   has finished starting.
+  def started?(service, opts={}) dispatch(service, opts) end
+
+  # Is this +service+ stopped?
+  #
+  # Options:
+  # * :wait -- Maximum number of seconds to wait until service stops. Useful
+  #   when a service accepts a #stop and returns immediately while the service
+  #   continues running for a few seconds.
+  def stopped?(service, opts={}) dispatch(service, opts) end
+
+  # Alias for #started?
+  def running?(service, opts={}) dispatch_to(:started?, service, opts) end
 
   # Start this +service+ if it's not running.
   def start(service, opts={}) dispatch(service, opts) end

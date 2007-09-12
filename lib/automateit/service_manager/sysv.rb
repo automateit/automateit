@@ -24,14 +24,15 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
   def _run_command(args, opts={})
     _raise_unless_available
     cmd = String === args ? args : args.join(' ')
-    if opts[:checking]
+    if opts[:silent]
       cmd += " > /dev/null 2>&1" # Discard STDOUT and STDERR
     elsif opts[:quiet]
       cmd += " > /dev/null" # Discard only STDOUT
     end
 
-    log.send((opts[:quiet] || opts[:checking]) ? :debug : :info, PEXEC+cmd)
-    if writing? or opts[:checking]
+    level = (opts[:quiet] || opts[:silent]) ? :debug : :info
+    log.send(level, PEXEC+cmd)
+    if writing? or opts[:silent]
       system(cmd)
       return $?.exitstatus.zero?
     else
@@ -46,8 +47,44 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
   end
 
   # See ServiceManager#running?
-  def running?(service)
-    return tell(service, :status, :checking => true)
+  def running?(service, opts={})
+    return started?(service, opts)
+  end
+
+  def _started_and_stopped_helper(kind, service, opts={})
+    expected = \
+      case kind
+      when :started?: true
+      when :stopped?: false
+      else raise ArgumentError.new("unknown kind argument: #{kind}")
+      end
+
+    result = tell(service, :status, :silent => true)
+    ### puts "k %s r %s e %s" % [kind, result, expected]
+    return result if expected == result
+    if opts[:wait]
+      timeout = Time.now + opts[:wait]
+      while timeout > Time.now
+        log.info(PNOTE+" ServiceManager#%s waiting on '%s' for %0.1f more seconds" %
+          [kind, service, timeout - Time.now])
+        sleep 0.5
+        result = tell(service, :status, :silent => true)
+        break if expected == result
+      end
+      log.info(PNOTE+" ServiceManager#%s finished waiting for '%s', got: %s" %
+        [kind, service, result])
+    end
+    return result
+  end
+
+  # See ServiceManager#started?
+  def started?(service, opts={})
+    return _started_and_stopped_helper(:started?, service, opts)
+  end
+
+  # See ServiceManager#stopped?
+  def stopped?(service, opts={})
+    return ! _started_and_stopped_helper(:stopped?, service, opts)
   end
 
   # See ServiceManager#start
