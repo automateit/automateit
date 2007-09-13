@@ -57,7 +57,7 @@ EOB
   parser.on("-d", "--debug", "Print debugging information") do |v|
     opts[:verbosity] = Logger::DEBUG
   end
-  
+
   parser.on("-v", "--version", "Display version") do |v|
     opts[:version] = v
   end
