@@ -69,14 +69,21 @@ else
 
   #-----------------------------------------------------------------------
 
-  {
-    :apt => "nomarch", # Obscure package for extracting ARC files from the early 80's
-    :yum => "nomarch", # Obscure package for extracting ARC files from the early 80's
+  targets = {
+    :apt => "nomarch", # Obscure package for extracting ARC files from the 80's
+    :yum => "nomarch", # Obscure package for extracting ARC files from the 80's
+    :portage => "arc", # Obscure package for extracting ARC files from the 80's
     :gem => "s33r", # Alpha-grade package its author deprecated in favor of another
     :egg => "_sre.py", # Slower reimplementation of ancient Python Regexps
-    :portage => "arc", # Obscure package for extracting ARC files from the early 80's
     ### :cpan => "Acme::please", # Insane gimmick port of intercal's please statements
-  }.each_pair do |driver_token, package|
+  }
+
+  if INTERPRETER.tagged?(:centos)
+    # CentOS lacks "nomarch", so use a less obscure archiver from the early 90's.
+    targets[:yum] = "arj"
+  end
+
+  targets.each_pair do |driver_token, package|
     driver = INTERPRETER.package_manager[driver_token]
     if driver.available?
       describe driver.class.to_s do
