@@ -139,9 +139,9 @@ module AutomateIt
         elsif is_available.nil?
           all_present = true
           missing = {}
-          for kind in [:files, :directories, :programs]
+          for kind in [:files, :directories, :programs, :callbacks]
             next unless opts[kind]
-            for item in opts[kind]
+            for item in [opts[kind]].flatten
               present = \
                 case kind
                 when :files
@@ -156,6 +156,8 @@ module AutomateIt
                   rescue ArgumentError, NotImplementedError, NoMethodError
                     false
                   end
+                when :callbacks
+                  item.call() ? true : false
                 else
                   raise "unknown kind: #{kind}"
                 end

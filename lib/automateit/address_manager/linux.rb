@@ -4,10 +4,11 @@
 # querying, adding and removing addresses on platforms that feature Linux-like
 # tools.
 class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
-  depends_on :programs => %w(ifconfig)
+  depends_on :programs => "ifconfig", 
+    :callbacks => lambda{`ifconfig --version 2>&1`.match(/net-tools/)}
 
   def suitability(method, *args) # :nodoc:
-    return available? ? 2 : 0
+    available? ? 2 : 0
   end
 
   # See AddressManager#has?
