@@ -1,3 +1,14 @@
+0.70913:
+    Date: Thu, 13 Sep 2007 06:35:50 -0700
+    Desc:
+    - (%) Fixed bug in PackageManager::Gem, it wasn't recognizing packages installed multiple times as being installed.
+    - Provided complete support for CentOS and RedHat.
+    - Provided complete support for Gentoo with new PackageManager::Portage and ServiceManager::RC_Update drivers.
+    - Provided basic support for FreeBSD with new PlatformManager::FreeBSD.
+    - Rewrote AddressManager::Linux using pure 'ifconfig' calls, which provide more universal support than 'iproute'.
+    - Reworked examples to create a user for the application, demonstrating the use of AccountManager and eliminating need for workarounds to platform-specific differences for the 'nobody' account.
+    - Added new 'depends_on' option to check complex dependencies using callbacks, e.g., ensure a specific version of ifconfig.
+
 0.70912:
     Date: Wed, 12 Sep 2007 18:54:10 -0700
     Desc:
