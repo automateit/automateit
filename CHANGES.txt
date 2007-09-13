@@ -8,6 +8,7 @@
     - Rewrote AddressManager::Linux using pure 'ifconfig' calls, which provide more universal support than 'iproute'.
     - Reworked examples to create a user for the application, demonstrating the use of AccountManager and eliminating need for workarounds to platform-specific differences for the 'nobody' account.
     - Added new 'depends_on' option to check complex dependencies using callbacks, e.g., ensure a specific version of ifconfig.
+    - Included examples/basic in Gem distribution, the code used in the Screenshots.
 
 0.70912:
     Date: Wed, 12 Sep 2007 18:54:10 -0700
