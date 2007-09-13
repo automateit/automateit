@@ -21,7 +21,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
         # Gem lists packages out of order, which screws up the
         # install/uninstall sequence, so we need to put them back in the
         # order that the user specified.
-        present = data.scan(/^([\w\-]+?)\s+\([\w\.\-]+\)\s*$/).flatten
+        present = data.scan(/^([^\s\(]+)\s+\([^\)]+\)\s*$/).flatten
         available = []
         for package in list
           available << package if present.include?(package)
