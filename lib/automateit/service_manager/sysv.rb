@@ -89,14 +89,28 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
 
   # See ServiceManager#start
   def start(service, opts={})
-    return false if not opts[:force] and running?(service)
-    return tell(service, :start, opts)
+    # TODO maybe add a :wait option?
+    if started?(service) and not opts[:force]
+      # Already started
+      return false
+    else
+      # Needs starting or forced
+      tell(service, :start, opts)
+      return true
+    end
   end
 
   # See ServiceManager#stop
   def stop(service, opts={})
-    return false if not opts[:force] and not running?(service)
-    return tell(service, :stop, opts)
+    # TODO maybe add a :wait option?
+    if stopped?(service) and not opts[:force]
+      # Already stopped
+      return false
+    else
+      # Needs stopping or forced
+      tell(service, :stop, opts)
+      return true
+    end
   end
 
   # See ServiceManager#restart
