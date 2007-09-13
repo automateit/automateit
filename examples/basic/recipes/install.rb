@@ -16,7 +16,7 @@ end
 
 # Setup the myapp server
 if tagged?(:myapp_servers)
-  # Create user for application
+  # Create user for the application
   account_manager.add_user(lookup(:user))
 
   # Create a directory for the application
