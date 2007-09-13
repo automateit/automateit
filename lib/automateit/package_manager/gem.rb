@@ -57,7 +57,9 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
       cmd = "gem install -y"
       cmd << " --no-ri" if opts[:ri] == false or opts[:docs] == false
       cmd << " --no-rdoc" if opts[:rdoc] == false or opts[:docs] == false
-      cmd << " "+list.join(" ")+" 2>&1"
+      cmd << " "+list.join(" ")
+      cmd << " " << opts[:args] if opts[:args]
+      cmd << " 2>&1"
 
       # XXX Try to warn the user that they won't see any output for a while
       log.info(PNOTE+"Installing Gems, this will take a while...") if writing? and not opts[:quiet]
