@@ -2,9 +2,9 @@
 if tagged?("rails_servers | myapp_servers")
   # Install platform-specific packages, queries system-provided tags
   if tagged?("ubuntu | debian")
-    package_manager.install(%w(ruby1.8-dev libsqlite3-dev))
-  elsif tagged?("fedoracore | fedora")
-    package_manager.install(%w(ruby-devel sqlite-devel))
+    package_manager.install(%w(build-essential ruby1.8-dev libsqlite3-dev))
+  elsif tagged?("fedoracore | fedora | centos")
+    package_manager.install(%w(gcc ruby-devel sqlite-devel))
   else
     raise NotImplementedError.new("no packages specified for this platform")
   end
@@ -16,6 +16,9 @@ end
 
 # Setup the myapp server
 if tagged?(:myapp_servers)
+  # Create user for application
+  account_manager.add_user(lookup(:user))
+
   # Create a directory for the application
   mkdir_p(lookup(:path)) do
     # Run shell commands to create the app and database

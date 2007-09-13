@@ -1,3 +1,3 @@
-user: nobody
+user: myapp_user
 port: 9826
 path: /tmp/myapp_server
