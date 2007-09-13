@@ -11,13 +11,13 @@ case ARGV.first
 when "start"
   Dir.chdir(path)
   puts "Starting MyAppServer at http://localhost:#{port}/"
-  exit system("su #{user} -c 'PATH=#{ENV["PATH"]} mongrel_rails start " \
-    "--pid #{pid} --daemonize --port #{port} 2>&1 | " \
-    "grep -v cgi_multipart_eof_fix'") ? 0 : 1
+  exit system("PATH=#{ENV["PATH"]} mongrel_rails start " \
+    "--user #{user} --group #{user} --pid #{pid} --daemonize " \
+    "--port #{port} 2>&1 | grep -v cgi_multipart_eof_fix") ? 0 : 1
 when "stop"
   Dir.chdir(path)
-  exit system("su #{user} -c 'PATH=#{ENV["PATH"]} mongrel_rails stop " \
-    "--pid #{pid} 2>&1 | grep -v cgi_multipart_eof_fix'") ? 0 : 1
+  exit system("PATH=#{ENV["PATH"]} mongrel_rails stop " \
+    "--pid #{pid} 2>&1 | grep -v cgi_multipart_eof_fix") ? 0 : 1
 when "status"
   begin
     Process.kill(0, File.read(File.join(path, pid)).to_i)
