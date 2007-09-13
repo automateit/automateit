@@ -86,6 +86,11 @@ module AutomateIt
     # Project path for this Interpreter. If no path is available, nil.
     attr_accessor :project
 
+    # Hash of parameters to make available to the Interpreter. Mostly useful
+    # when needing to pass arguments to an embedded Interpreter before doing an
+    # #instance_eval.
+    attr_accessor :params
+
     # Setup the Interpreter. This method is also called from Interpreter#new.
     #
     # Options for users:
