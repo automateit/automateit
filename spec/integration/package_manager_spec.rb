@@ -74,6 +74,7 @@ else
     :yum => "nomarch", # Obscure package for extracting ARC files from the early 80's
     :gem => "s33r", # Alpha-grade package its author deprecated in favor of another
     :egg => "_sre.py", # Slower reimplementation of ancient Python Regexps
+    :portage => "arc", # Obscure package for extracting ARC files from the early 80's
     ### :cpan => "Acme::please", # Insane gimmick port of intercal's please statements
   }.each_pair do |driver_token, package|
     driver = INTERPRETER.package_manager[driver_token]
