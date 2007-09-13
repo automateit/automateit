@@ -1,16 +1,10 @@
 # == AddressManager::Linux
 #
-# A Linux-specific driver for the AddressManager provides complete support
-# for querying, adding and removing addresses on platforms that feature
-# Linux-like tools.
-#
-# NOTE: Not all Linux distributions provide the programs needed to use this
-# driver. you may need You may need to install additional programs for this
-# to work:
-# * arping -- which provides the +arping+ command (e.g., Debian package "arping")
-# * iproute -- which provides the +ip+ command (e.g., Debian package "iproute")
+# A Linux-specific driver for the AddressManager provides complete support for
+# querying, adding and removing addresses on platforms that feature Linux-like
+# tools.
 class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
-  depends_on :programs => %w(ifconfig ip arping)
+  depends_on :programs => %w(ifconfig)
 
   def suitability(method, *args) # :nodoc:
     return available? ? 2 : 0
@@ -33,7 +27,9 @@ class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
     raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
     return false if has?(opts)
     interpreter.sh(_add_or_remove_command(:add, opts))
-    interpreter.sh("arping -q -c #{announcements} -w #{announcements} -I #{opts[:device]} #{opts[:address]}")
+    if interpreter.which("arping")
+      interpreter.sh("arping -q -c #{announcements} -w #{announcements} -I #{opts[:device]} #{opts[:address]}")
+    end
     return true
   end
 
@@ -54,11 +50,17 @@ class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
     opts[:alias] ||= opts[:alias] if opts[:alias]
     opts[:device] ||= opts[:interface] if opts[:interface]
 
-    # ip address add 10.0.0.123/24 brd + dev eth0 label eth0:foo
-    ipcmd = "ip address #{action} #{opts[:address]}"
-    ipcmd += "/#{opts[:mask]}" if opts[:mask]
-    ipcmd += " brd + dev #{opts[:device]}"
-    ipcmd += " label #{opts[:device]}:#{opts[:label]}" if opts[:label]
+    if opts[:mask] and not opts[:mask].match(/\./)
+      opts[:mask] = cidr_to_mask(opts[:mask])
+    end
+
+    ipcmd = "ifconfig"
+    ipcmd << " %s" % opts[:device] if opts[:device] and not opts[:label]
+    ipcmd << " %s:%s" % [opts[:device], opts[:label]] if opts[:device] and opts[:label]
+    ipcmd << " %s" % opts[:address]
+    ipcmd << " netmask %s" % opts[:mask] if opts[:mask]
+    ipcmd << " up" if action == :add
+    ipcmd << " down" if action == :del
     return ipcmd
   end
   private :_add_or_remove_command

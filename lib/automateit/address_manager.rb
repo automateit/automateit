@@ -76,6 +76,30 @@ class AutomateIt::AddressManager < AutomateIt::Plugin::Manager
   #   hostnames_for("kagami")
   #   => ["kagami"]
   def hostnames_for(hostname) dispatch(hostname) end
+
+  # Convert a mask to a CIDR.
+  #
+  # Example:
+  #  mask_to_cidr("255.255.255.0") # => 24
+  def mask_to_cidr(mask) dispatch(mask) end
+
+  # Convert CIDR to mask.
+  #
+  # Example:
+  #  cidr_to_mask(24) # => "255.255.255.0"
+  def cidr_to_mask(cidr) dispatch(cidr) end
+
+  # Convert a decimal number to binary notation.
+  #
+  # Example:
+  #  dec2bin(255) # => "11111111"
+  def dec2bin(n) dispatch(n) end
+
+  # Convert a binary number to decimal.
+  #
+  # Example:
+  #  bin2dec("11111111") # => 255
+  def bin2dec(s) dispatch(s) end
 end
 
 # == AddressManager::BaseDriver
@@ -105,6 +129,34 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
       results << elements[0..i-1].join(".")
     end
     return results.to_a.sort
+  end
+
+  # See AddressManager#mask_to_cidr
+  def mask_to_cidr(mask)
+    # TODO Find less horrible solution which can handle IPv6.
+    result = ''
+    for chunk in mask.split(".")
+      result += dec2bin(chunk.to_i)
+    end
+    return result.scan(/1/).size
+  end
+
+  # See AddressManager#cidr_to_mask
+  def cidr_to_mask(cidr)
+    # TODO Find less horrible solution which can handle IPv6.
+    require 'ipaddr'
+    IPAddr.new("0.0.0.0/#{cidr}").inspect.match(%r{/([\d\.]+)>})[1]
+  end
+
+  # See AddressManager#dec2bin
+  def dec2bin(n)
+    # dec2bin(255)
+    return "%b" % n
+  end
+
+  # See AddressManager#bin2dec
+  def bin2dec(s)
+    return s.to_i(2)
   end
 end
 
