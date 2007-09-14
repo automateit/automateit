@@ -16,7 +16,7 @@ class AutomateIt::ShellManager::Unix < AutomateIt::ShellManager::Portable
   # See ShellManager#which
   def which(command)
     data = `which "#{command}" 2>&1`.chomp
-    return File.exists?(data) ? data : nil
+    return (! data.blank? && File.exists?(data)) ? data : nil
   end
 
   # See ShellManager#which!
