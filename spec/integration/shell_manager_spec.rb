@@ -349,7 +349,9 @@ describe "AutomateIt::ShellManager" do
     end
   end
 
-  if not INTERPRETER.shell_manager.provides_ownership?
+  if not INTERPRETER.euid?
+    puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
+  elsif not INTERPRETER.shell_manager.provides_ownership?
     puts "NOTE: Can't check ownership on this platform, #{__FILE__}"
   elsif INTERPRETER.superuser?
     it "should change the ownership of files (chown)" do

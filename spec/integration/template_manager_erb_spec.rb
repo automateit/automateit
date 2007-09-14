@@ -21,7 +21,11 @@ describe "AutomateIt::TemplateManager::ERB" do
       opts[:mode] = mode1 if mode1
       @a.render(opts).should be_true
       File.read(target).should == "42"
-      File.stat(target).mode.should == mode2 if INTERPRETER.shell_manager.provides_mode?
+      if INTERPRETER.shell_manager.provides_mode?
+        File.stat(target).mode.should == mode2 
+      else
+        puts "NOTE: Can't check permission modes on this platform, #{__FILE__}"
+      end
     end
   end
 end

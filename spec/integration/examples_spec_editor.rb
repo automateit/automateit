@@ -2,7 +2,9 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 
 # This spec edits the recipes to make them run silently when used with an internal invoke. Although this is faster and more portable, it's also evil and brittle because it can't run the recipes as they are.
 
-if not INTERPRETER.superuser?
+if not INTERPRETER.euid?
+  puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
+elsif not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
 else
   describe "Examples" do

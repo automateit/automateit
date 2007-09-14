@@ -1,6 +1,8 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-if not INTERPRETER.superuser?
+if not INTERPRETER.euid?
+  puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
+elsif not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
 elsif not INTERPRETER.service_manager[:sysv].available?
   puts "NOTE: Can't check ServiceManager::SYSV on this platform, #{__FILE__}"

@@ -41,7 +41,12 @@ begin
           m[:lsb].send(:instance_eval, "@struct.delete(:release)")
           m[:lsb].class.send(:class_eval, "@@struct_cache.delete(:release)")
           m[:lsb].should_receive(:_read_lsb_release_output).and_return("not : valid : yaml")
-          lambda{ m[:lsb].setup; m[:lsb].query(:release) }.should raise_error(ArgumentError, /invalid YAML/)
+          callback = lambda{ m[:lsb].setup; m[:lsb].query(:release) }
+          if RUBY_PLATFORM == "java"
+            callback.should raise_error # YAML throws a native, internal error
+          else
+            callback.should raise_error(ArgumentError, /invalid YAML/)
+          end
         end
       end
 

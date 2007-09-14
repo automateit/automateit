@@ -3,7 +3,9 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 PACKAGE_FOUND_ERROR = %q{ERROR: Found the '%s' package installed for %s. You're probably not using this obscure package and should remove it so that this test can run. In the unlikely event that you actually rely on this package, change the spec to test with another unused package.}
 PACKAGE_DRIVER_MISSING_ERROR = %{NOTE: Can't check %s on this platform, #{__FILE__}}
 
-if not INTERPRETER.superuser?
+if not INTERPRETER.euid?
+  puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
+elsif not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
 else
   describe "AutomateIt::PackageManager", :shared => true do
