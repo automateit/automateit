@@ -58,5 +58,6 @@ class AutomateIt::TagManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # Drivers
+require 'automateit/tag_manager/tag_parser'
 require 'automateit/tag_manager/struct'
 require 'automateit/tag_manager/yaml'
