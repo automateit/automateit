@@ -14,7 +14,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   end
 
   def broken?
-    RUBY_PLATFORM =~ /mswin/
+    RUBY_PLATFORM =~ /mswin|java/
   end
   private :broken?
 
