@@ -287,6 +287,11 @@ module AutomateIt
       end
     end
 
+    # Does this platform provide euid (Effective User ID)?
+    def euid?
+      Process.respond_to?(:euid)
+    end
+
     # Does the current user have superuser (root) privileges?
     def superuser?
       Process.euid.zero?
@@ -303,7 +308,7 @@ module AutomateIt
     def invoke(recipe)
       # TODO Interpreter#invoke -- lookup unqualified names in the project's 'recipes' directory
       data = File.read(recipe)
-      eval(data, binding, recipe, 0)
+      instance_eval(data, recipe, 0)
     end
 
     # Path of this project's "dist" directory. If a project isn't available or
