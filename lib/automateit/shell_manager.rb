@@ -181,6 +181,10 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
 
   # Create a directory or directories. Returns an array of directories
   # created or +false+ if all directories are already present.
+  # 
+  # Options:
+  # * :parents -- Create parents, like "mkdir -p". Boolean.
+  # * :mode, :user, :group -- See #chperm
   #
   # CAUTION: Read notes at the top of ShellManager for potentially
   # problematic situations that may be encountered if using this command in
@@ -189,6 +193,8 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
 
   # Create a directory or directories with their parents. Returns an array of
   # directories created or +false+ if all directories are already present.
+  #
+  # Options same as #mkdir.
   #
   # Example:
   #   File.exists?("/tmp/foo") # => false
