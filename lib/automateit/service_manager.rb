@@ -31,6 +31,16 @@ class AutomateIt::ServiceManager < AutomateIt::Plugin::Manager
   # Restart this +service+ if it's running, or start it if it's stopped.
   def restart(service, opts={}) dispatch(service, opts) end
 
+  # If +is_restart+, #restart the service, otherwise #start it. 
+  #
+  # Example:
+  #  modified = edit "/etc/myapp.conf" {#...}
+  #  service_manager.start_or_restart("myapp", modified)
+  def start_or_restart(service, is_restart, opts={}) dispatch(service, is_restart, opts) end
+
+  # Start and enable the service using #start and #enable.
+  def start_and_enable(service, opts={}) dispatch(service, opts) end
+
   # Tell the +service+ to take a specific +action+, e.g., "condrestart".
   def tell(service, action, opts={}) dispatch(service, action, opts={}) end
 
@@ -50,6 +60,16 @@ end
 #
 # Base class for all ServiceManager drivers.
 class AutomateIt::ServiceManager::BaseDriver < AutomateIt::Plugin::Driver
+  # See ServiceManager#start_or_restart
+  def start_or_restart(service, is_restart, opts={})
+    send(is_restart ? :restart : :start, service, opts)
+  end
+
+  # See ServiceManager#start_and_enable
+  def start_and_enable(service, opts={})
+    start(service, opts)
+    enable(service, opts)
+  end
 end
 
 # Drivers
