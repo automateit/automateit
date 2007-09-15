@@ -11,10 +11,10 @@ Information about AutomateIt is best read in the following order:
 
 === Quick links
 
-UNIX commands, run with <tt>--help</tt> for details:
-* automateit (ai) -- Run a recipe or create a project.
-* aitag -- Query project's tags.
-* aifield -- Query project's fields.
+Unix commands, run with <tt>--help</tt> for details:
+* +automateit+ or +ai+ -- Run a recipe or create a project.
+* +aitag+ -- Query project's tags.
+* +aifield+ -- Query project's fields.
 
 Execution:
 * AutomateIt::Interpreter -- Runs AutomateIt commands.
