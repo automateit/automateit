@@ -105,6 +105,8 @@ module AutomateIt
     def setup(opts={})
       super(opts.merge(:interpreter => self))
 
+      self.params ||= {}
+
       if opts[:irb]
         @irb = opts[:irb]
       end
@@ -304,11 +306,28 @@ module AutomateIt
       AutomateIt.new(opts).invoke(recipe)
     end
 
-    # Invoke the +recipe+ at the given path.
+    # Invoke the +recipe+. The recipe may be expressed as a relative or fully
+    # qualified path. When invoked within a project, the recipe can also be the
+    # name of a recipe.
+    #
+    # Example: 
+    #  invoke "/tmp/recipe.rb"  # Run "/tmp/recipe.rb"
+    #  invoke "recipe.rb"       # Run "./recipe.rb". If not found and in a
+    #                           # project, will try running "recipes/recipe.rb"
+    #  invoke "recipe"          # Run "recipes/recipe.rb" in a project
     def invoke(recipe)
-      # TODO Interpreter#invoke -- lookup unqualified names in the project's 'recipes' directory
-      data = File.read(recipe)
-      instance_eval(data, recipe, 0)
+      filenames = [recipe]
+      filenames << File.join(project, "recipes", recipe) if project
+      filenames << File.join(project, "recipes", recipe + ".rb") if project
+
+      for filename in filenames 
+        log.debug(PNOTE+" invoking "+filename)
+        if File.exists?(filename)
+          data = File.read(filename)
+          return instance_eval(data, filename, 0)
+        end
+      end
+      raise Errno::ENOENT.new("No such file or directory - "+recipe)
     end
 
     # Path of this project's "dist" directory. If a project isn't available or
@@ -324,6 +343,40 @@ module AutomateIt
       else
         raise NotImplementedError.new("can't use dist without a project")
       end
+    end
+
+    # Set value to share throughout the Interpreter. Use this instead of
+    # globals so that different Interpreters don't see each other's variables.
+    # Creates a method that returns the value and also adds a #params entry.
+    #
+    # Example:
+    #  set :asdf, 9 # => 9
+    #  asdf         # => 9
+    #
+    # This is best used for frequently-used variables, like paths. For
+    # infrequently-used variables, use #lookup and #params. A good place to use
+    # the #set is in the  Project's <tt>config/automateit_env.rb</tt> file so
+    # that paths are exposed to all recipes like this:
+    #
+    #  set :helpers, project+"/helpers"
+    def set(key, value)
+      key = key.to_sym
+      params[key] = value
+      eval <<-HERE
+        def #{key}
+          return params[:#{key}]
+        end
+      HERE
+      value
+    end
+
+    # Retrieve a #params entry.
+    #
+    # Example:
+    #  params[:foo] = "bar"  # => "bar"
+    #  get :foo              # => "bar"
+    def get(key)
+      params[key.to_sym]
     end
   end
 end
