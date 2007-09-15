@@ -8,22 +8,29 @@ module AutomateIt
   class CLI < Common
     # Create a new CLI interpreter. If no :recipe or :eval option is provided,
     # it starts an interactive IRB session for the Interpreter.
+    # 
+    # Examples:
+    #   AutomateIt::CLI.run("myrecipe.rb")
+    #   AutomateIt::CLI.run(:recipe => "myrecipe.rb")
+    #   AutomateIt::CLI.run(:eval => "42")
     #
     # Options:
     # * :project -- Project directory to load.
     # * :recipe -- Recipe file to execute.
     # * :eval -- Evaluate this string.
     # * :quiet -- Don't print shell header.
-    def self.run(opts={})
-      opts[:project] ||= opts[:recipe] ? File.join(File.dirname(opts[:recipe]), "..") : "."
+    def self.run(*a)
+      args, opts = args_and_opts(*a)
+      recipe = args.first || opts[:recipe]
+      opts[:project] ||= recipe ? File.join(File.dirname(recipe), "..") : "."
       opts[:verbosity] ||= Logger::INFO
       if opts[:create]
         Project::create(opts)
       elsif code = opts.delete(:eval)
         interpreter = AutomateIt.new(opts)
         interpreter.instance_eval(code)
-      elsif opts[:recipe]
-        AutomateIt.invoke(opts[:recipe], opts)
+      elsif recipe
+        AutomateIt.invoke(recipe, opts)
       else
         # Welcome messages
         display = lambda{|msg| puts msg if opts[:verbosity] <= Logger::INFO}
