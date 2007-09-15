@@ -169,4 +169,23 @@ describe "AutomateIt::CLI" do
       AutomateIt::CLI.run(:recipe => recipe).should be_true
     end
   end
+
+  it "should let recipes invoke other recipes" do
+    INTERPRETER.mktempdircd do
+      project = "myproject"
+      first = File.join(project, "recipes", "first.rb")
+      second = File.join(project, "recipes", "second.rb")
+      AutomateIt::CLI.run(:create => project, :verbosity => Logger::WARN)
+
+      File.open(first, "w+"){|h| h.write(<<-HERE)}
+        invoke 'second'
+      HERE
+
+      File.open(second, "w+"){|h| h.write(<<-HERE)}
+        42
+      HERE
+
+      AutomateIt::CLI.run(first).should == 42
+    end
+  end
 end
