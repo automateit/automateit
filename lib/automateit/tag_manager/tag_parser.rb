@@ -40,6 +40,7 @@ class AutomateIt::TagManager::TagParser
 
   # Return array of hosts for the +tag+.
   def hosts_for(tag)
+    raise IndexError.new("Unknown tag - #{tag}") unless struct[tag]
     trace "\nAA %s" % tag
     hosts = Set.new
     for item in struct[tag]
