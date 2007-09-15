@@ -105,6 +105,24 @@ describe "AutomateIt::EditManager for strings" do
       different?.should == true
     end
   end
+
+  it "should provide session with access to interpreter" do
+    @a.lookup["foo"] = "bar"
+    output = @a.edit(:text => @input) do
+      manipulate do |b|
+        lookup "foo"
+      end
+    end
+    output.should == "bar"
+  end
+
+  it "should raise exceptions for invalid methods" do
+    lambda { 
+      @a.edit(:text => @input) do
+        qwoiuerjzxiuo
+      end
+    }.should raise_error(NoMethodError, /qwoiuerjzxiuo/)
+  end
 end
 
 describe "AutomateIt::EditManager for files" do
@@ -129,6 +147,14 @@ describe "AutomateIt::EditManager for files" do
   it "should not rewrite an unchanged file" do
     File.should_receive(:read).with(@filename).and_return(@input)
     result = @a.edit(:file => @filename) do
+      # Do nothing
+    end
+    result.should be_false
+  end
+
+  it "should default to editing a file" do
+    File.should_receive(:read).with(@filename).and_return(@input)
+    result = @a.edit(@filename) do
       # Do nothing
     end
     result.should be_false
