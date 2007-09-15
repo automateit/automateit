@@ -66,7 +66,7 @@ class Numeric
 end
 
 desc "Display the lines of source code and how many lines were changed in the repository"
-task :loc => [:loclines, :locdiff, :locchurn]
+task :loc => [:loclines, :locdiff, :locchurn, :sloc]
 
 desc "Display the lines of source code"
 task :loclines do
@@ -99,6 +99,10 @@ desc "Display lines of churn"
 task :locchurn do
   require 'active_support'
   puts "%s lines of Hg churn" % (`hg churn`.scan(/^[^\s]+\s+(\d+)\s/).flatten.map(&:to_i).sum).commify
+end
+
+task :sloc do
+  sh "sloccount lib spec misc examples bin"
 end
 
 #---[ misc ]------------------------------------------------------------
@@ -186,8 +190,8 @@ spec = Gem::Specification.new do |s|
   s.date = File.mtime('lib/automateit/root.rb')
   s.email = "igal@pragmaticraft.org"
   s.executables = Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)}
-  s.extra_rdoc_files = %w(README.txt TUTORIAL.txt TESTING.txt)
-  s.files = [FileList["{bin,lib,misc,examples}/**/*"].to_a, 'Rakefile'].flatten
+  s.extra_rdoc_files = %w(README.txt TUTORIAL.txt TESTING.txt CHANGES.txt)
+  s.files = %w(Rakefile gpl.txt) + FileList["{bin,lib,misc,examples}/**/*"]
   s.has_rdoc = true
   s.homepage = "http://automateit.org/"
   s.name = "automateit"
