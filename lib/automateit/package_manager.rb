@@ -4,6 +4,7 @@
 # uninstall and query if the Apache package is installed with APT.
 #
 # Examples:
+#
 #   package_manager.installed?("apache2") # => false
 #   package_manager.install("apache2") # => true
 #   package_manager.installed?("apache2") # => true
@@ -11,17 +12,28 @@
 #   package_manager.not_installed("apache2") # => true
 #
 # Commands can accept arrays:
-#   package_manager.install("apache2", "bash")
 #
-# Commands can also accept a single, annotated string:
+#   package_manager.install("apache2", "bash")
+#   package_manager.installed? %w(apache2 bash)
+#
+# Commands can also accept a single, annotated string -- useful for installing
+# large numbers of packages at once:
+#
 #   package_manager.install <<HERE, :with => :apt
-#     # My packages
+#     # One per line
 #     apache
 #     bash
 #
-#     # Some other packages
-#     ruby
+#     # Or many on the same line
+#     sysvconfig sysv-rc-conf
 #   HERE
+#
+# Commands can also accept a hash of names to paths -- necessary for installing
+# packages stored on the filesystem:
+#
+#   # Is the package called "TracTags" installed? If not, run the installer
+#   # with the "/tmp/tractags_latest" path as an argument:
+#   package.manager.install({"TracTags" => "/tmp/tractags_latest"}, :with => :egg)
 class AutomateIt::PackageManager < AutomateIt::Plugin::Manager
   # Are these +packages+ installed? Returns +true+ if all +packages+ are
   # installed, or an array of installed packages when called with an options
@@ -62,6 +74,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     packages, opts = args_and_opts(*packages)
     packages = _list_normalizer(packages)
+    packages = packages.keys if Hash === packages
 
     available = block.call(packages, opts)
     truth = (packages - available).empty?
@@ -77,6 +90,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     # Requires that your PackageManager#installed? method is implemented.
     packages, opts = args_and_opts(*packages)
     packages = _list_normalizer(packages)
+    packages = packages.keys if Hash === packages
 
     available = [installed?(packages, :list => true)].flatten
     missing = packages - available
@@ -103,11 +117,24 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     packages, opts = args_and_opts(*packages)
     packages = _list_normalizer(packages)
 
-    missing = not_installed?(packages, :list => true)
+    check_packages = \
+      case packages
+      when Hash: packages.keys
+      else packages
+      end
+
+    missing = not_installed?(check_packages, :list => true)
     return false if missing.blank?
-    block.call(missing, opts)
+
+    install_packages = \
+      case packages
+      when Hash: missing.map{|t| packages[t]}
+      else missing
+      end
+    block.call(install_packages, opts)
+
     return true if noop?
-    unless (failed = not_installed?(missing, :list => true)).empty?
+    unless (failed = not_installed?(check_packages, :list => true)).empty?
       raise ArgumentError.new("couldn't install: #{failed.join(' ')}")
     else
       return true
@@ -131,11 +158,24 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     packages, opts = args_and_opts(*packages)
     packages = _list_normalizer(packages)
 
-    present = installed?(packages, :list => true)
+    check_packages = \
+      case packages
+      when Hash: packages.keys
+      else packages
+      end
+
+    present = installed?(check_packages, :list => true)
     return false if present.blank?
-    block.call(present, opts)
+
+    uninstall_packages = \
+      case packages
+      when Hash: present.map{|t| packages[t]}
+      else present
+      end
+    block.call(uninstall_packages, opts)
+
     return true if noop?
-    unless (failed = installed?(present, :list => true)).empty?
+    unless (failed = installed?(check_packages, :list => true)).empty?
       raise ArgumentError.new("couldn't uninstall: #{failed.join(' ')}")
     else
       return true
@@ -147,11 +187,28 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
   def _list_normalizer(*packages)
     packages = [packages].flatten
     if packages.size == 1
+      packages = packages.first
       ## puts "LN SI %s" % packages.inspect
-      packages = packages.first.grep(LIST_NORMALIZER_RE).join(" ").split
+      case packages
+      when String
+        packages = packages.grep(LIST_NORMALIZER_RE).join(" ").split
+      when Hash
+        # Don't do anything
+      else
+        raise TypeError.new("Unknown input type - #{packages.class}")
+      end
       ## puts "LN SO %s" % packages.inspect
     end
-    result = packages.map{|t|t.to_s}.grep(LIST_NORMALIZER_RE)
+
+    case packages
+    when Array
+      result = packages.map(&:to_s).grep(LIST_NORMALIZER_RE)
+    when Hash
+      result = packages.stringify_keys
+    else
+      raise TypeError.new("Unknown input type - #{packages.class}")
+    end
+
     ## puts "LN RR %s" % result.inspect
     return result
   end
