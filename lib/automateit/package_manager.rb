@@ -9,6 +9,19 @@
 #   package_manager.installed?("apache2") # => true
 #   package_manager.uninstall("apache2") # => true
 #   package_manager.not_installed("apache2") # => true
+#
+# Commands can accept arrays:
+#   package_manager.install("apache2", "bash")
+#
+# Commands can also accept a single, annotated string:
+#   package_manager.install <<HERE, :with => :apt
+#     # My packages
+#     apache
+#     bash
+#
+#     # Some other packages
+#     ruby
+#   HERE
 class AutomateIt::PackageManager < AutomateIt::Plugin::Manager
   # Are these +packages+ installed? Returns +true+ if all +packages+ are
   # installed, or an array of installed packages when called with an options
@@ -32,13 +45,6 @@ end
 # == PackageManager::BaseDriver
 #
 # Base class for all PackageManager drivers.
-#
-# It provides methods that make it easier to write PackageManager drivers. It
-# can't install packages itself, but its helper methods make it easier for
-# other drivers to do this by providing them with a bunch of common
-# functionality that would otherwise have to be duplicated in each driver.
-# These helpers are generic enough to be useful for all sorts of PackageManager
-# driver implementations. Read the APT driver for good usage examples.
 class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
   protected
 
@@ -55,8 +61,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     _raise_unless_available
 
     packages, opts = args_and_opts(*packages)
-    packages = [packages].flatten
-    packages = packages.map{|t|t.to_s}
+    packages = _list_normalizer(packages)
 
     available = block.call(packages, opts)
     truth = (packages - available).empty?
@@ -71,8 +76,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     # Requires that your PackageManager#installed? method is implemented.
     packages, opts = args_and_opts(*packages)
-    packages = [packages].flatten
-    packages = packages.map{|t|t.to_s}
+    packages = _list_normalizer(packages)
 
     available = [installed?(packages, :list => true)].flatten
     missing = packages - available
@@ -97,8 +101,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     _raise_unless_available
 
     packages, opts = args_and_opts(*packages)
-    packages = [packages].flatten
-    packages = packages.map{|t|t.to_s}
+    packages = _list_normalizer(packages)
 
     missing = not_installed?(packages, :list => true)
     return false if missing.blank?
@@ -126,8 +129,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     _raise_unless_available
 
     packages, opts = args_and_opts(*packages)
-    packages = [packages].flatten
-    packages = packages.map{|t|t.to_s}
+    packages = _list_normalizer(packages)
 
     present = installed?(packages, :list => true)
     return false if present.blank?
@@ -139,6 +141,23 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       return true
     end
   end
+
+  # Returns a normalized array of packages. Transforms manifest string into
+  # packages. Turns symbols into string, strips blank lines and comments.
+  def _list_normalizer(*packages)
+    packages = [packages].flatten
+    if packages.size == 1
+      ## puts "LN SI %s" % packages.inspect
+      packages = packages.first.grep(LIST_NORMALIZER_RE).join(" ").split
+      ## puts "LN SO %s" % packages.inspect
+    end
+    result = packages.map{|t|t.to_s}.grep(LIST_NORMALIZER_RE)
+    ## puts "LN RR %s" % result.inspect
+    return result
+  end
+
+  # Expression for matching packages in arguments
+  LIST_NORMALIZER_RE = /^\s*([^\s#]+)\s*$/
 end
 
 # Drivers
