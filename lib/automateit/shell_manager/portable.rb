@@ -54,7 +54,8 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   def _mktemp_helper(kind, name=nil, opts={}, &block)
     # Tempster takes care of rethrowing exceptions
-    opts = {:name => name}.merge(opts)
+    opts[:name] = name || "automateit_temp"
+    opts[:message_callback] = lambda{|msg| log.info(PEXEC+msg)}
     ::Tempster.send(kind, opts, &block)
   end
   private :_mktemp_helper
@@ -112,7 +113,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       rescue Exception => e
         raise e
       ensure
-        log.dequeue(:info, PEXEC+"popd")
+        log.dequeue(:info, PEXEC+"popd # => #{pwd}")
       end
     else
       FileUtils.cd(dir) if writing?
