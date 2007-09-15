@@ -79,7 +79,11 @@ class Tempster
         end
         # XXX Should we pretend that it's mktemp? Or give users something more useful?
         # messager.puts("mktemp -m 0%o%s -p %s %s # => %s" % [mode, kind == :directory ? ' -d' : '', dir, name, path])
-        messager.puts("mktempster --mode=0%o --kind=%s --dir=%s --name=%s # => %s" % [mode, kind, dir, name, path])
+        if block
+          messager.puts("mktempster --mode=0%o --kind=%s --dir=%s --name=%s" % [mode, kind, dir, name])
+        else
+          messager.puts("mktempster --mode=0%o --kind=%s --dir=%s --name=%s # => %s" % [mode, kind, dir, name, path])
+        end
         success = true
         break
       rescue Errno::EEXIST
@@ -92,7 +96,7 @@ class Tempster
       begin
         if cd
           Dir.chdir(path)
-          messager.puts("cd #{path}")
+          messager.puts("pushd #{path}")
         end
         block.call(path)
       rescue Exception => e
@@ -101,7 +105,7 @@ class Tempster
       ensure
         if cd
           Dir.chdir(previous)
-          messager.puts("cd #{previous}")
+          messager.puts("popd # => #{previous}")
         end
         if delete
           FileUtils.rm_rf(path)
@@ -148,7 +152,7 @@ class Tempster
         @callback.call(@prefix+message)
       else
         if @verbose
-          $stdout.puts @prefix+message
+          STDOUT.puts @prefix+message
         end
       end
     end
