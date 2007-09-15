@@ -9,10 +9,36 @@ Information about AutomateIt is best read in the following order:
 4. TESTING.txt[link:files/TESTING_txt.html] -- instructions on running the AutomateIt self-test
 5. Links on the left provide technical documentation for specific classes and methods
 
+=== Quick links
+
+UNIX commands, run with <tt>--help</tt> for details:
+* automateit (ai) -- Run a recipe or create a project.
+* aitag -- Query project's tags.
+* aifield -- Query project's fields.
+
+Execution:
+* AutomateIt::Interpreter -- Runs AutomateIt commands.
+* AutomateIt::Project -- Collection of related recipes, tags, fields and custom plugins.
+
+Plugins:
+* AutomateIt::AccountManager -- Manipulates users and groups.
+* AutomateIt::AddressManager -- Manipulates host's network addresses.
+* AutomateIt::EditManager -- Edits files and strings.
+* AutomateIt::FieldManager -- Queries configuration variables.
+* AutomateIt::PackageManager -- Manipulates software packages.
+* AutomateIt::PlatformManager -- Queries platform, such as its OS version.
+* AutomateIt::ServiceManager -- Manipulates services, such as Unix daemons.
+* AutomateIt::ShellManager -- Manipulates files and executes Unix commands.
+* AutomateIt::TagManager -- Groups hosts by role and queries membership.
+* AutomateIt::TemplateManager -- Renders templates to files.
+
+Useful drivers:
+* AutomateIt::EditManager::Basic::EditSession -- Commands for editing files.
+* AutomateIt::TemplateManager::ERB -- Commands for rendering files.
+
 === Legal
 
-Author:: Igal Koshevoy (igal@pragmaticraft.com)
-Copyright:: Copyright (C) 2007 Igal Koshevoy
+Copyright (C) 2007 Igal Koshevoy (igal@pragmaticraft.com)
 
 AutomateIt is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
