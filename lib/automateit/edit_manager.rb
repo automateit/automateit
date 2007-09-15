@@ -43,8 +43,9 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
   #   end
   #   # => "hello\nworld"
   class EditSession < AutomateIt::Common
-    # Edit a file or string. You must specify either the :file or :text
-    # options.
+    # Edit a file or string. Requires a filename argument or options hash --
+    # e.g.,. <tt>edit("foo")</tt> and <tt>edit(:file => "foo")</tt> will both
+    # edit a file called +foo+.
     #
     # Options:
     # * :file -- File to edit.
@@ -56,10 +57,15 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
     #     prepend "myheader"
     #     append "yo "+params[:hello]
     #   end
-    def edit(opts, &block)
-      raise ArgumentError.new("no file or text specified for editing") unless opts[:file] or opts[:text]
-      @filename = opts.delete(:file)
-      @contents = opts.delete(:text)
+    def edit(*a, &block)
+      args, opts = args_and_opts(*a)
+      if args.first
+        @filename = args.first
+      else
+        raise ArgumentError.new("no file or text specified for editing") unless opts[:file] or opts[:text]
+        @filename = opts.delete(:file)
+        @contents = opts.delete(:text)
+      end
       @params = opts.delete(:params) || {}
       @comment_prefix = "# "
       @comment_suffix = ""
@@ -204,6 +210,15 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
         File.open(@filename, "w+"){|writer| writer.write(@contents)}
       else
         true
+      end
+    end
+
+    # Dispatch unknown methods to Interpreter, e.g., #lookup.
+    def method_missing(method, *args, &block)
+      if interpreter.respond_to?(method)
+        interpreter.send(method, *args, &block)
+      else
+        raise NoMethodError.new("NameError: undefined local variable or method `#{method}' for #{self}")
       end
     end
   end # class EditSession
