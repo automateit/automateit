@@ -1,3 +1,15 @@
+0.70914:
+    Date: Fri, 14 Sep 2007 17:37:48 -0700
+    Desc:
+    - (%) Fixed bug in ShellManager::Portable that caused 'cp' to actually copy even when in 'noop' mode.
+    - Ported code to work with JRuby.
+    - Wrote TagParser that works with JRuby and handles arbitrarily complex and deep rules with correct precedence.
+    - Improved PackageManager commands to accept hash of names to paths, e.g., if package 'TracTags' isn't present, installs it from a directory.
+    - Improved PackageManager commands to accept annotated, free-form strings with comments.
+    - Improved Interpreter.invoke to search a project's recipes directory, making it easier for recipes to invoke other recipes.
+    - Improved EditSession to provide easier access to Interpreter methods.
+    - Improved ServiceManager to provide 'start_and_enable' and 'start_or_restart' convenience commands.
+
 0.70913:
     Date: Thu, 13 Sep 2007 06:35:50 -0700
     Desc:

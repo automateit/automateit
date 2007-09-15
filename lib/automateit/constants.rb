@@ -4,7 +4,7 @@ module AutomateIt # :nodoc:
   # Various constants.
   module AutomateIt::Constants
     # AutomateIt version
-    VERSION=Gem::Version.new("0.70913")
+    VERSION=Gem::Version.new("0.70914")
 
     # Output prefix for command execution, e.g., "** ls -la"
     PEXEC = "** "
