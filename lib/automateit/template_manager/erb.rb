@@ -22,7 +22,9 @@ class AutomateIt::TemplateManager::ERB < AutomateIt::TemplateManager::BaseDriver
     return 1
   end
 
-  # Render +source+ filename to +target+ filename.
+  # Render +source+ filename to +target+ filename. You may specify the source
+  # and target as arguments or options -- <tt>render(:file => "input",
+  # :to => "output")</tt> is the same as <tt>render("input", "output")</tt>.
   #
   # Options:
   # * :locals -- Hash of variables passed to template as local variables.
