@@ -13,20 +13,20 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   # See PackageManager#installed?
   def installed?(*packages)
     return _installed_helper?(*packages) do |list, opts|
-        cmd = "gem list --local 2>&1"
+      cmd = "gem list --local 2>&1"
 
-        log.debug(PEXEC+cmd)
-        data = `#{cmd}`
+      log.debug(PEXEC+cmd)
+      data = `#{cmd}`
 
-        # Gem lists packages out of order, which screws up the
-        # install/uninstall sequence, so we need to put them back in the
-        # order that the user specified.
-        present = data.scan(/^([^\s\(]+)\s+\([^\)]+\)\s*$/).flatten
-        available = []
-        for package in list
-          available << package if present.include?(package)
-        end
-        available
+      # Gem lists packages out of order, which screws up the
+      # install/uninstall sequence, so we need to put them back in the
+      # order that the user specified.
+      present = data.scan(/^([^\s\(]+)\s+\([^\)]+\)\s*$/).flatten
+      available = []
+      for package in list
+        available << package if present.include?(package)
+      end
+      available
     end
   end
 
@@ -75,7 +75,8 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
           re_missing=/Could not find.+in any repository/m
           re_select=/Select which gem to install.+>/m
           re_failed=/Gem files will remain.+for inspection/m
-          re_all=/#{re_missing}|#{re_select}|#{re_failed}/m
+          re_refused=/Errno::ECONNREFUSED reading .+?\.gem/m
+          re_all=/#{re_missing}|#{re_select}|#{re_failed}|#{re_refused}/m
 
           while true
             begin
@@ -87,8 +88,11 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
             ### puts "Captureded %s" % captureded.inspect
             captured = captureded.first
             if captured.match(re_failed)
-              log.warn(PNOTE+"Gem install failed mid-process")
+              log.warn(PERROR+"Gem install failed mid-process")
               uninstall_needed = true
+              break
+            elsif captured.match(re_refused)
+              log.warn(PERROR+"Gem install refused by server!\n#{captured}")
               break
             elsif captured.match(re_select)
               choice = captured.match(/^ (\d+)\. .+?\(ruby\)\s*$/)[1]
@@ -105,7 +109,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
         log.error(PERROR+"Gem install failed, trying to uninstall broken pieces: #{list.inspect}")
         uninstall(list, opts)
 
-        raise ArgumentError.new("Gem install failed, either it's invalid or missing a dependency: #{list.inspect}")
+        raise ArgumentError.new("Gem install failed because it's invalid, missing a dependency, or can't talk with Gem server: #{list.inspect}")
       end
     end
   end
