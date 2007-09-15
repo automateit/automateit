@@ -5,8 +5,11 @@ ENV.delete("AUTOMATEIT_PROJECT")
 
 require 'automateit'
 
-# Create a global instance
-INTERPRETER = AutomateIt.new unless defined?(INTERPRETER)
+# Create a global instance, using WARN verbosity so that
+# INTERPRETER.mktempdircd calls don't generate output.
+unless defined?(INTERPRETER)
+  INTERPRETER = AutomateIt.new(:verbosity => Logger::WARN) 
+end
 
 # Inject matchers into interpreter, e.g., 'should be_true'
 INTERPRETER.class.send(:include, Spec::Matchers)
