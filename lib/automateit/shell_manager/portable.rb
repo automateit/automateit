@@ -135,6 +135,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     missing = [dirs].flatten.select{|dir| ! File.directory?(dir)}
     result = false
     if missing.empty? and not block
+      chperm(opts) if opts[:user] or opts[:group] or opts[:mode]
       return result
     end
     unless missing.empty?
@@ -152,6 +153,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
         block.call(result)
       end
     end
+    chperm(opts) if opts[:user] or opts[:group] or opts[:mode]
     return missing
   end
 
@@ -202,13 +204,23 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       end
     end
     return false if missing.empty?
+
     log.debug(PNOTE+"_ln(%s, %s, %s) # => %s" % [kind, sources.inspect, target.inspect, missing.inspect])
     missing = missing.first if missing.size == 1
+
+    displayed = "ln"
+    if opts[:symbolic] and opts[:force]
+      displayed << " -sf"
+    else
+      displayed << " -s" if opts[:symbolic]
+      displayed << " -f" if opts[:force]
+    end
+
     if kind == :ln
-      log.info(PEXEC+"ln #{missing} #{target}")
+      log.info(PEXEC+"#{displayed} #{missing} #{target}")
       FileUtils.ln(missing, target, _fileutils_opts) && missing
     else
-      log.info(PEXEC+"#{kind} #{String === missing ? missing : missing.join(' ')} #{target}")
+      log.info(PEXEC+"#{displayed} #{String === missing ? missing : missing.join(' ')} #{target}")
       FileUtils.send(kind, missing, target, _fileutils_opts) && missing
     end
     return missing
@@ -243,9 +255,14 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   # See ShellManager#cp
   def cp(sources, target, opts={})
     # TODO ShellManager::Portable#cp -- rather funky, needs a code review
-    fu_opts = _fileutils_opts.merge(:noop => opts[:noop], :verbose => opts[:verbose])
+    fu_opts = _fileutils_opts
+    for opt in %w(noop verbose)
+      opt = opt.to_sym
+      fu_opts[opt] = opts[opt] if opts[opt]
+    end
     #fu_opts[:verbose] = true
     fu_opts_with_preserve = {:preserve => opts[:preserve]}.merge(fu_opts)
+
     changed = []
     sources_a = [sources].flatten
     sources_a.each do |parent|
@@ -308,6 +325,8 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
         end
         if is_copy
           log.info(PEXEC+"cp%s %s %s" % [opts[:recursive] ? ' -r' : '', source_fn, target_fn])
+          ## puts "fo %s" % fu_opts.inspect
+          ## puts "fowp %s" % fu_opts_with_preserve.inspect
           FileUtils.cp_r(source_fn, target_fn, fu_opts_with_preserve)
         end
       end
