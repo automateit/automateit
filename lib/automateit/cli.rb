@@ -34,7 +34,7 @@ module AutomateIt
       else
         # Welcome messages
         display = lambda{|msg| puts msg if opts[:verbosity] <= Logger::INFO}
-        display.call PNOTE+"AutomateIt Shell v#{AutomateIt::VERSION}"
+        display.call PNOTE+"AutomateIt Shell v#{AutomateIt::VERSION} #{$0}"
 
         # Create and connect instances
         require "irb"
