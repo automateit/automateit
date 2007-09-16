@@ -117,6 +117,7 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
     #   prepend("add this line", :unless => /add\s*this\*line/)
     def prepend(line, opts={})
       query = Regexp.new(opts[:unless] || line)
+      query = Regexp.escape(query) if query.is_a?(String)
       return if contains?(query)
       @contents = "%s\n%s" % [line, @contents]
     end
@@ -130,19 +131,25 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
     #
     # See example for #prepend.
     def append(line, opts={})
-      query = Regexp.new(opts[:unless] || line)
+      query = opts[:unless] || line
+      if query.is_a?(String)
+        query = Regexp.new(Regexp.escape(query))
+      end
       return if contains?(query)
       @contents = "%s\n%s" % [@contents.chomp, line]
     end
 
     # Does the buffer contain anything that matches the String or Regexp +query+?
     def contains?(query)
-      query = Regexp.new(query) unless Regexp === query
+      if query.is_a?(String)
+        query = Regexp.new(Regexp.escape(query))
+      end
       ! @contents.match(query).nil?
     end
 
     # Delete lines matching the String or Regexp +query+
     def delete(query, opts={})
+      query = Regexp.escape(query) if query.is_a?(String)
       query = Regexp.new(query+"\n?")
       @contents.gsub!(query, "")
     end
@@ -159,6 +166,7 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
 
     # Comment out lines matching the String or Regexp +query+.
     def comment(query, opts={})
+      query = Regexp.escape(query) if query.is_a?(String)
       query = Regexp.new("^([^\n]*%s[^\n]*)(\n*)" % query)
       return false unless @contents.match(query)
       @contents.gsub!(query, "%s%s%s%s" % [@comment_prefix, $1, @comment_suffix, $2])
@@ -166,6 +174,7 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
 
     # Uncomment lines matching the String or Regexp +query+.
     def uncomment(query, opts={})
+      query = Regexp.escape(query) if query.is_a?(String)
       query = Regexp.new("^(%s)([^\n]*%s[^\n]*)(%s)(\n*)" % [@comment_prefix, query, @comment_suffix])
       return false unless @contents.match(query)
       @contents.gsub!(query, "%s%s" % [$2, $4])
@@ -173,7 +182,9 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
 
     # Replace contents matching the String or Regexp +query+ with the +string+.
     def replace(query, string, opts={})
-      query = Regexp.new(query)
+      if query.is_a?(String)
+        query = Regexp.new(Regexp.escape(query))
+      end
       @contents.gsub!(query, string)
     end
 
