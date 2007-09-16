@@ -1,3 +1,9 @@
+0.70915:
+    Date: Sat, 15 Sep 2007 23:09:26 -0700
+    Desc:
+    - Improved Interpreter with friendly error messages that make it easier for users to see what's wrong with a recipe. These new messages display the cause, a snapshot of the problematic code, shortened paths, and only the relevant stack frames. Also provided way to get complete, raw backtraces for debugging internals.
+    - Improved plugins that use ERB by creating a new HelpfulERB class that provides sane behavior and provides friendly, contextual error messages making it much easier for users to identify and fix problems in templates.
+
 0.70914:
     Date: Fri, 14 Sep 2007 17:37:48 -0700
     Desc:
