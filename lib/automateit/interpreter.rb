@@ -385,8 +385,12 @@ module AutomateIt
               end
 
               # Extract line number
-              result.last.match(/^([^:]+):(\d+):in `invoke'/)
-              line_number = $2.to_i
+              if e.is_a?(SyntaxError)
+                line_number = e.message.match(/^[^:]+:(\d+):/)[1].to_i
+              else
+                result.last.match(/^([^:]+):(\d+):in `invoke'/)
+                line_number = $2.to_i
+              end
 
               msg = "Problem with recipe '#{recipe}' at line #{line_number}\n"
 
