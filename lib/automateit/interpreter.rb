@@ -91,13 +91,36 @@ module AutomateIt
     # #instance_eval.
     attr_accessor :params
 
+    # The Interpreter throws friendly error messages by default that make it
+    # easier to see what's wrong with a recipe. These friendly messages display
+    # the cause, a snapshot of the problematic code, shortened paths, and only
+    # the relevant stack frames.
+    #
+    # However, if there's a bug in the AutomateIt internals, these friendly
+    # messages may inadvertently hide the cause, and it may be necessary to
+    # turn them off to figure out what's wrong.
+    #
+    # To turn off friendly exceptions:
+    #
+    #   # From a recipe or the AutomateIt interactive shell:
+    #   self.friendly_exceptions = false
+    #
+    #   # For an embedded interpreter at instantiation:
+    #   AutomateIt.new(:friendly_exceptions => false)
+    #
+    #   # From the UNIX command line when invoking a recipe:
+    #   automateit --trace myrecipe.rb
+    attr_accessor :friendly_exceptions
+
     # Setup the Interpreter. This method is also called from Interpreter#new.
     #
     # Options for users:
     # * :verbosity -- Alias for :log_level
-    # * :log_level -- Set log level, defaults to Logger::INFO.
-    # * :noop -- Set noop (no-operation) mode as boolean.
-    # * :project -- Set project as directory path.
+    # * :log_level -- Log level to use, defaults to Logger::INFO.
+    # * :noop -- Turn on noop (no-operation) mode, defaults to false.
+    # * :project -- Set project path.
+    # * :friendly_exceptions -- Throw user-friendly exceptions that make it
+    #   easier to see errors in recipes, defaults to true.
     #
     # Options for internal use:
     # * :parent -- Parent plugin instance.
@@ -130,6 +153,12 @@ module AutomateIt
         @noop = false unless defined?(@noop)
       else
         @noop = opts[:noop]
+      end
+
+      if opts[:friendly_exceptions].nil?
+        @friendly_exceptions = true unless defined?(@friendly_exceptions)
+      else
+        @friendly_exceptions = opts[:friendly_exceptions]
       end
 
       # Instantiate core plugins so they're available to the project
@@ -310,7 +339,7 @@ module AutomateIt
     # qualified path. When invoked within a project, the recipe can also be the
     # name of a recipe.
     #
-    # Example: 
+    # Example:
     #  invoke "/tmp/recipe.rb"  # Run "/tmp/recipe.rb"
     #  invoke "recipe.rb"       # Run "./recipe.rb". If not found and in a
     #                           # project, will try running "recipes/recipe.rb"
@@ -320,14 +349,88 @@ module AutomateIt
       filenames << File.join(project, "recipes", recipe) if project
       filenames << File.join(project, "recipes", recipe + ".rb") if project
 
-      for filename in filenames 
+      for filename in filenames
         log.debug(PNOTE+" invoking "+filename)
         if File.exists?(filename)
           data = File.read(filename)
-          return instance_eval(data, filename, 1)
+          begin
+            return instance_eval(data, filename, 1)
+          rescue Exception => e
+            if @friendly_exceptions
+              # TODO Extract this routine and its companion in HelpfulERB
+
+              # Capture initial stack in case we add a debug/breakpoint after this
+              stack = caller
+
+              # Extract trace for recipe after the Interpreter#invoke call
+              preresult = []
+              for line in e.backtrace
+                # Stop at the Interpreter#invoke call
+                break if line == stack.first
+                preresult << line
+              end
+
+              # Extract the recipe filename
+              preresult.last.match(/^([^:]+):(\d+):in `invoke'/)
+              recipe = $1
+
+              # Extract trace for most recent block
+              result = []
+              for line in preresult
+                # Ignore manager wrapper and dispatch methods
+                next if line =~ %r{lib/automateit/.+manager\.rb:\d+:in `.+'$}
+                result << line
+                # Stop at the first mention of this recipe
+                break if line =~ /^#{recipe}/
+              end
+
+              # Extract line number
+              result.last.match(/^([^:]+):(\d+):in `invoke'/)
+              line_number = $2.to_i
+
+              msg = "Problem with recipe '#{recipe}' at line #{line_number}\n"
+
+              # Extract recipe text
+              begin
+                lines = File.read(recipe).split(/\n/)
+
+                min = line_number - 7
+                min = 0 if min < 0
+
+                max = line_number + 1
+                max = lines.size if max > lines.size
+
+                width = max.to_s.size
+
+                for i in min..max
+                  n = i+1
+                  marker = n == line_number ? "*" : ""
+                  msg << "\n%2s %#{width}i %s" % [marker, n, lines[i]]
+                end
+
+                msg << "\n"
+              rescue Exception => e
+                # Ignore
+              end
+
+              msg << "\n(#{e.exception.class}) #{e.message}"
+
+              # Append shortened trace
+              for line in result
+                msg << "\n  "+line
+              end
+
+              # Remove project path
+              msg.gsub!(/#{@project}\/?/, '') if @project
+
+              raise AutomateIt::Error.new(msg, e)
+            else
+              raise e
+            end
+          end
         end
       end
-      raise Errno::ENOENT.new("No such file or directory - "+recipe)
+      raise Errno::ENOENT.new(recipe)
     end
 
     # Path of this project's "dist" directory. If a project isn't available or

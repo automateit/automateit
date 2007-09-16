@@ -11,6 +11,8 @@ require 'logger'
 require 'optparse'
 require 'automateit'
 
+include AutomateIt::Constants
+
 OptionParser.new do |parser|
   PROG = File.basename($0)
   opts = {}
@@ -62,10 +64,14 @@ EOB
     opts[:version] = v
   end
 
+  parser.on("-T", "--trace", "Display raw exception traces") do |v|
+    opts[:friendly_exceptions] = ! v
+  end
+
   args = parser.parse!.dup
 
   if opts[:version]
-    puts AutomateIt::VERSION
+    puts VERSION
     exit 0
   end
 
@@ -79,7 +85,26 @@ EOB
   argscopy = args.clone
   optscopy = opts.clone
 
-  rv = AutomateIt::CLI.run(opts)
+  begin
+    rv = AutomateIt::CLI.run(opts)
+  rescue Exception => e
+    msg = nil
+    if opts[:friendly_exceptions] != false and e.is_a?(AutomateIt::Error)
+      # Friendly message
+      msg = PERROR+e.message
+      msg << "\n\n"+PNOTE+"Use 'automateit --trace' to see complete backtrace"
+    else
+      # Raw backtrace
+      puts PERROR+"AutomateIt error trace:"
+      stack = e.backtrace.clone
+      msg = "#{stack.shift}: #{e.message} (#{e.exception.class})}";
+      for line in stack
+        msg << "\n  "+line
+      end
+    end
+    puts msg
+    exit 1
+  end
   if optscopy[:create] or optscopy[:eval] or argscopy.size > 0
     exit rv ? 0 :1
   else
