@@ -49,6 +49,10 @@ class AutomateIt::TemplateManager::ERB < AutomateIt::TemplateManager::BaseDriver
     target_filename = args[1] || opts[:to]
     source_contents = opts[:text]
 
+    raise ArgumentError.new("No source specified with :file or :text") if not source_filename and not source_contents
+    raise Errno::ENOENT.new(source_filename) if writing? and source_filename and not _exists?(source_filename)
+    raise ArgumentError.new("No target specified with :to") if not target_filename
+
     begin
       # source_filename, target_filename, opts={}
       opts[:check] ||= @default_check
@@ -78,6 +82,11 @@ class AutomateIt::TemplateManager::ERB < AutomateIt::TemplateManager::BaseDriver
 
       target_contents = target_exists ? _read(target_filename) : ""
       source_contents ||= _read(source_filename)
+
+      if source_contents.blank? and noop?
+        return true
+      end
+
       binder = nil
       if opts[:locals]
         # Create a binding that the template can get variables from without
@@ -92,7 +101,8 @@ class AutomateIt::TemplateManager::ERB < AutomateIt::TemplateManager::BaseDriver
         }
         binder = callback.call
       end
-      output = ::ERB.new(source_contents, nil, '-').result(binder)
+
+      output = HelpfulERB.new(source_contents, source_filename).result(binder)
 
       case opts[:check]
       when :compare

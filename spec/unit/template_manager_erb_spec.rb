@@ -25,6 +25,7 @@ describe "AutomateIt::TemplateManager::ERB" do
   end
 
   it "should render a file template" do
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(false)
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
     @d.should_receive(:_write).once.with(@target, "my template content").and_return(true)
@@ -33,6 +34,7 @@ describe "AutomateIt::TemplateManager::ERB" do
   end
 
   it "should render with local variables" do
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(false)
     @d.should_receive(:_read).once.with(@source).and_return("hello <%=entity%>")
     @d.should_receive(:_write).once.with(@target, "hello world").and_return(true)
@@ -42,6 +44,7 @@ describe "AutomateIt::TemplateManager::ERB" do
 
   it "should render when the template was updated" do
     timestamp = Time.now
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_read).once.with(@target).and_return("my old content")
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
@@ -54,6 +57,7 @@ describe "AutomateIt::TemplateManager::ERB" do
 
   it "shouldn't render when the template wasn't updated" do
     timestamp = Time.now
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_mtime).once.with(@source).and_return(timestamp)
     @d.should_receive(:_mtime).once.with(@target).and_return(timestamp+1)
@@ -63,6 +67,7 @@ describe "AutomateIt::TemplateManager::ERB" do
 
   it "should render when the template's dependencies are updated" do
     timestamp = Time.now
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_read).once.with(@target).and_return("my old content")
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
@@ -76,6 +81,7 @@ describe "AutomateIt::TemplateManager::ERB" do
 
   it "shouldn't render when the template's dependencies weren't updated" do
     timestamp = Time.now
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_mtime).once.with("foo").and_return(timestamp)
     @d.should_receive(:_mtime).once.with(@source).and_return(timestamp)
@@ -85,6 +91,7 @@ describe "AutomateIt::TemplateManager::ERB" do
   end
 
   it "should render when forced even if the template wasn't updated" do
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_read).once.with(@target).and_return("my old content")
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
@@ -94,6 +101,7 @@ describe "AutomateIt::TemplateManager::ERB" do
   end
 
   it "should render if told to check the existence of output and it doesn't exist" do
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(false)
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
     @d.should_receive(:_write).once.with(@target, "my template content").and_return(true)
@@ -102,12 +110,14 @@ describe "AutomateIt::TemplateManager::ERB" do
   end
 
   it "shouldn't render if told to check the existence of output and it exists" do
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
 
     @a.render(@source, @target, :check => :exists).should be_false
   end
 
   it "should render if told to compare if the output is different" do
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_read).once.with(@target).and_return("my old content")
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
@@ -117,6 +127,7 @@ describe "AutomateIt::TemplateManager::ERB" do
   end
 
   it "shouldn't render if told to compare if the output is the same" do
+    @d.should_receive(:_exists?).once.with(@source).and_return(true)
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_read).once.with(@target).and_return("my template content")
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
