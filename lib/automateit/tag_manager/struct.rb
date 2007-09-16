@@ -67,7 +67,12 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
         end
       end
       code = booleans.join(" ")
-      return eval(code) # XXX What could possibly go wrong?
+
+      begin
+        return eval(code) # XXX What could possibly go wrong?
+      rescue Exception => e
+        raise ArgumentError.new("Invalid query -- #{query}")
+      end
     else
       return tags.include?(query)
     end
