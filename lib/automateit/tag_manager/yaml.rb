@@ -13,9 +13,11 @@ class AutomateIt::TagManager::YAML < AutomateIt::TagManager::Struct
   #   must produce YAML content.
   def setup(opts={})
     if filename = opts.delete(:file)
-      contents = ERB.new(_read(filename), nil, '-').result
-      contents = AutomateIt::TagManager::TagParser.normalize(contents)
-      opts[:struct] = ::YAML::load(contents)
+      contents = _read(filename)
+      output = HelpfulERB.new(contents, filename).result
+
+      text = AutomateIt::TagManager::TagParser.normalize(output)
+      opts[:struct] = ::YAML::load(text)
     end
     super(opts)
   end

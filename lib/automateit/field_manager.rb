@@ -87,9 +87,11 @@ class AutomateIt::FieldManager::YAML < AutomateIt::FieldManager::Struct
   #   parsed with ERB and then handed to YAML.
   def setup(opts={})
     if filename = opts.delete(:file)
-      opts[:struct] = ::YAML::load(
-        ::ERB.new(_read(filename), nil, '-') \
-        .result(interpreter.send(:binding)))
+      contents = _read(filename)
+      binder = interpreter.send(:binding)
+      output = HelpfulERB.new(contents, filename).result(binder)
+
+      opts[:struct] = ::YAML::load(output)
     end
     super(opts)
   end
