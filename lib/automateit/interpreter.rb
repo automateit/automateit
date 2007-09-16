@@ -324,7 +324,7 @@ module AutomateIt
         log.debug(PNOTE+" invoking "+filename)
         if File.exists?(filename)
           data = File.read(filename)
-          return instance_eval(data, filename, 0)
+          return instance_eval(data, filename, 1)
         end
       end
       raise Errno::ENOENT.new("No such file or directory - "+recipe)
