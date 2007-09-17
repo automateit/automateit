@@ -138,7 +138,7 @@ else
     it "should query groups for a user" do
       # Depends on user to be created by previous tests
       # Depends on group to be created by previous tests
-      @m.groups_for_user(@username).include?(@groupname).should be_true
+      @m.groups_for_user(@username).should include(@groupname)
     end
 
     it "should remove users from a group" do

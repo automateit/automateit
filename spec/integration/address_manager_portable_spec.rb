@@ -7,24 +7,24 @@ describe "AutomateIt::AddressManager::Portable" do
   end
 
   it "should have hostnames" do
-    @d.hostnames.empty?.should be_false
+    @d.hostnames.should_not be_empty
   end
 
   it "should have localhost in hostnames" do
-    @d.hostnames.include?("localhost").should be_true
+    @d.hostnames.should include("localhost")
     @d.has?("localhost").should be_true
   end
 
   it "should have machine's hostname in hostnames" do
-    @d.hostnames.include?(Socket.gethostname).should be_true
+    @d.hostnames.should include(Socket.gethostname)
     @d.has?(Socket.gethostname).should be_true
   end
 
   it "should have addresses" do
-    @d.addresses.empty?.should be_false
+    @d.addresses.should_not be_empty
   end
 
   it "should have 127.0.0.1 in addresses" do
-    @d.addresses.include?("127.0.0.1").should be_true
+    @d.addresses.should include("127.0.0.1")
   end
 end

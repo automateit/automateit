@@ -6,7 +6,7 @@ describe AutomateIt::Interpreter do
   end
 
   it "should have a logger" do
-    Logger.should === @a.log
+    @a.log.should be_a_kind_of(Logger)
   end
 
   it "should have noop (dryrun) detection" do
@@ -26,9 +26,7 @@ describe AutomateIt::Interpreter do
   it "should eval commands in context" do
     @a.noop = true
     @a.instance_eval{noop?}.should be_true
-    @a.instance_eval do
-      self
-    end.should == @a
+    @a.instance_eval{self}.should == @a
     @a.instance_eval("noop?").should be_true
   end
 end

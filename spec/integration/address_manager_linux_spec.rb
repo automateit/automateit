@@ -33,15 +33,15 @@ else
     end
 
     it "should find interfaces for top-level device" do
-      @m.interfaces.include?(@properties[:device]).should be_true
+      @m.interfaces.should include(@properties[:device])
     end
 
     it "should not find non-existent device-label" do
-      @m.interfaces.include?(@device_and_label).should be_false
+      @m.interfaces.should_not include(@device_and_label)
     end
 
     it "should not find non-existant IP address" do
-      @m.addresses.include?(@properties[:address]).should be_false
+      @m.addresses.should_not include(@properties[:address])
     end
 
     it "should not have non-existent address bundles" do
@@ -55,12 +55,12 @@ else
 
     it "should find added interface" do
       # Depends on active interface being created by earlier test
-      @m.interfaces.include?(@device_and_label).should be_true
+      @m.interfaces.should include(@device_and_label)
     end
 
     it "should find added IP address" do
       # Depends on active interface being created by earlier test
-      @m.addresses.include?(@properties[:address]).should be_true
+      @m.addresses.should include(@properties[:address])
     end
 
     it "should find added address using a properties bundle" do
@@ -84,11 +84,11 @@ else
     end
 
     it "should not have an interface after removing it" do
-      @m.interfaces.include?(@device_and_label).should be_false
+      @m.interfaces.should_not include(@device_and_label)
     end
 
     it "should not have an address after removing it" do
-      @m.addresses.include?(@properties[:address]).should be_false
+      @m.addresses.should_not include(@properties[:address])
     end
 
     it "should not have an address match a properties bundle after removing it" do

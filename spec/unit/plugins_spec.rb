@@ -95,15 +95,15 @@ describe "AutomateIt::Plugin::Manager" do
   end
 
   it "should have plugins" do
-    @x.classes.include?(MyManager).should be_true
+    @x.classes.should include(MyManager)
   end
 
   it "should not have abstract plugins" do
-    @x.classes.include?(MyManagerSubclass).should be_false
+    @x.classes.should_not include(MyManagerSubclass)
   end
 
   it "should have implementations of abstract plugins" do
-    @x.classes.include?(MyManagerSubclassImplementation).should be_true
+    @x.classes.should include(MyManagerSubclassImplementation)
   end
 end
 
@@ -114,7 +114,7 @@ describe "MyManager" do
 
   it "should have drivers" do
     for driver in [MyManager::MyUnsuitableDriver, MyManager::MyFirstDriver, MyManager::MySecondDriver]
-      @m.class.driver_classes.include?(driver)
+      @m.class.driver_classes.should include(driver)
     end
   end
 
@@ -123,12 +123,12 @@ describe "MyManager" do
   end
 
   it "should access drivers by index keys" do
-    MyManager::MyFirstDriver.should === @m[:my_first_driver]
-    MyManager::MyFirstDriver.should === @m.drivers[:my_first_driver]
+    @m[:my_first_driver].should be_a_kind_of(MyManager::MyFirstDriver)
+    @m.drivers[:my_first_driver].should be_a_kind_of(MyManager::MyFirstDriver)
   end
 
   it "should have aliased methods" do
-    @m.class.aliased_methods.include?(:mymethod).should be_true
+    @m.class.aliased_methods.should include(:mymethod)
   end
 
   it "should respond to aliased methods" do
@@ -136,7 +136,7 @@ describe "MyManager" do
   end
 
   it "should have an interpreter instance" do
-    AutomateIt::Interpreter.should === @m.interpreter
+    @m.interpreter.should be_a_kind_of(AutomateIt::Interpreter)
   end
 
   # XXX Plugins spec -- Instantiating a Plugin outside of an Interpreter should retain consistent object references
@@ -155,7 +155,7 @@ describe "MyManager's drivers" do
   end
 
   it "should fail on unavailable methods" do
-    lambda{ MyManager::MyUnsuitableDriver.new.unavailable_method }.should \
+    lambda{ MyManager::MyUnsuitableDriver.new.unavailable_method }.should
       raise_error(NotImplementedError, /non_existent/)
   end
 
@@ -173,13 +173,13 @@ describe "MyManager's drivers" do
 
   it "should determine suitability levels" do
     rs = @m.driver_suitability_levels_for(:mymethod, :one => 1)
-    rs[:my_first_driver].should eql?(10)
-    rs[:my_second_driver].should eql?(5)
+    rs[:my_first_driver].should == 10
+    rs[:my_second_driver].should == 5
     rs[:my_unsuitable_driver].should be_nil
   end
 
   it "should choose suitable driver" do
-    MyManager::MyFirstDriver.should === @m.driver_for(:mymethod, :one => 1)
+    @m.driver_for(:mymethod, :one => 1).should be_a_kind_of(MyManager::MyFirstDriver)
   end
 
   it "should not choose driver if none match" do
@@ -187,8 +187,8 @@ describe "MyManager's drivers" do
   end
 
   it "should dispatch_to suitable driver" do
-    @m.dispatch_to(:mymethod, :one => 1).should eql?(1)
-    @m.mymethod(:one => 1).should eql?(1)
+    @m.dispatch_to(:mymethod, :one => 1).should == 1
+    @m.mymethod(:one => 1).should == 1
   end
 
   it "should fail dispatch_to if no suitable driver is found" do
@@ -203,11 +203,11 @@ describe "MyManager's drivers" do
   end
 
   it "should have an interpreter instance" do
-    AutomateIt::Interpreter.should === MyManager::MyFirstDriver.new.interpreter
+    MyManager::MyFirstDriver.new.interpreter.should be_a_kind_of(AutomateIt::Interpreter)
   end
 
   it "should share object instances" do
-    @m[:my_first_driver].should eql?(@m.interpreter.my_manager[:my_first_driver])
+    @m[:my_first_driver].should == @m.interpreter.my_manager[:my_first_driver]
   end
 end
 
@@ -218,7 +218,7 @@ describe AutomateIt::Interpreter do
 
   it "should instantiate plugins" do
     @a.should respond_to(:plugins)
-    @a.plugins.include?(:my_manager).should be_true
+    @a.plugins.should include(:my_manager)
   end
 
   it "should expose plugin instance aliases" do
@@ -232,22 +232,22 @@ describe AutomateIt::Interpreter do
   end
 
   it "should inject itself into plugins" do
-    @a.my_manager.interpreter.should equal?(@a)
+    @a.my_manager.interpreter.should == @a
   end
 
   it "should inject itself into drivers" do
-    @a.my_manager[:my_first_driver].interpreter.should equal?(@a)
+    @a.my_manager[:my_first_driver].interpreter.should == @a
   end
 
   it "should not see abstract managers" do
-    @a.plugins.include?(MyManagerSubclass.token).should be_false
+    @a.plugins.should_not include(MyManagerSubclass.token)
   end
 
   it "should not see abstract drivers" do
-    @a.my_manager.drivers.include?(MyManager::AnotherBaseDriver.token).should be_false
+    @a.my_manager.drivers.should_not include(MyManager::AnotherBaseDriver.token)
   end
 
   it "should not see base drivers" do
-    @a.my_manager.drivers.include?(MyManager::BaseDriver.token).should be_false
+    @a.my_manager.drivers.should_not include(MyManager::BaseDriver.token)
   end
 end

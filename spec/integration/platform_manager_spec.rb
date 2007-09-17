@@ -12,26 +12,26 @@ begin
     end
 
     it "should query os" do
-      String.should === @m.query("os")
+      @m.query("os").should be_a_kind_of(String)
     end
 
     it "should query arch" do
-      String.should === @m.query(:arch)
+      @m.query(:arch).should be_a_kind_of(String)
     end
 
     it "should query os and arch" do
-      String.should === @m.query("os#arch")
+      @m.query("os#arch").should be_a_kind_of(String)
     end
 
     begin
       raise IndexError unless String === INTERPRETER.platform_manager.query("distro")
 
       it "should query distro" do
-        String.should === @m.query("distro")
+        @m.query("distro").should be_a_kind_of(String)
       end
 
       it "should query release" do
-        String.should === @m.query(:release)
+        @m.query(:release).should be_a_kind_of(String)
       end
 
       it "should fail on invalid LSB output" do
@@ -52,11 +52,11 @@ begin
 
       it "should query combination of os, arch, distro and release" do
         result = @m.query("os#arch#distro#release")
-        String.should === result
+        result.should be_a_kind_of(String)
         elements = result.split(/_/)
         elements.size.should >= 4
         for element in elements
-          String.should === element
+          element.should be_a_kind_of(String)
           element.size.should > 0
         end
       end

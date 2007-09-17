@@ -17,11 +17,11 @@ describe "AutomateIt::TagManager", :shared => true do
   end
 
   it "should have tags" do
-    Enumerable.should === @a.tags
+    @a.tags.should be_a_kind_of(Enumerable)
   end
 
   it "should have tags that include tag for hostname" do
-    @a.tags.include?("kurou")
+    @a.tags.should include("kurou")
   end
 
   it "should have tag for short hostname" do
@@ -97,18 +97,18 @@ describe "AutomateIt::TagManager", :shared => true do
   end
 
   it "should find tags for a host using an array" do
-    @a.tags_for(["kurou"]).include?("apache_servers").should be_true
+    @a.tags_for(["kurou"]).should include("apache_servers")
   end
 
   it "should find tags for a host using a string" do
-    @a.tags_for("akane.foo.bar").include?("proxy_servers").should be_true
+    @a.tags_for("akane.foo.bar").should include("proxy_servers")
   end
 
   it "should find hosts with a tag" do
     hosts = @a.hosts_tagged_with("apache_servers")
-    hosts.include?("kurou").should be_true
-    hosts.include?("shirou").should be_true
-    hosts.include?("akane").should be_false
+    hosts.should include("kurou")
+    hosts.should include("shirou")
+    hosts.should_not include("akane")
   end
 
   it "should find using negative queries" do

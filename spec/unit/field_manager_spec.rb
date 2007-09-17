@@ -9,32 +9,32 @@ describe "AutomateIt::FieldManager", :shared => true do
 
   it "should be able to lookup entire hash" do
     rv = @m.lookup("*")
-    rv.keys.include?("hash").should be_true
-    Hash.should === rv["hash"]
-    rv.keys.include?("key").should be_true
+    rv.keys.should include("hash")
+    rv["hash"].should be_a_kind_of(Hash)
+    rv.keys.should include("key")
     rv["key"].should == "value"
   end
 
   it "should lookup keys by string" do
-    @m.lookup("key").should eql("value")
+    @m.lookup("key").should == "value"
   end
 
   it "should lookup keys by symbol" do
-    @m.lookup(:key).should eql("value")
+    @m.lookup(:key).should == "value"
   end
 
   it "should lookup hash" do
-    @m.lookup(:hash)["leafkey"].should eql("leafvalue")
+    @m.lookup(:hash)["leafkey"].should == "leafvalue"
   end
 
   it "should lookup leaves" do
-    @m.lookup("hash#leafkey").should eql("leafvalue")
-    @m.lookup("hash#branchkey#deepleafkey").should eql("deepleafvalue")
+    @m.lookup("hash#leafkey").should == "leafvalue"
+    @m.lookup("hash#branchkey#deepleafkey").should == "deepleafvalue"
   end
 
   it "should have aliased lookup into the interpreter" do
-    @m.object_id.should == @m.interpreter.field_manager.object_id
-    @m[:yaml].object_id.should == @m.interpreter.field_manager[:yaml].object_id
+    @m.should equal(@m.interpreter.field_manager)
+    @m[:yaml].should equal(@m.interpreter.field_manager[:yaml])
   end
 
   it "should be aliases into the interpreter" do
