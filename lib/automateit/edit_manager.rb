@@ -43,6 +43,11 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
   #   end
   #   # => "hello\nworld"
   class EditSession < AutomateIt::Common
+    def initialize(*args)
+      super(*args)
+      interpreter.add_method_missing_to(self)
+    end
+
     # Edit a file or string. Requires a filename argument or options hash --
     # e.g.,. <tt>edit("foo")</tt> and <tt>edit(:file => "foo")</tt> will both
     # edit a file called +foo+.
@@ -221,15 +226,6 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
         File.open(@filename, "w+"){|writer| writer.write(@contents)}
       else
         true
-      end
-    end
-
-    # Dispatch unknown methods to Interpreter, e.g., #lookup.
-    def method_missing(method, *args, &block)
-      if interpreter.respond_to?(method)
-        interpreter.send(method, *args, &block)
-      else
-        raise NoMethodError.new("NameError: undefined local variable or method `#{method}' for #{self}")
       end
     end
   end # class EditSession

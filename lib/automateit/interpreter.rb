@@ -486,11 +486,11 @@ module AutomateIt
       params[key.to_sym]
     end
 
-    # Include the Interpreter instance's methods in an +object+. This makes it possible to embed an Interpreter and get direct access to its methods without having to type the instance object's name.
+    # Creates wrapper methods in +object+ to dispatch calls to an Interpreter instance.
     #
-    # WARNING: This will overwrite all methods and variables in the target +object+ that have the same names as the Interpreter's methods. You should considerer specifying the +methods+ to limit the number of methods included to minimize surprises due to collisions.
+    # WARNING: This will overwrite all methods and variables in the target +object+ that have the same names as the Interpreter's methods. You should considerer specifying the +methods+ to limit the number of methods included to minimize surprises due to collisions. If +methods+ is left blank, will create wrappers for all Interpreter methods.
     #
-    # For example, include an Interpreter instance into a Rakefile session, which will override the FileUtils commands with AutomateIt equivalents:
+    # For example, include an Interpreter instance into a Rake session, which will override the FileUtils commands with AutomateIt equivalents:
     #
     #   # Rakefile
     #
@@ -504,22 +504,7 @@ module AutomateIt
     #     cp "foo", "bar" # Uses FileUtils#cp, not Interpreter#cp
     #   end
     #
-    # For situations where you don't want to override any existing methods, consider this alternative:
-    #
-    #   # Rakefile
-    #
-    #   require 'automateit'
-    #   @ai = AutomateIt.new
-    #
-    #   # Dispatch unknown methods to AutomateIt
-    #   def method_missing(method, *args, &block)
-    #     @ai.send(method, *args, &block)
-    #   end
-    #
-    #   task :default do
-    #     puts noop? # Uses Interpreter#noop?
-    #     sh "id"    # Uses FileUtils#sh, not Interpreter#sh
-    #   end
+    # For situations where you don't want to override any existing methods, consider using #add_method_missing_to.
     def include_in(object, *methods)
       methods = [methods].flatten
       methods = unique_methods.reject(&:match =~ /^_/) if methods.empty?
@@ -533,6 +518,48 @@ module AutomateIt
           end
         HERE
       end
+    end
+
+    # Creates #method_missing in +object+ that dispatches calls to an Interpreter instance. If a #method_missing is already present, it will be preserved as a fall-back using #alias_method_chain. 
+    #
+    # For example, add #method_missing to a Rake session to provide direct access to Interpreter instance's methods whose names don't conflict with the names existing variables and methods:
+    #
+    #   # Rakefile
+    #
+    #   require 'automateit'
+    #   @ai = AutomateIt.new
+    #   @ai.add_method_missing_to(self)
+    #
+    #   task :default do
+    #     puts noop? # Uses Interpreter#noop?
+    #     sh "id"    # Uses FileUtils#sh, not Interpreter#sh
+    #   end
+    #
+    # For situations where it's necessary to override existing methods, such as the +sh+ call in the example, consider using #include_in.
+    def add_method_missing_to(object)
+      object.instance_variable_set(:@__automateit, self)
+      chain = object.respond_to?(:method_missing)
+
+      template = <<-HERE
+        def method_missing<%=chain ? '_with_automateit' : ''%>(method, *args, &block)
+          ### puts "method_missing(%s, %s)" % [method, args.inspect]
+          if @__automateit.respond_to?(method)
+            @__automateit.send(method, *args, &block)
+          else
+            <%if chain%>
+              method_missing_without_automateiti(method, *args, &block)
+            <%else%>
+              raise NoMethodError.new("NameError: undefined local variable or method `%s' for %s" % [method, self])
+            <%end%>
+          end
+        end
+        <%if chain%>
+          alias_method_chain :method_missing, :automateit
+        <%end%>
+      HERE
+
+      text = ::HelpfulERB.new(template).result(binding)
+      object.instance_eval(text)
     end
   end
 end
