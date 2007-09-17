@@ -1,0 +1,38 @@
+# Demonstration of how to embed AutomateIt into Rakefile
+
+# Load AutomateIt from local path, if possible.
+ailib = File.expand_path("../../lib")
+$LOAD_PATH.unshift << ailib if File.exists?(ailib+"/automateit.rb")
+
+require "automateit"
+
+# Create an Interpreter for project in current directory.
+@interpreter_opts = {:project => ".", :verbosity => Logger::INFO}
+@interpreter = AutomateIt.new(@interpreter_opts)
+
+# Include methods into the Rake session, see "install" task for details.
+@interpreter.include_in(self, %w(invoke noop))
+
+task :default => :shell
+
+desc "Interactive AutomateIt shell for myapp project"
+task :shell do
+  AutomateIt::CLI.run(@interpreter_opts)
+end
+
+desc "Install myapp server"
+task :install do
+  # This 'invoke' method was created by the 'include_in' call earlier, as a
+  # convenient shortcut for: @interpreter.invoke("install")
+  invoke "install"
+end
+
+desc "Uninstall myapp server"
+task :uninstall do
+  invoke "uninstall"
+end
+
+desc "Preview action, e.g, 'rake preview install'"
+task :preview do
+  noop true
+end

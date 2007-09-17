@@ -485,5 +485,54 @@ module AutomateIt
     def get(key)
       params[key.to_sym]
     end
+
+    # Include the Interpreter instance's methods in an +object+. This makes it possible to embed an Interpreter and get direct access to its methods without having to type the instance object's name.
+    #
+    # WARNING: This will overwrite all methods and variables in the target +object+ that have the same names as the Interpreter's methods. You should considerer specifying the +methods+ to limit the number of methods included to minimize surprises due to collisions.
+    #
+    # For example, include an Interpreter instance into a Rakefile session, which will override the FileUtils commands with AutomateIt equivalents:
+    #
+    #   # Rakefile
+    #
+    #   require 'automateit'
+    #   @ai = AutomateIt.new
+    #   @ai.include_in(self, %w(noop? sh)) # Include #noop? and #sh methods
+    #
+    #   task :default do
+    #     puts noop?      # Uses Interpreter#noop?
+    #     sh "id"         # Uses Interpreter#sh, not FileUtils#sh
+    #     cp "foo", "bar" # Uses FileUtils#cp, not Interpreter#cp
+    #   end
+    #
+    # For situations where you don't want to override any existing methods, consider this alternative:
+    #
+    #   # Rakefile
+    #
+    #   require 'automateit'
+    #   @ai = AutomateIt.new
+    #
+    #   # Dispatch unknown methods to AutomateIt
+    #   def method_missing(method, *args, &block)
+    #     @ai.send(method, *args, &block)
+    #   end
+    #
+    #   task :default do
+    #     puts noop? # Uses Interpreter#noop?
+    #     sh "id"    # Uses FileUtils#sh, not Interpreter#sh
+    #   end
+    def include_in(object, *methods)
+      methods = [methods].flatten
+      methods = unique_methods.reject(&:match =~ /^_/) if methods.empty?
+
+      object.instance_variable_set(:@__automateit, self)
+
+      for method in methods
+        object.instance_eval <<-HERE
+          def #{method}(*args, &block)
+            @__automateit.send(:#{method}, *args, &block)
+          end
+        HERE
+      end
+    end
   end
 end
