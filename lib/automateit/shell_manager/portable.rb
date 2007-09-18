@@ -395,6 +395,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   def chperm(targets, opts={})
     user = \
       if opts[:user]
+        opts[:user] = opts[:user].to_s if opts[:user].is_a?(Symbol)
         if opts[:user].is_a?(String)
           begin
             Etc.getpwnam(opts[:user]).uid
@@ -408,6 +409,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
     group = \
       if opts[:group]
+        opts[:group] = opts[:group].to_s if opts[:group].is_a?(Symbol)
         if opts[:group].is_a?(String)
           begin
             Etc.getgrnam(opts[:group]).gid
@@ -454,14 +456,21 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     display_entries = [display_entries].flatten
 
     if opts[:mode]
-      log.info(PEXEC+"chmod%s 0%o %s" % [opts[:recursive] ? ' -R' : '',
-               opts[:mode], display_entries.join(' ')])
+      msg = "chmod"
+      msg << " -R" if opts[:recursive]
+      msg << " 0%o" % opts[:mode] if opts[:mode]
+      msg << " " << display_entries.join(' ')
+      log.info(PEXEC+msg)
     end
     if opts[:user] or opts[:group]
-      log.info(PEXEC+"chown%s%s%s %s" % [opts[:recursive] ? ' -R' : '',
-               opts[:user] ? ' %s'%opts[:user] : '',
-               opts[:group] ? ' %s'%opts[:group] : '',
-               display_entries.join(' ')])
+      msg = "chown"
+      msg << " -R" if opts[:recursive]
+      msg << " %s" % opts[:user] if opts[:user]
+      msg << ":" if opts[:user] and opts[:group]
+      msg << " " unless opts[:user] and opts[:group]
+      msg << "%s" % opts[:group] if opts[:group]
+      msg << " " << display_entries.join(' ')
+      log.info(PEXEC+msg)
     end
     return targets.is_a?(String) ? modified_entries.first : modified_entries
   end
