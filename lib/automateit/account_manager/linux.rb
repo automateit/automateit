@@ -32,8 +32,6 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
     cmd << " --gid #{opts[:gid]}" if opts[:gid]
     cmd << " #{username} < /dev/null"
     cmd << " > /dev/null" if opts[:quiet]
-    # --password CRYPT(3)ENCRYPTED
-    # TODO AccountManager#add_user -- set password
     interpreter.sh(cmd)
     interpreter.sh("nscd --invalidate passwd") if nscd?
 
@@ -45,6 +43,8 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
         add_group(groupname, opts)
       end
     end
+
+    passwd(username, opts[:passwd]) if opts[:passwd]
 
     return users[username]
   end
@@ -90,6 +90,42 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
     interpreter.sh(cmd)
     interpreter.sh("nscd --invalidate group") if nscd?
     return removeable
+  end
+
+  # See AccountManager#passwd
+  def passwd(user, password, opts={})
+    quiet = (opts[:quiet] or not log.info?)
+
+    unless users[user]
+      if noop?
+        log.info(PNOTE+"Setting password for user: #{user}")
+        return true
+      else
+        raise ArgumentError.new("No such user: #{user}")
+      end
+    end
+
+    require 'open4'
+    require 'expect'
+    require 'pty'
+
+    case user
+    when Symbol: user = user.to_s
+    when Integer: user = users[user]
+    when String: # leave it alone
+    else raise TypeError.new("Unknown user type: #{user.class}")
+    end
+
+    exitstruct = Open4::popen4("passwd %s 2>&1" % user) do |pid, sin, sout, serr|
+      $expect_verbose = ! quiet
+      2.times do
+        sout.expect(/:/)
+        sin.puts password
+        puts "*" * 12 unless quiet
+      end
+    end
+
+    return exitstruct.exitstatus.zero?
   end
 
   #.......................................................................

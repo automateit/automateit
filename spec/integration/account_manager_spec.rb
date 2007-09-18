@@ -36,7 +36,7 @@ else
     end
 
     it "should create a user" do
-      entry = @m.add_user(@username)
+      entry = @m.add_user(@username, :passwd => "asdf", :shell => "/bin/false")
 
       entry.should_not be_nil
       entry.name.should == @username
@@ -186,6 +186,24 @@ else
       ensure
         @a.noop false
       end
+    end
+
+    it "should change password" do
+      # Depends on user to be created by previous tests
+      pass = "automateit"
+
+      # TODO This isn't portable
+      def extract_pwent(username)
+        for filename in %w(/etc/shadow /etc/passwd)
+          next unless File.exist?(filename)
+          return File.read(filename).split(/\n/).grep(/^#{username}\b/)
+        end
+      end
+
+      before = extract_pwent(@username)
+      @m.passwd(@username, pass).should be_true
+      after = extract_pwent(@username)
+      before.should_not eql(after)
     end
 
     it "should remove a user" do

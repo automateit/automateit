@@ -49,6 +49,9 @@ class AutomateIt::AccountManager < AutomateIt::Plugin::Manager
   # Remove +groups+ (array of groupnames) from +user+.
   def remove_groups_from_user(groups, user) dispatch(groups, user) end
 
+  # Change the +password+ for the +user+.
+  def passwd(user, password) dispatch(user, password) end
+
   #.......................................................................
 
   # Find a group. Method returns a query helper which takes a
