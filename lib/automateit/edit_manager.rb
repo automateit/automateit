@@ -2,11 +2,13 @@
 #
 # The EditManager provides a way of editing files and strings
 # programmatically.
+#
+# See documentation for EditManager::Basic::EditSession.
 class AutomateIt::EditManager < AutomateIt::Plugin::Manager
   alias_methods :edit
 
-  # Creates an editing session. See documentation for EditManager::Basic::EditSession#edit.
-  def edit(opts, &block) dispatch(opts, &block) end
+  # Creates an editing session. See documentation for EditManager::Basic::EditSession.
+  def edit(*opts, &block) dispatch(*opts, &block) end
 end
 
 # == EditManager::BaseDriver
@@ -26,8 +28,8 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
   end
 
   # Creates an editing session. See documentation for EditSession#edit.
-  def edit(opts, &block)
-    EditSession.new(:interpreter => @interpreter).edit(opts, &block)
+  def edit(*opts, &block)
+    EditSession.new(:interpreter => @interpreter).edit(*opts, &block)
   end
 
   #-----------------------------------------------------------------------
@@ -36,31 +38,55 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
   #
   # EditSession provides a way to edit files and strings.
   #
-  # Example:
+  # Example of how to edit a string from the AutomateIt Interpreter:
+  #
   #   edit(:text => "# hello") do
   #     uncomment "llo"
   #     append "world"
   #   end
   #   # => "hello\nworld"
   class EditSession < AutomateIt::Common
+    # Create an EditSession.
+    #
+    # Options:
+    # * :interpreter -- AutomateIt Interpreter, required. Will be automatically
+    #   set if you use AutomateIt::Interpreter#edit.
     def initialize(*args)
       super(*args)
       interpreter.add_method_missing_to(self)
     end
 
-    # Edit a file or string. Requires a filename argument or options hash --
-    # e.g.,. <tt>edit("foo")</tt> and <tt>edit(:file => "foo")</tt> will both
-    # edit a file called +foo+.
+    # Edit a file or string.
+    #
+    # Requires a filename argument or options hash -- e.g.,.
+    # <tt>edit("foo")</tt> and <tt>edit(:file => "foo")</tt> will both edit a
+    # file called +foo+.
     #
     # Options:
     # * :file -- File to edit.
     # * :text -- String to edit.
-    # * :params -- Hash to make available to editor session. Optional.
+    # * :params -- Hash to make available to editor session.
+    # * :create -- Create the file if it doesn't exist? Defaults to false.
+    # * :mode, :user, :group -- Set permissions on generated file, see ShellManager#chperm
     #
-    # Example:
-    #   EditSession.edit(:file => "myfile", :params => {:hello => "world"} do
-    #     prepend "myheader"
-    #     append "yo "+params[:hello]
+    # Edit a string:
+    #
+    #   edit(:text => "foo") do
+    #     replace "o", "@"
+    #   end
+    #   # => "f@@"
+    #
+    # Edit a file and pass parameters to the editing session:
+    #
+    #   edit(:file => "myfile", :params => {:greet => "world"} do
+    #     prepend "MyHeader"
+    #     append "Hello "+params[:greet]
+    #   end
+    #
+    # Edit a file, create it and set permissions if necessary:
+    #
+    #   edit("/tmp/foo", :create => true, :mode => 0600, :user => :root) do
+    #     prepend "Hello world!"
     #   end
     def edit(*a, &block)
       args, opts = args_and_opts(*a)
@@ -74,13 +100,29 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
       @params = opts.delete(:params) || {}
       @comment_prefix = "# "
       @comment_suffix = ""
-      @contents ||= read || ""
+      begin
+        @contents ||= read || ""
+      rescue Errno::ENOENT => e
+        if opts[:create]
+          @contents = ""
+        else
+          raise e
+        end
+      end
       @original_contents = @contents.clone
 
       raise ArgumentError.new("no block given") unless block
       instance_eval(&block)
       if @filename
         write if different?
+
+        chperm_opts = {}
+        for key in %w(mode user group)
+          key = key.to_sym
+          chperm_opts[key] = opts[key] if opts[key]
+        end
+        chperm(@filename, chperm_opts) unless chperm_opts.empty?
+
         return different?
       else
         return contents
@@ -141,7 +183,7 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
         query = Regexp.new(Regexp.escape(query))
       end
       return if contains?(query)
-      @contents = "%s\n%s" % [@contents.chomp, line]
+      @contents = "%s\n%s\n" % [@contents.chomp, line]
     end
 
     # Does the buffer contain anything that matches the String or Regexp +query+?
