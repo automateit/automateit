@@ -135,7 +135,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     return true if noop?
     unless (failed = not_installed?(check_packages, :list => true)).empty?
-      raise ArgumentError.new("couldn't install: #{failed.join(' ')}")
+      raise ArgumentError.new("Couldn't install: #{failed.join(' ')}")
     else
       return true
     end
@@ -176,7 +176,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     return true if noop?
     unless (failed = installed?(check_packages, :list => true)).empty?
-      raise ArgumentError.new("couldn't uninstall: #{failed.join(' ')}")
+      raise ArgumentError.new("Couldn't uninstall: #{failed.join(' ')}")
     else
       return true
     end
@@ -198,7 +198,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
         nitpick "LN Sh"
       else
         nitpick "LN S?"
-        raise TypeError.new("Unknown input type - #{packages.class}")
+        raise TypeError.new("Unknown input type: #{packages.class}")
       end
       nitpick "LN SO %s" % packages.inspect
     end
@@ -209,7 +209,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     when Hash
       result = packages.stringify_keys
     else
-      raise TypeError.new("Unknown input type - #{packages.class}")
+      raise TypeError.new("Unknown input type: #{packages.class}")
     end
 
     nitpick "LN RR %s" % result.inspect
