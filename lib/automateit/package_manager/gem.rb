@@ -35,6 +35,9 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
     _not_installed_helper?(*packages)
   end
 
+  # Special options:
+  # * :docs -- If set to false, won't install rdoc or ri.
+  #
   # See PackageManager#install
   def install(*packages)
     return _install_helper(*packages) do |list, opts|
