@@ -104,6 +104,8 @@ EOB
     end
     puts msg
     exit 1
+  rescue SysExit => e
+    # Don't display errors when exit gets called
   end
   if optscopy[:create] or optscopy[:eval] or argscopy.size > 0
     exit rv ? 0 :1
