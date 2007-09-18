@@ -507,7 +507,7 @@ module AutomateIt
     # For situations where you don't want to override any existing methods, consider using #add_method_missing_to.
     def include_in(object, *methods)
       methods = [methods].flatten
-      methods = unique_methods.reject(&:match =~ /^_/) if methods.empty?
+      methods = unique_methods.reject{|t| t =~ /^_/} if methods.empty?
 
       object.instance_variable_set(:@__automateit, self)
 
@@ -520,7 +520,7 @@ module AutomateIt
       end
     end
 
-    # Creates #method_missing in +object+ that dispatches calls to an Interpreter instance. If a #method_missing is already present, it will be preserved as a fall-back using #alias_method_chain. 
+    # Creates #method_missing in +object+ that dispatches calls to an Interpreter instance. If a #method_missing is already present, it will be preserved as a fall-back using #alias_method_chain.
     #
     # For example, add #method_missing to a Rake session to provide direct access to Interpreter instance's methods whose names don't conflict with the names existing variables and methods:
     #
@@ -540,22 +540,34 @@ module AutomateIt
       object.instance_variable_set(:@__automateit, self)
       chain = object.respond_to?(:method_missing)
 
+      # XXX The solution below is evil and ugly, but I don't know how else to solve this. The problem is that I want to *only* alter the +object+ instance, and NOT its class. Unfortunately, #alias_method and #alias_method_chain only operate on classes, not instances, which makes them useless for this task.
+
       template = <<-HERE
         def method_missing<%=chain ? '_with_automateit' : ''%>(method, *args, &block)
-          ### puts "method_missing(%s, %s)" % [method, args.inspect]
+          ### puts "mm+a(%s, %s)" % [method, args.inspect]
           if @__automateit.respond_to?(method)
             @__automateit.send(method, *args, &block)
           else
-            <%if chain%>
-              method_missing_without_automateiti(method, *args, &block)
-            <%else%>
-              raise NoMethodError.new("NameError: undefined local variable or method `%s' for %s" % [method, self])
-            <%end%>
+            <%-if chain-%>
+              method_missing_without_automateit(method, *args, &block)
+            <%-else-%>
+              super
+            <%-end-%>
           end
         end
-        <%if chain%>
-          alias_method_chain :method_missing, :automateit
-        <%end%>
+        <%-if chain-%>
+          @__method_missing_without_automateit = self.method(:method_missing)
+
+          def method_missing_without_automateit(*args)
+            ### puts "mm-a %s" % args.inspect
+            @__method_missing_without_automateit.call(*args)
+          end
+
+          def method_missing(*args)
+            ### puts "mm %s" % args.inspect
+            method_missing_with_automateit(*args)
+          end
+        <%-end-%>
       HERE
 
       text = ::HelpfulERB.new(template).result(binding)

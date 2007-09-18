@@ -121,7 +121,7 @@ describe "AutomateIt::EditManager for strings" do
       @a.edit(:text => @input) do
         qwoiuerjzxiuo
       end
-    }.should raise_error(NoMethodError, /qwoiuerjzxiuo/)
+    }.should raise_error(NameError, /qwoiuerjzxiuo/)
   end
 end
 
