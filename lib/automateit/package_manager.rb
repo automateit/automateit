@@ -188,16 +188,19 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     packages = [packages].flatten
     if packages.size == 1
       packages = packages.first
-      ## puts "LN SI %s" % packages.inspect
+      nitpick "LN SI %s" % packages.inspect
       case packages
       when String
+        nitpick "LN Ss"
         packages = packages.grep(LIST_NORMALIZER_RE).join(" ").split
       when Hash
         # Don't do anything
+        nitpick "LN Sh"
       else
+        nitpick "LN S?"
         raise TypeError.new("Unknown input type - #{packages.class}")
       end
-      ## puts "LN SO %s" % packages.inspect
+      nitpick "LN SO %s" % packages.inspect
     end
 
     case packages
@@ -209,12 +212,12 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       raise TypeError.new("Unknown input type - #{packages.class}")
     end
 
-    ## puts "LN RR %s" % result.inspect
+    nitpick "LN RR %s" % result.inspect
     return result
   end
 
   # Expression for matching packages in arguments
-  LIST_NORMALIZER_RE = /^\s*([^\s#]+)\s*$/
+  LIST_NORMALIZER_RE = /^\s*([^\s#]+)/
 end
 
 # Drivers
