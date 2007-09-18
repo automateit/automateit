@@ -573,5 +573,19 @@ module AutomateIt
       text = ::HelpfulERB.new(template).result(binding)
       object.instance_eval(text)
     end
+
+    # Get or set mode to display nitpick debug messages? Only useful for debugging AutomateIt internals.
+    def is_nitpick(value=nil)
+      if value.nil?
+        return @is_nitpick == true
+      else
+        @is_nitpick = value
+      end
+    end
+
+    # Display a nitpick debug message. Only useful for debugging Automateit internals.
+    def nitpick(msg)
+      puts "%% #{msg}" if is_nitpick
+    end
   end
 end
