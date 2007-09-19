@@ -25,6 +25,9 @@ class AutomateIt::PlatformManager < AutomateIt::Plugin::Manager
   # while a multi-vendor product uses a "distro#release" format
   # ("ubuntu_6.06").
   def single_vendor?() dispatch() end
+
+  # Return an array of tags for this platform.
+  def tags() dispatch() end
 end
 
 # == PlatformManager::BaseDriver

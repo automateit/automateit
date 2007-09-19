@@ -5,8 +5,6 @@
 class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
   depends_on :nothing
 
-  attr_accessor :tags
-
   def suitability(method, *args) # :nodoc:
     return 1
   end
@@ -14,36 +12,35 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
   # Options:
   # * :struct -- Hash to use for queries.
   def setup(opts={})
-    # XXX Consider refactoring tags using lazy-loading.
     super(opts)
 
-    @struct ||= {}
     if opts[:struct]
-      @struct = AutomateIt::TagManager::TagParser.new(opts[:struct]).expand
+      @struct = AutomateIt::TagManager::TagParser.expand(opts[:struct])
+      @tags   = Set.new
+    else
+      @struct ||= {}
+      @tags   ||= Set.new
     end
+  end
 
-    @tags ||= Set.new
-
-    hostnames = interpreter.address_manager.hostnames.to_a # SLOW 0.4s
-    @tags.merge(hostnames)
-    @tags.merge(tags_for(hostnames))
-
-    begin
-      @tags.add(interpreter.platform_manager.query("os")) rescue IndexError
-      @tags.add(interpreter.platform_manager.query("arch")) rescue IndexError
-      @tags.add(interpreter.platform_manager.query("distro")) rescue IndexError
-      @tags.add(interpreter.platform_manager.query("release")) rescue IndexError
-      @tags.add(interpreter.platform_manager.query("os#arch")) rescue IndexError
-      if interpreter.platform_manager.single_vendor?
-        # E.g. windows_xp
-        @tags.add(interpreter.platform_manager.query("os#release")) rescue IndexError
-      else
-        # E.g. ubuntu_6.06
-        @tags.add(interpreter.platform_manager.query("distro#release")) rescue IndexError
+  # Return tags, populate them if necessary.
+  def tags
+    if @tags.empty?
+      begin
+        hostnames = interpreter.address_manager.hostnames # SLOW 0.4s
+        @tags.merge(hostnames)
+        @tags.merge(tags_for(hostnames))
+      rescue NotImplementedError => e
+        log.debug("Can't find AddressManager for this platform: #{e}")
       end
-    rescue NotImplementedError => e
-      log.debug("this platform doesn't have a PlatformManager driver: #{e}")
+
+      begin
+        @tags.merge(interpreter.platform_manager.tags)
+      rescue NotImplementedError => e
+        log.debug("Can't find PlatformManager for this platform: #{e}")
+      end
     end
+    @tags
   end
 
   # See TagManager#hosts_tagged_with
@@ -55,13 +52,13 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
   # See TagManager#tagged?
   def tagged?(query, hostname=nil)
     query = query.to_s
-    tags = hostname ? tags_for(hostname) : @tags
+    selected_tags = hostname ? tags_for(hostname) : tags
     # XXX This tokenization process discards unknown characters, which may hide errors in the query
     tokens = query.scan(%r{\!|\(|\)|\&+|\|+|!?[\.\w]+})
     if tokens.size > 1
       booleans = tokens.map do |token|
         if matches = token.match(/^(!?)([\.\w]+)$/)
-          tags.include?(matches[2]) && matches[1].empty?
+          selected_tags.include?(matches[2]) && matches[1].empty?
         else
           token
         end
@@ -74,7 +71,7 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
         raise ArgumentError.new("Invalid query -- #{query}")
       end
     else
-      return tags.include?(query)
+      return selected_tags.include?(query)
     end
   end
 

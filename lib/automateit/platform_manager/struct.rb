@@ -56,7 +56,23 @@ class AutomateIt::PlatformManager::Struct < AutomateIt::PlatformManager::BaseDri
   end
   private :_query_key
 
+  # See PlatformManager#single_vendor?
   def single_vendor?
     return false
+  end
+
+  # See PlatformManager#tags
+  def tags
+    results = @struct.values
+    results << query("os#arch") rescue IndexError
+
+    release_query = \
+      if single_vendor?
+        "os#release"     # E.g. windows_xp
+      else
+        "distro#release" # E.g. ubuntu_6.06
+      end
+    results << query(release_query) rescue IndexError
+    return results
   end
 end
