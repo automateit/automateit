@@ -15,6 +15,15 @@ class AutomateIt::PlatformManager::Uname < AutomateIt::PlatformManager::Struct
     if available?
       @struct[:os]   ||= @@struct_cache[:os]   ||= `uname -s`.chomp.downcase
       @struct[:arch] ||= @@struct_cache[:arch] ||= `uname -m`.chomp.downcase
+=begin
+      # This method is 20% faster, but is it less portable because of the combined calls?
+      @struct[:os] and @struct[:arch] or begin
+        output = `uname -s -m`.chomp.downcase
+        os, arch = output.split(/\s+/)
+        @struct[:os]   = @@struct_cache[:os]   = os
+        @struct[:arch] = @@struct_cache[:arch] = arch
+      end
+=end
     end
   end
 end
