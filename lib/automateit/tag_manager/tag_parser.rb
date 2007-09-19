@@ -83,4 +83,9 @@ class AutomateIt::TagManager::TagParser
   def expand!
     struct.replace(expand)
   end
+
+  # Expand the +struct+.
+  def self.expand(struct, is_trace=false)
+    self.new(struct, is_trace).expand
+  end
 end
