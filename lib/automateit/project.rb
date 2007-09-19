@@ -290,7 +290,7 @@ module AutomateIt
 # loaded after the tags, you can use ERB to provide specific fields for
 # specific groups of hosts, e.g.:
 #
-#   magical: <%%= tagged?("magical_hosts") ? true : false %%>
+#   magical: <%%= tagged?("magical_hosts") ? true : false %>
 #
 #-----------------------------------------------------------------------
     EOB
