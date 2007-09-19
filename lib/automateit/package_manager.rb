@@ -190,6 +190,8 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       packages = packages.first
       nitpick "LN SI %s" % packages.inspect
       case packages
+      when Hash
+        packages = packages.to_s
       when String
         nitpick "LN Ss"
         packages = packages.grep(LIST_NORMALIZER_RE).join(" ").split
