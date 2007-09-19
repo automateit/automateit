@@ -350,6 +350,11 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   def cp_r(sources, target, opts={})
     cp(sources, target, {:recursive => true}.merge(opts))
   end
+  
+  # See ShellManager#cp_R
+  def cp_R(*args)
+    cp_r(*args)
+  end
 
   # See ShellManager#mv
   def mv(sources, target)

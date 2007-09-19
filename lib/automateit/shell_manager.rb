@@ -75,7 +75,7 @@
 #   => Deleting all files in directory /tmp/foo/bar
 class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
-  alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch
+  alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :cp_R, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch
 
   #...[ Detection commands ]..............................................
   def provides_mode?() dispatch() end
@@ -239,6 +239,10 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   # Copy the +sources+ to the +target+ recursively. Returns an array of
   # sources copied or +false+ if all are present.
   def cp_r(sources, target, opts={}) dispatch(sources, target, opts) end
+  
+  # Copy the +sources+ to the +target+ recursively. Returns an array of
+  # sources copied or +false+ if all are present.
+  def cp_R(sources, target, opts={}) dispatch(sources, target, opts) end
 
   # Move the +sources+ to the +target+. Returns an array of sources copied or
   # +false+ if none of the sources exist.
