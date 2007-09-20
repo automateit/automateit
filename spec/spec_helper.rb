@@ -17,3 +17,7 @@ end
 
 # Inject matchers into interpreter, e.g., 'should be_true'
 INTERPRETER.class.send(:include, Spec::Matchers)
+
+def write_to(filename, text)
+  File.open(filename, "w+"){|h| h.write(text)}
+end
