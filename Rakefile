@@ -109,8 +109,8 @@ end
 
 desc "Chown files if needed"
 task :chown do
-  if Process.euid.zero?
-    load_automateit
+  load_automateit
+  if @interpreter.superuser?
     stat = File.stat("..")
     #AutomateIt.new(:noop => false).chown_R(stat.uid, stat.gid, Dir["*"], :report => :details)
     @interpreter.chown_R(stat.uid, stat.gid, [Dir["*"], Dir[".*"]].flatten, :report => :details)
