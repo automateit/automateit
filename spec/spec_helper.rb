@@ -1,4 +1,8 @@
-$LOAD_PATH << File.join(File.dirname(File.expand_path(__FILE__)), "/../lib")
+AutomateIt_Base = File.dirname(File.expand_path(__FILE__))
+AutomateIt_Lib = File.join(AutomateIt_Base, "/../lib")
+AutomateIt_Bin = File.join(AutomateIt_Base, "/../bin")
+
+$LOAD_PATH.unshift(AutomateIt_Lib)
 
 # Remove environmental variables that will contaminate tests
 ENV.delete("AUTOMATEIT_PROJECT")
