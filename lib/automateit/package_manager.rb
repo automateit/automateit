@@ -189,8 +189,10 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     if packages.size == 1
       packages = packages.first
       nitpick "LN SI %s" % packages.inspect
+      nitpick "LN Sc %s" % packages.class
       case packages
-      when Hash
+      when Symbol
+        nitpick "LN Sy"
         packages = packages.to_s
       when String
         nitpick "LN Ss"
