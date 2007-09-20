@@ -32,7 +32,7 @@ module AutomateIt
       def noop(value) @interpreter.noop(value) end
 
       # See Interpreter#noop?
-      def noop?(&block) @interpreter.noop?(&block) end
+      def noop?() @interpreter.noop?() end
 
       # See Interpreter#writing=
       def writing=(value) @interpreter.writing=(value) end
@@ -41,7 +41,19 @@ module AutomateIt
       def writing(value) @interpreter.writing(value) end
 
       # See Interpreter#writing?
-      def writing?(message=nil, &block) @interpreter.writing?(message, &block) end
+      def writing?() @interpreter.writing?() end
+
+      # See Interpreter#preview?
+      def preview?() @interpreter.preview?() end
+
+      # See Interpreter#preview
+      def preview(value=nil) @interpreter.preview(value) end
+
+      # See Interpreter#preview=
+      def preview=(value) @interpreter.preview=(value) end
+
+      # See Interpreter#preview_for
+      def preview_for(message, &block) @interpreter.preview_for(message, &block) end
 
       # See Interpreter#superuser?
       def superuser?() @interpreter.superuser? end

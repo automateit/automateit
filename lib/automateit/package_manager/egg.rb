@@ -53,7 +53,7 @@ class AutomateIt::PackageManager::Egg < AutomateIt::PackageManager::BaseDriver
 
       # Parse output for paths and remove the orphaned entries
       log.info(PEXEC+cmd)
-      return packages if noop?
+      return packages if preview?
       data = `#{cmd}`
       paths = data.scan(/^Using ([^\n]+\.egg)$/m).flatten
       for path in paths

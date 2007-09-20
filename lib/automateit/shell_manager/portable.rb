@@ -36,11 +36,11 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   #...[ Custom commands ].................................................
 
-  # Returns providesh of verbosity and noop settings for FileUtils commands.
+  # Returns hash of verbosity and preview settings for FileUtils commands.
   def _fileutils_opts
     opts = {}
     opts[:verbose] = false # Generate our own log messages
-    opts[:noop] = true if noop?
+    opts[:noop] = true if preview?
     return opts
   end
   private :_fileutils_opts
@@ -56,7 +56,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     # Tempster takes care of rethrowing exceptions
     opts[:name] = name || "automateit_temp"
     opts[:message_callback] = lambda{|msg| log.info(PEXEC+msg)}
-    opts[:noop] = interpreter.noop? if opts[:noop].nil?
+    opts[:noop] = interpreter.preview?
     ::Tempster.send(kind, opts, &block)
   end
   private :_mktemp_helper
@@ -255,7 +255,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   def cp(sources, target, opts={})
     # TODO ShellManager::Portable#cp -- rather funky, needs a code review
     fu_opts = _fileutils_opts
-    for opt in %w(noop verbose)
+    for opt in [:noop, :verbose]
       opt = opt.to_sym
       fu_opts[opt] = opts[opt] if opts[opt]
     end

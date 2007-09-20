@@ -2,36 +2,36 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 
 describe AutomateIt::Interpreter do
   before(:all) do
-    @a = AutomateIt::Interpreter.new
+    @a = AutomateIt::Interpreter.new(:verbosity => Logger::WARN)
   end
 
   it "should have a logger" do
     @a.log.should be_a_kind_of(Logger)
   end
 
-  it "should have noop (dryrun) detection" do
-    @a.noop = true
+  it "should provide a preview mode" do
+    @a.preview = true
+    @a.preview?.should be_true
+    @a.preview_for("answer"){42}.should == :preview
     @a.noop?.should be_true
-    @a.noop?{9}.should == 9
     @a.writing?.should be_false
-    @a.writing?{9}.should be_false
 
-    @a.writing(true)
+    @a.preview = false
+    @a.preview?.should be_false
+    @a.preview_for("answer"){42}.should == 42
     @a.noop?.should be_false
-    @a.noop?{9}.should be_false
     @a.writing?.should be_true
-    @a.writing?{9}.should == 9
   end
 
-  it "should eval commands in context" do
-    @a.noop = true
-    @a.instance_eval{noop?}.should be_true
+  it "should eval commands within Interpreter's context" do
+    @a.preview = true
+    @a.instance_eval{preview?}.should be_true
     @a.instance_eval{self}.should == @a
-    @a.instance_eval("noop?").should be_true
+    @a.instance_eval("preview?").should be_true
   end
 
   it "should be able to include methods into a class" do
-    @a.noop true
+    @a.preview = true
     @a.instance_eval do
       class MyInterpreterWrapper1
         def initialize(interpreter)
@@ -42,21 +42,20 @@ describe AutomateIt::Interpreter do
           42
         end
 
-        # Method overridden by Interpreter#noop?
-        def noop?
-          raise ArgumentError.new("MyInterpreterWrapper#noop? wasn't overriden")
+        # Method overridden by Interpreter#preview?
+        def preview?
+          raise ArgumentError.new("MyInterpreterWrapper#preview? wasn't overriden")
         end
       end
       mc = MyInterpreterWrapper1.new(self)
       mc.answer.should == 42      # Instance method
-      mc.noop?.should == true     # Interpreter method that overrides instance
-      mc.writing?.should == false # Interpreter method not included
+      mc.preview?.should == true  # Interpreter method that overrides instance
       lambda{ mc.not_a_method }.should raise_error(NoMethodError)
     end
   end
 
   it "should be able to add method_missing to a class" do
-    @a.noop true
+    @a.preview = true
     @a.instance_eval do
       class MyInterpreterWrapper2
         def initialize(interpreter)
@@ -67,21 +66,20 @@ describe AutomateIt::Interpreter do
           42
         end
 
-        # Method masking Interpreter#noop?
-        def noop?
+        # Method masking Interpreter#preview?
+        def preview?
           42
         end
       end
       mc = MyInterpreterWrapper2.new(self)
       mc.answer.should == 42      # Instance method
-      mc.noop?.should == 42       # Instance method masking Interpreter
-      mc.writing?.should == false # interpreter method
+      mc.preview?.should == 42       # Instance method masking Interpreter
       lambda{ mc.not_a_method }.should raise_error(NoMethodError)
     end
   end
 
   it "should be able to add method_missing to a class with an existing method_missing" do
-    @a.noop true
+    @a.preview = true
     @a.instance_eval do
       class MyInterpreterWrapper3
         def initialize(interpreter)
@@ -94,8 +92,7 @@ describe AutomateIt::Interpreter do
       end
       mc = MyInterpreterWrapper3.new(self)
       mc.answer.should == 42      # Instance#method_missing
-      mc.noop?.should == true     # Interpreter method
-      mc.writing?.should == false # Interpreter method
+      mc.preview?.should == true  # Interpreter method
     end
   end
 end

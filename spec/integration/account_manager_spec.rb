@@ -166,12 +166,12 @@ else
       lambda{ @m.add_users_to_group(@username, @groupname) }.should raise_error(ArgumentError)
     end
 
-    it "should pretend to add users to non-existent group in noop mode" do
+    it "should pretend to add users to non-existent group in preview mode" do
       begin
-        @a.noop true
+        @a.preview = true
         @m.add_users_to_group(@username, @groupname).should == [@username]
       ensure
-        @a.noop false
+        @a.preview = false
       end
     end
 
@@ -179,12 +179,12 @@ else
       lambda{ @m.remove_users_from_group(@username, @groupname) }.should raise_error(ArgumentError)
     end
 
-    it "should pretend to remove users from non-existent group in noop mode" do
+    it "should pretend to remove users from non-existent group in preview mode" do
       begin
-        @a.noop true
+        @a.preview = true
         @m.remove_users_from_group(@username, @groupname).should == [@username]
       ensure
-        @a.noop false
+        @a.preview = false
       end
     end
 

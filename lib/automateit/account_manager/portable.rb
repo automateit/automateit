@@ -81,7 +81,7 @@ class ::AutomateIt::AccountManager::Portable < ::AutomateIt::AccountManager::Bas
   # See AccountManager#groups_for_user
   def groups_for_user(query)
     pwent = users[query]
-    return [] if noop? and not pwent
+    return [] if preview? and not pwent
     username = pwent.name
     result = Set.new
     result << groups[pwent.gid].name if groups[pwent.gid]
@@ -94,7 +94,7 @@ class ::AutomateIt::AccountManager::Portable < ::AutomateIt::AccountManager::Bas
   # See AccountManager#users_for_group
   def users_for_group(query)
     grent = groups[query]
-    return (noop? || ! grent) ? [] : grent.mem
+    return (preview? || ! grent) ? [] : grent.mem
   end
 
   # See AccountManager#users_to_groups

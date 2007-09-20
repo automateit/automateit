@@ -16,8 +16,8 @@ else
     INTERPRETER.params = params
 
     begin
-      # This will throw a NotImplemented error on unsupported platforms
-      AutomateIt::invoke(params[:installer], :verbosity => Logger::WARN, :noop => true)
+      # Preview examples to cause a NotImplemented error on unsupported platforms
+      AutomateIt::invoke(params[:installer], :verbosity => Logger::WARN, :preview => true)
 
       it "should install the example" do
         INTERPRETER.instance_eval do

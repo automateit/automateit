@@ -427,7 +427,7 @@ EOB
 
     RECIPE_HELLO_CONTENT = <<-'EOB' #:nodoc
 puts "Hello, I'm an #{self.class} -- pleased to meet you!"
-puts "I'm in preview mode" if noop?
+puts "I'm in preview mode" if preview?
     EOB
 
     RAKEFILE_CONTENT = <<-EOB #:nodoc
@@ -453,7 +453,7 @@ end
 
 desc "Preview action, e.g, 'rake preview hello'"
 task :preview do
-  noop true
+  preview true
 end
     EOB
   end

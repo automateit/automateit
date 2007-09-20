@@ -28,7 +28,7 @@ Examples:
   # Execute a recipe
   #{PROG} myrecipe.rb
 
-  # Preview what a recipe does using noop mode
+  # Preview the commands a recipe will run without running them
   #{PROG} -n myrecipe.rb
 
   # Eval a string
@@ -44,8 +44,8 @@ EOB
     opts[:project] = v
   end
 
-  parser.on("-n", "--noop", "Preview without executing commands") do |v|
-    opts[:noop] = v
+  parser.on("-n", "--preview", "Preview without executing commands") do |v|
+    opts[:preview] = v
   end
 
   parser.on("-e", "--eval STRING", "Evaluate string") do |v|

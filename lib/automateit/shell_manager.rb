@@ -17,28 +17,27 @@
 #
 #   puts "Hello!"
 #
-# The above +puts+ method will execute in both preview (noop) and non-preview
-# (writing) modes. To execute custom code only in a specific mode, wrap it with
-# conditionals.
+# The above +puts+ method will execute in both preview and non-preview modes.
+# To execute custom code only in a specific mode, wrap it with conditionals.
 #
 # For example:
 #
-#  if noop?
+#  if preview?
 #    puts "This is a preview"
 #  end
 #
-#  writing?("PREVIEW: Will run custom commands") do
+#  preview_for("PREVIEW: Will run custom commands") do
 #    puts "Custom commands"
 #  end
 #
-# When run normally (#writing?), the above recipe displays:
-#
-#  Custom commands
-#
-# And when in preview mode (#noop?):
+# When in preview mode, the above recipe will display:
 #
 #  This is a preview
 #  => PREVIEW: Will run custom commands
+#
+# When run normally without preview mode:
+#
+#  Custom commands
 #
 # Therefore, wrap all non-AutomateIt commands (e.g. +system+) that shouldn't be
 # executed during the preview with conditionals.
@@ -69,20 +68,22 @@
 # The correct way to write the above example is:
 #
 #   mkdir_p "/tmp/foo/bar" do
-#     writing?("PREVIEW: Deleting all files in directory /tmp/foo/bar") do
+#     preview_for("PREVIEW: Deleting all files in directory /tmp/foo/bar") do
 #       system "echo 'I'm going to do: rm -rf *'"
 #     end
 #   end
 #
-# The Interpreter#writing? method ensures the +system+ command is only run when
-# writing. When running in preview mode, that block will display only the
-# message and won't actually execute the +system+ command:
+# The Interpreter#preview_for method provides conditional execution of blocks.
+# When running in preview mode, it will display the supplied message and not
+# execute the block containing the +system+ command:
 #
 #   => PREVIEW: Deleting all files in directory /tmp/foo/bar
 #
-# Without preview mode, AutomateIt will raise an exception when told to change
-# into a non-existent directory. However, pretend to change directories without
-# raising exceptions is necessary for preview mode to function properly.
+# When running without preview mode, the method will not display the message
+# but will call block, generating the following output:
+#
+#   ** echo 'I'm going to do: rm -rf *'"
+#   I'm going to do: rm -rf *
 class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
   alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :cp_R, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch

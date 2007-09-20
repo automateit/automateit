@@ -39,6 +39,7 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
       groupname = opts[:group] || username
       unless has_group?(groupname)
         opts = {:members => [username]}
+        # In preview mode, user doesn't exist and has no UID
         opts[:gid] = users[username].uid if writing?
         add_group(groupname, opts)
       end
@@ -97,7 +98,7 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
     quiet = (opts[:quiet] or not log.info?)
 
     unless users[user]
-      if noop?
+      if preview?
         log.info(PNOTE+"Setting password for user: #{user}")
         return true
       else

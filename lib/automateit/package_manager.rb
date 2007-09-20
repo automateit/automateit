@@ -137,7 +137,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       end
     block.call(install_packages, opts)
 
-    return true if noop?
+    return true if preview?
     unless (failed = not_installed?(check_packages, :details => true)[1]).empty?
       raise ArgumentError.new("Couldn't install: #{failed.join(' ')}")
     else
@@ -178,7 +178,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       end
     block.call(uninstall_packages, opts)
 
-    return true if noop?
+    return true if preview?
     unless (failed = installed?(check_packages, :details => true)[1]).empty?
       raise ArgumentError.new("Couldn't uninstall: #{failed.join(' ')}")
     else

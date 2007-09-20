@@ -255,7 +255,7 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
     # Read contents from #filename.
     def read
       @contents = \
-        if writing? or (noop? and @filename and File.exists?(@filename))
+        if writing? or (preview? and @filename and File.exists?(@filename))
           File.read(@filename)
         else
           nil
@@ -265,10 +265,10 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
     # Write contents to #filename.
     def write
       log.info(PNOTE+"Edited '#{@filename}'")
-      if writing?
-        File.open(@filename, "w+"){|writer| writer.write(@contents)}
-      else
+      if preview?
         true
+      else
+        File.open(@filename, "w+"){|writer| writer.write(@contents)}
       end
     end
   end # class EditSession

@@ -69,7 +69,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
       # XXX Try to warn the user that they won't see any output for a while
       log.info(PNOTE+"Installing Gems, this will take a while...") if writing? and not opts[:quiet]
       log.info(PEXEC+cmd)
-      return true if noop?
+      return true if preview?
 
       uninstall_needed = false
       begin

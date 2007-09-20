@@ -83,7 +83,7 @@ class AutomateIt::TemplateManager::ERB < AutomateIt::TemplateManager::BaseDriver
       target_contents = target_exists ? _read(target_filename) : ""
       source_contents ||= _read(source_filename)
 
-      if source_contents.blank? and noop?
+      if source_contents.blank? and preview?
         return true
       end
 

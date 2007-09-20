@@ -117,7 +117,7 @@ module AutomateIt
     # Options for users:
     # * :verbosity -- Alias for :log_level
     # * :log_level -- Log level to use, defaults to Logger::INFO.
-    # * :noop -- Turn on noop (no-operation) mode, defaults to false.
+    # * :preview -- Turn on preview mode, defaults to false.
     # * :project -- Set project path.
     # * :friendly_exceptions -- Throw user-friendly exceptions that make it
     #   easier to see errors in recipes, defaults to true.
@@ -153,10 +153,10 @@ module AutomateIt
         @log.level = opts[:log_level] || opts[:verbosity]
       end
 
-      if opts[:noop].nil? # can be false
-        @noop = false unless defined?(@noop)
+      if opts[:preview].nil? # can be false
+        self.preview = false unless preview?
       else
-        @noop = opts[:noop]
+        self.preview = opts[:preview]
       end
 
       if opts[:friendly_exceptions].nil?
@@ -268,60 +268,76 @@ module AutomateIt
       end
     end
 
-    # Set noop (no-operation mode) to +value+.
+    # Set preview mode to +value+. See warnings in ShellManager to learn how to
+    # correctly write code for preview mode.
+    def preview(value)
+      self.preview = value
+    end
+
+    # Is Interpreter running in preview mode?
+    def preview?
+      @preview
+    end
+
+    # Preview a block of custom commands. When in preview mode, displays the
+    # +message+ but doesn't execute the +block+. When not previewing, will
+    # execute the block and not display the +message+.
+    #
+    # For example:
+    #
+    #   preview_for("FOO") do
+    #     puts "BAR"
+    #   end
+    #
+    # In preview mode, this displays:
+    #   
+    #   => FOO
+    #
+    # When not previewing, displays:
+    #
+    #   BAR
+    def preview_for(message, &block)
+      if preview? 
+        log.info(message) 
+        :preview
+      else
+        block.call
+      end
+    end
+
+    # Set preview mode to +value.
+    def preview=(value)
+      @preview = value
+    end
+
+    # Set noop (no-operation mode) to +value+. Alias for #preview.
     def noop(value)
       self.noop = value
     end
 
-    # Set noop (no-operation mode) to +value+.
+    # Set noop (no-operation mode) to +value+. Alias for #preview=.
     def noop=(value)
-      @noop = value
+      self.preview = value
     end
 
-    # Are we in noop (no-operation) mode? If a block is given, executes the
-    # block if in noop mode.
-    def noop?(&block)
-      if @noop and block
-        block.call
-      else
-        @noop
-      end
+    # Are we in noop (no-operation) mode? Alias for #preview?.
+    def noop?
+      preview?
     end
 
-    # Set writing to +value+.
+    # Set writing to +value+. This is the opposite of #preview.
     def writing(value)
       self.writing = value
     end
 
-    # Set writing to +value+.
+    # Set writing to +value+. This is the opposite of #preview=.
     def writing=(value)
-      @noop = !value
+      self.preview = !value
     end
 
-    # Are we writing? Opposite of #noop. If given a block, executes it when in
-    # writing mode. If given a +message+, displays it when in noop mode, which
-    # is handy so you can preview a complex command.
-    #
-    # Example:
-    #   writing?("Making big changes") do
-    #     # do your big changes
-    #     sh "ls -la"
-    #   end
-    #
-    #   # When in noop mode, will print the message and won't execute the block:
-    #   => Making big changes
-    #
-    #   # When in writing mode, won't print the message and will execute the block:
-    #   ** ls -la
-    #
-    # See also the examples in ShellManager describing how to preview commands.
-    def writing?(message=nil, &block)
-      if block
-        log.info(PNOTE+"#{message}") if message and @noop
-        !@noop ? block.call : !@noop
-      else
-        !@noop
-      end
+    # Is Interpreter writing? This is the opposite of #preview?.
+    def writing?
+      !preview?
     end
 
     # Does this platform provide euid (Effective User ID)?
@@ -502,10 +518,10 @@ module AutomateIt
     #
     #   require 'automateit'
     #   @ai = AutomateIt.new
-    #   @ai.include_in(self, %w(noop? sh)) # Include #noop? and #sh methods
+    #   @ai.include_in(self, %w(preview? sh)) # Include #preview? and #sh methods
     #
     #   task :default do
-    #     puts noop?      # Uses Interpreter#noop?
+    #     puts preview?   # Uses Interpreter#preview?
     #     sh "id"         # Uses Interpreter#sh, not FileUtils#sh
     #     cp "foo", "bar" # Uses FileUtils#cp, not Interpreter#cp
     #   end
@@ -537,8 +553,8 @@ module AutomateIt
     #   @ai.add_method_missing_to(self)
     #
     #   task :default do
-    #     puts noop? # Uses Interpreter#noop?
-    #     sh "id"    # Uses FileUtils#sh, not Interpreter#sh
+    #     puts preview? # Uses Interpreter#preview?
+    #     sh "id"       # Uses FileUtils#sh, not Interpreter#sh
     #   end
     #
     # For situations where it's necessary to override existing methods, such as the +sh+ call in the example, consider using #include_in.

@@ -24,15 +24,15 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
   def _run_command(args, opts={})
     _raise_unless_available
     cmd = String === args ? args : args.join(' ')
-    if opts[:silent]
+    if opts[:silent] or opts[:check]
       cmd += " > /dev/null 2>&1" # Discard STDOUT and STDERR
     elsif opts[:quiet]
       cmd += " > /dev/null" # Discard only STDOUT
     end
 
-    level = (opts[:quiet] || opts[:silent]) ? :debug : :info
+    level = (opts[:quiet] || opts[:silent] || opts[:check]) ? :debug : :info
     log.send(level, PEXEC+cmd)
-    if writing? or opts[:silent]
+    if writing? or opts[:check]
       system(cmd)
       return $?.exitstatus.zero?
     else
@@ -59,7 +59,7 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
       else raise ArgumentError.new("unknown kind argument: #{kind}")
       end
 
-    result = tell(service, :status, :silent => true)
+    result = tell(service, :status, :check => true)
     ### puts "k %s r %s e %s" % [kind, result, expected]
     return result if expected == result
     if opts[:wait]
@@ -68,7 +68,7 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
         log.info(PNOTE+" ServiceManager#%s waiting on '%s' for %0.1f more seconds" %
           [kind, service, timeout - Time.now])
         sleep 0.5
-        result = tell(service, :status, :silent => true)
+        result = tell(service, :status, :check => true)
         break if expected == result
       end
       log.info(PNOTE+" ServiceManager#%s finished waiting for '%s', got: %s" %
