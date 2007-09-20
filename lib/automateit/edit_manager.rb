@@ -119,8 +119,7 @@ class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
         write if different?
 
         chperm_opts = {}
-        for key in %w(mode user group)
-          key = key.to_sym
+        for key in [:owner, :user, :group, :mode]
           chperm_opts[key] = opts[key] if opts[key]
         end
         chperm(@filename, chperm_opts) unless chperm_opts.empty?
