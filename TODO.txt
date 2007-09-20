@@ -2,8 +2,6 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
-111 Screenshots -- Include Rakefile embedding example
-
 1oo Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 
 1oo Edit -- Display summary of edits, return with :details as [rv, list]
@@ -20,6 +18,7 @@ ooo Darwin -- Write drivers, e.g. PackageManager for Fink, MacPorts, Pkgsrc
 
 ??? Shell -- Return false or list, never single item?
 ??? Shell -- Extract FileManager? change docs
+??? Driver -- How to determine if a manager or driver method is available? Manager#available?, Manager#available and Driver#suitable? only say if it should be a default.
 
 #===[ Web ]=============================================================
 1oo Index: Call for pilot users, driver authors

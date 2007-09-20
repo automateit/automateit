@@ -1,5 +1,7 @@
-.*\.rcov
+syntax: glob
+
+*.rcov
 coverage
 doc
 pkg
-prof\.txt
+prof.txt

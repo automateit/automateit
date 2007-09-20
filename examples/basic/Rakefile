@@ -10,7 +10,7 @@ require "automateit"
 
 desc "Install myapp server"
 task :install do
-  # This 'invoke' method was created by the 'include_in' call earlier, 
+  # The 'invoke' method was created by the 'include_in' call earlier, 
   # as a convenient shortcut for: @interpreter.invoke("install")
   invoke "install"
 end

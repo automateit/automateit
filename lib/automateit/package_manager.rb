@@ -16,8 +16,8 @@
 #   package_manager.install("apache2", "bash")
 #   package_manager.installed? %w(apache2 bash)
 #
-# Commands can also accept a single, annotated string -- useful for installing
-# large numbers of packages at once:
+# Commands can also accept a single, annotated string as a manifest -- useful
+# for installing large numbers of packages at once:
 #
 #   package_manager.install <<HERE, :with => :apt
 #     # One per line
