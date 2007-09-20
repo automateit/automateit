@@ -1,4 +1,4 @@
-# Install packages on machines tagged 'rails_servers' or 'myapp_servers'
+# Install packages on hosts tagged 'rails_servers' or 'myapp_servers'
 if tagged?("rails_servers | myapp_servers")
   # Install platform-specific packages, queries system-provided tags
   if tagged?("ubuntu | debian")
