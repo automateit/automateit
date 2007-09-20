@@ -344,11 +344,11 @@ More documentation on tags can be found in AutomateIt::TagManager.
 
 === Previewing commands
 
-It's important to preview the commands a recipe will run without letting them actually modify the system.
+AutomateIt lets you preview commands the recipe will run without actually letting them actually modify the system.
 
-The Interpreter has a boolean that determines if it'll make changes to your system. This variable can be called from two different ways for the sake of code clarity:
-* +writing+: Will it write changes?
-* +noop+: Will it not write changes? The +noop+ means "no-operation"
+The Interpreter has a boolean that determines if it'll make changes to your system. This one variable can be called from two different ways:
+* <tt>writing?</tt> -- Will it write changes?
+* <tt>noop?</tt> -- Will it not write changes and just preview them? The +noop+ means "no-operation"
 
 Here's an example with the interactive shell, with comments for annotations:
 
@@ -361,7 +361,7 @@ Here's an example with the interactive shell, with comments for annotations:
  ** mkdir foo                 # Message showing directory will be creating
  => ["foo"]                   # Return value with directories to create
  ai> File.directory? "foo"    # Was the directory actually made?
- => false                     # No, noop mode prevents changes
+ => false                     # No, noop mode prevented the change
 
 Recipes can take advantage of the noop mode as well, consider a <tt>mkdir_example.rb</tt> recipe:
 
@@ -374,9 +374,9 @@ To run this recipe with noop mode, pass the <tt>-n</tt> option to the Interprete
  you@host:tmp> ls foo
  ls: foo: No such file or directory
 
-Notice how the directory wasn't actually created?
+Notice how the directory wasn't actually created? This is great because you can see exactly what commands AutomateIt will run without actually having it apply the changes.
 
-WARNING: Be careful about how you write code that relies on relative paths when changing directories using commands like +cd+, +mkdir+ and +mktempdir+. In preview mode, these will not change into non-existent directories and will not raise exceptions. Your custom commands must detect that they're running in preview mode or they may executing in the wrong directory. Read the details for how to deal with this in the AutomateIt::ShellManager .
+WARNING: Previewing non-AutomateIt commands (e.g., +system+) can be dangerous! Please read the warnings in AutomateIt::ShellManager that explain how to correctly write custom code that works in preview mode.
 
 === Conclusion
 

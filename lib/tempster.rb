@@ -15,7 +15,20 @@ require 'fileutils'
 # collisions. Linux "mktemp" works fine but is platform-specific. Therefore, I
 # had to write something.
 #
-# = Credits
+# === WARNING: Using 'cd' and :noop together can be dangerous!
+#
+# Tempster will only *pretend* to make directories in :noop (no-operation)
+# mode. In :noop mode, it will also only *pretend* to change into the directory
+# when using :cd or +mktempdircd+.
+#
+# This can be *disastrous* if you're executing non-AutomateIt commands (e.g.
+# +system+) that use *relative* *paths* and expect to be run inside the
+# newly-created temporary directory because the +chdir+ didn't actually happen.
+#
+# Read more on this issue and how to deal with it in the
+# AutomateIt::ShellManager class documentation.
+#
+# == Credits
 # * Random string generator taken from
 #   http://pleac.sourceforge.net/pleac_ruby/numbers.html
 class Tempster
@@ -26,21 +39,23 @@ class Tempster
   ARMOR_CHARACTERS = ["A".."Z","a".."z","0".."9"].collect{|r| r.to_a}.join
 
   # Options:
-  # * :name - name to use for file, defaults to "tempster".
-  # * :kind - :file or :directory, required.
-  # * :dir - directory to create temporary entries in, uses system-wide temporary directory (e.g., <tt>/tmp</tt>) by default.
-  # * :cd - change into the newly directory created using +ch+ within the block, and then switch back to the previous directory. Only used when a block is given and the :kind is :directory. Default is false.
-  # * :verbose - print status messages about creating and deleting the temporary entries. Default is false.
-  # * :delete - delete the temporary file or directory when finished. Only works when given a block. Default is true if given a block, false otherwise. So if you don't use a block, you're responsible for deleting the files yourself.
-  # * :tries - number of tries to come up with a temporary entry, usually it'll succeed on the first try. Default is 10.
-  # * :armor - length of armor to add to the name, these are random characters padding out the temporary entry names to prevent them from using existing files. If you have a very short armor, you're likely to get a collision and the algorithm will have to try again for the specified number of +tries+.
-  # * :message_callback - lambda called when there's a message, e.g., <tt>lambda{|message| puts message}</tt>, regardless of :verbose state. By default :messaging is nil and messages are printed to STDOUT only when :verbose is true.
-  # * :message_prefix - string to put in front of messages, e.g., "# "
+  # * :name -- Name prefix to usse, defaults to "tempster".
+  # * :kind -- Create a :file or :directory, required.
+  # * :dir -- Base directory to create temporary entries in, uses system-wide temporary directory (e.g., <tt>/tmp</tt>) by default.
+  # * :cd -- Change into the newly directory created using +ch+ within the block, and then switch back to the previous directory. Only used when a block is given and the :kind is :directory. Default is false. See WARNING at the top of this class's documentation!
+  # * :noop -- no-operation mode, pretends to do actions without actually creating or deleting temporary entries. Default is false. WARNING: See WARNING at the top of this class's documentation!
+  # * :verbose -- Print status messages about creating and deleting the temporary entries. Default is false.
+  # * :delete -- Delete the temporary entries when exiting block. Default is true when given a block, false otherwise. If you don't use a block, you're responsible for deleting the entries yourself.
+  # * :tries -- Number of tries to create a temporary entry, usually it'll succeed on the first try. Default is 10.
+  # * :armor -- Length of armor to add to the name. These are random characters padding out the temporary entry names to prevent them from using existing files. If you have a very short armor, you're likely to get a collision and the algorithm will have to try again for the specified number of +tries+.
+  # * :message_callback -- +lambda+ called when there's a message, e.g., <tt>lambda{|message| puts message}</tt>, regardless of :verbose state. By default :messaging is nil and messages are printed to STDOUT only when :verbose is true.
+  # * :message_prefix -- String to put in front of messages, e.g., "# "
   def self._tempster(opts={}, &block)
     name = opts.delete(:name) || DEFAULT_NAME
     kind = opts.delete(:kind) or raise ArgumentError.new("'kind' option not specified")
     dir = opts.delete(:dir) || Dir.tmpdir
     cd = opts.delete(:cd) || false
+    noop =  opts.delete(:noop) || false
     verbose = opts.delete(:verbose) || false
     delete = opts.delete(:delete) || block ? true : false
     tries = opts.delete(:tries) || 10
@@ -68,14 +83,16 @@ class Tempster
     for i in 1..tries
       begin
         path = File.join(dir, name+"_"+_armor_string(armor))
-        case kind
-        when :file
-          File.open(path, File::RDWR|File::CREAT|File::EXCL).close
-          File.chmod(mode, path)
-        when :directory
-          Dir.mkdir(path, mode)
-        else
-          raise ArgumentError.new("unknown kind: #{kind}")
+        unless noop
+          case kind
+          when :file
+            File.open(path, File::RDWR|File::CREAT|File::EXCL).close
+            File.chmod(mode, path)
+          when :directory
+            Dir.mkdir(path, mode)
+          else
+            raise ArgumentError.new("unknown kind: #{kind}")
+          end
         end
         # XXX Should we pretend that it's mktemp? Or give users something more useful?
         # messager.puts("mktemp -m 0%o%s -p %s %s # => %s" % [mode, kind == :directory ? ' -d' : '', dir, name, path])
@@ -95,7 +112,7 @@ class Tempster
       previous = Dir.pwd if cd
       begin
         if cd
-          Dir.chdir(path)
+          Dir.chdir(path) unless noop
           messager.puts("pushd #{path}")
         end
         block.call(path)
@@ -104,11 +121,11 @@ class Tempster
         raise e
       ensure
         if cd
-          Dir.chdir(previous)
+          Dir.chdir(previous) unless noop
           messager.puts("popd # => #{previous}")
         end
         if delete
-          FileUtils.rm_rf(path)
+          FileUtils.rm_rf(path) unless noop
           messager.puts("rm -rf #{path}")
         end
       end
@@ -129,6 +146,8 @@ class Tempster
   end
 
   # Creates a temporary directory.
+  #
+  # WARNING: See WARNING at the top of this class's documentation!
   def self.mktempdir(opts={}, &block)
     _tempster({:kind => :directory}.merge(opts), &block)
 
@@ -136,6 +155,8 @@ class Tempster
 
   # Creates a temporary directory and changes into it using +chdir+. This is a
   # shortcut for using +mktempdir+ with the <tt>:cd => true</tt> option.
+  #
+  # WARNING: See WARNING at the top of this class's documentation!
   def self.mktempdircd(opts={}, &block)
     _tempster({:kind => :directory, :cd => true}.merge(opts), &block)
   end

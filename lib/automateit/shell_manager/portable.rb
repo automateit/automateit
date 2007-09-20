@@ -56,6 +56,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     # Tempster takes care of rethrowing exceptions
     opts[:name] = name || "automateit_temp"
     opts[:message_callback] = lambda{|msg| log.info(PEXEC+msg)}
+    opts[:noop] = interpreter.noop? if opts[:noop].nil?
     ::Tempster.send(kind, opts, &block)
   end
   private :_mktemp_helper

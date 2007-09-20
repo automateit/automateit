@@ -3,15 +3,23 @@
 # The ShellManager provides Unix-like shell commands for manipulating files and
 # executing commands.
 #
-# ==== Basic previews
+# === WARNING: Previewing custom code can be dangerous!
 #
-# The USAGE.txt[link:files/USAGE_txt.html] describes the basic use of preview
-# with ShellCommands.
+# AutomateIt provides a way to preview commands without actually running them.
+# The USAGE.txt[link:files/USAGE_txt.html] describes the basic concepts and use
+# of preview when used with ShellCommands.
 #
-# ==== Advanced previews
+# However, AutomateIt only provides previewing logic for its own commands.
+# Recipe authors are responsible for providing previewing logic for their own
+# custom code.
 #
-# AutomateIt only provides previewing logic for its own commands and recipe
-# authors are responsible for providing logic for their own code.
+# Here's what not to do with previews:
+#
+#   puts "Hello!"
+#
+# The above +puts+ method will execute in both preview (noop) and non-preview
+# (writing) modes. To execute custom code only in a specific mode, wrap it with
+# conditionals.
 #
 # For example:
 #
@@ -19,60 +27,62 @@
 #    puts "This is a preview"
 #  end
 #
-#  writing?("Will run custom commands") do
+#  writing?("PREVIEW: Will run custom commands") do
 #    puts "Custom commands"
 #  end
 #
-# When run normally, it displays:
+# When run normally (#writing?), the above recipe displays:
 #
 #  Custom commands
 #
-# And when in noop mode, this displays:
+# And when in preview mode (#noop?):
 #
 #  This is a preview
-#  => Will run custom commands
+#  => PREVIEW: Will run custom commands
 #
-# ==== WARNING: Changing directories during preview
+# Therefore, wrap all non-AutomateIt commands (e.g. +system+) that shouldn't be
+# executed during the preview with conditionals.
 #
-# Commands that change directories will behave in a potentially surprising way
-# when running in noop mode. These commands include #cd, #mkdir and
-# #mktempdircd.
+# === WARNING: Changing directories during preview can be dangerous!
 #
-# If a recipe tries to change into a directory that doesn't exist in normal
-# writing mode, the command will throw an exception. But when running in noop
-# mode, these commands will appear to succeed without changing into the
-# non-existent target directory. This is reasonable behavior because the goal
-# is to preview the commands run.
+# AutomateIt will only *pretend* to make directories in preview mode. In
+# preview mode, it will also only *pretend* to change into non-existent
+# directories when using commands like #cd, #mkdir and #mktempdircd.
 #
-# The potential surprise is that code that's using relative paths might execute
-# in the wrong directory. 
+# This can be *disastrous* if you're executing non-AutomateIt commands (e.g.
+# +system+) that use *relative* *paths* and expect to be run inside the
+# newly-created temporary directory because the +chdir+ didn't actually happen.
 #
 # For example:
 #
+#   # DON'T EVER DO THIS!!!
 #   mkdir_p "/tmp/foo/bar" do
-#     touch "myfile"
 #     system "echo 'I'm going to do: rm -rf *'"
 #   end
 #
-# If the above example was run in noop mode and the directory didn't exist, the
-# +system+ command actually run and, if this weren't an echo, it would delete
-# the contents of your current directory,  not the <tt>/tmp/foo/bar</tt>
-# directory!
+# If that directory didn't already exist, then running the above code in
+# preview mode would cause the +system+ command to actually run! If that wasn't
+# an +echo+ command, it would have deleted the contents of your *current*
+# directory -- not the <tt>/tmp/foo/bar</tt> directory -- because that
+# directory wasn't actually created due to the preview mode!
 #
-# The correct way to write that example is:
+# The correct way to write the above example is:
 #
 #   mkdir_p "/tmp/foo/bar" do
-#     touch "myfile"
-#     writing?("Deleting all files in directory /tmp/foo/bar") do
+#     writing?("PREVIEW: Deleting all files in directory /tmp/foo/bar") do
 #       system "echo 'I'm going to do: rm -rf *'"
 #     end
 #   end
 #
 # The Interpreter#writing? method ensures the +system+ command is only run when
-# writing. When running in noop mode, the code will display the text and won't
-# execute the +system+ command:
+# writing. When running in preview mode, that block will display only the
+# message and won't actually execute the +system+ command:
 #
-#   => Deleting all files in directory /tmp/foo/bar
+#   => PREVIEW: Deleting all files in directory /tmp/foo/bar
+#
+# Without preview mode, AutomateIt will raise an exception when told to change
+# into a non-existent directory. However, pretend to change directories without
+# raising exceptions is necessary for preview mode to function properly.
 class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
   alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :cp_R, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch
@@ -181,7 +191,7 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
 
   # Create a directory or directories. Returns an array of directories
   # created or +false+ if all directories are already present.
-  # 
+  #
   # Options:
   # * :parents -- Create parents, like "mkdir -p". Boolean.
   # * :mode, :user, :group -- See #chperm
@@ -239,7 +249,7 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   # Copy the +sources+ to the +target+ recursively. Returns an array of
   # sources copied or +false+ if all are present.
   def cp_r(sources, target, opts={}) dispatch(sources, target, opts) end
-  
+
   # Copy the +sources+ to the +target+ recursively. Returns an array of
   # sources copied or +false+ if all are present.
   def cp_R(sources, target, opts={}) dispatch(sources, target, opts) end
