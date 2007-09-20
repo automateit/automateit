@@ -1,6 +1,6 @@
-AutomateIt_Base = File.dirname(File.expand_path(__FILE__))
-AutomateIt_Lib = File.join(AutomateIt_Base, "/../lib")
-AutomateIt_Bin = File.join(AutomateIt_Base, "/../bin")
+AutomateIt_Base = File.dirname(File.expand_path(__FILE__)) unless defined?(AutomateIt_Base)
+AutomateIt_Lib = File.join(AutomateIt_Base, "/../lib") unless defined?(AutomateIt_Lib)
+AutomateIt_Bin = File.join(AutomateIt_Base, "/../bin") unless defined?(AutomateIt_Bin)
 
 $LOAD_PATH.unshift(AutomateIt_Lib)
 
