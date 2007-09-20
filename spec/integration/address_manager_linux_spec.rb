@@ -73,7 +73,7 @@ else
       @m.has?(:address => @properties[:address]).should be_true
     end
 
-    it "should find added address using device and lable" do
+    it "should find added address using device and label" do
       # Depends on user to be created by previous tests
       @m.has?(:device => @properties[:device], :label => @properties[:label]).should be_true
     end
