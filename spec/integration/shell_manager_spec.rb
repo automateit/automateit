@@ -1,10 +1,14 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-describe "AutomateIt::ShellManager" do
+describe AutomateIt::ShellManager, :shared => true do
   before(:all) do
     @a = AutomateIt.new(:verbosity => Logger::WARN)
     @m = @a.shell_manager
   end
+end
+
+describe AutomateIt::ShellManager, " with sh and which" do
+  it_should_behave_like "AutomateIt::ShellManager"
 
   begin
     INTERPRETER.which("true")
@@ -33,6 +37,10 @@ describe "AutomateIt::ShellManager" do
       lambda{ @m.which!("not_a_real_program") }.should raise_error(ArgumentError, /not_a_real_program/)
     end
   end
+end
+
+describe AutomateIt::ShellManager, " in general" do # FIXME
+  it_should_behave_like "AutomateIt::ShellManager"
 
   it "should change directories (cd)" do
     before = Dir.pwd
@@ -356,10 +364,9 @@ describe AutomateIt::ShellManager, " when changing permissions" do
   elsif not INTERPRETER.shell_manager.provides_ownership?
     puts "NOTE: Can't check ownership on this platform, #{__FILE__}"
   elsif INTERPRETER.superuser?
-    before(:all) do
-      @a = AutomateIt.new(:verbosity => Logger::WARN)
-      @m = @a.shell_manager
+    it_should_behave_like "AutomateIt::ShellManager"
 
+    before(:all) do
       @pwent, @grent = find_mortal_pwent_and_grent
       @user =  @pwent.name
       @uid = @pwent.uid
