@@ -4,19 +4,9 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 111 Screenshots -- Include Rakefile embedding example
 
-1o1 Project#create -- Display welcome message, include it into top-level README, see TLRC
-1o1 Project#create -- Rename README files, maybe create single README_AutomateIt.txt?
-1o1 Project#create -- Include sample Rakefile and recipes/hello.rb
-
-1o1 Package and Shell -- Normalize @:report => :details@ and @:list => true@ to @:details => true@
-1o1 Package -- :details should return @[rv, list]@, not just @list@. Change tests.
-1o1 Edit -- Rework RDoc and links to put general docs in class, not #edit
-1o1 CLI and Interpreter -- Fail if :project doesn't exist unless :guessed_project
-
 1oo Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 
 1oo Edit -- Display summary of edits, return with :details as [rv, list]
-1o1 Shell and Edit -- Provide :owner to :user workarouund for Cfengine refugees
 1o1 CLI -- Add tags via command-line
 
 1oo Interpreter#invoke and HelpfulERB -- Extract error context code into class

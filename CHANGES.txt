@@ -1,3 +1,14 @@
+0.70918:
+    Date: Tue, 18 Sep 2007 14:57:56 -0700
+    Desc:
+    - (!) Normalized PackageManager methods and ShellManager#chperm to use consistent ':details => true' option.
+    - Fixed bug in ShellManager and Tempster that created temporary files and directories in preview mode.
+    - Simplified embedding with new Interpreter methods 'include_in' and 'add_method_missing_to'. Provided Rakefile with example project to demonstrate embedding.
+    - Improved AccountManager to set and change passwords on user accounts.
+    - Improved TagManager with lazy-loading of tags, which speeds startup.
+    - Improved documentation for previewing custom commands.
+    - Improved ShellManager, TemplateManager and EditManager so they translate :owner to :user for Cfengine refugees.
+
 0.70915:
     Date: Sat, 15 Sep 2007 23:09:26 -0700
     Desc:
