@@ -39,7 +39,7 @@ describe AutomateIt::ShellManager, " with sh and which" do
   end
 end
 
-describe AutomateIt::ShellManager, " in general" do # FIXME
+describe AutomateIt::ShellManager, " in general" do
   it_should_behave_like "AutomateIt::ShellManager"
 
   it "should change directories (cd)" do
@@ -378,7 +378,8 @@ describe AutomateIt::ShellManager, " when changing permissions" do
     def find_mortal_pwent_and_grent
       while true
         pwent = Etc.getpwent
-        break if pwent.uid != 0
+        # Root is usually 0, but Darwin's users can have negative UIDs
+        break if pwent.uid > 0
       end
       Etc.endpwent
       grent = Etc.getgrgid(pwent.gid)
