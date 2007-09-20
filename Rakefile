@@ -280,6 +280,7 @@ end
 task :uninstall do
   load_automateit
   @interpreter.package_manager.uninstall "automateit", :with => :gem
+  @interpreter.sh "gem sources -r http://automateit.org/pub"
 end
 
 #===[ fin ]=============================================================
