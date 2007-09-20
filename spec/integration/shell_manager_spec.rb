@@ -6,7 +6,7 @@ describe "AutomateIt::ShellManager" do
     @m = @a.shell_manager
   end
 
-  begin 
+  begin
     INTERPRETER.which("true")
     INTERPRETER.which("false")
 
@@ -348,12 +348,25 @@ describe "AutomateIt::ShellManager" do
       before.should <= after
     end
   end
+end
 
+describe AutomateIt::ShellManager, " when changing permissions" do
   if not INTERPRETER.euid?
     puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
   elsif not INTERPRETER.shell_manager.provides_ownership?
     puts "NOTE: Can't check ownership on this platform, #{__FILE__}"
   elsif INTERPRETER.superuser?
+    before(:all) do
+      @a = AutomateIt.new(:verbosity => Logger::WARN)
+      @m = @a.shell_manager
+
+      @pwent, @grent = find_mortal_pwent_and_grent
+      @user =  @pwent.name
+      @uid = @pwent.uid
+      @group = @grent.name
+      @gid = @grent.gid
+    end
+
     # Return a pwent and grent of a non-root user
     def find_mortal_pwent_and_grent
       while true
@@ -367,36 +380,24 @@ describe "AutomateIt::ShellManager" do
 
     it "should change the ownership of files (chown)" do
       @m.mktempdircd do
-        pwent, grent = find_mortal_pwent_and_grent
-        user =  pwent.name
-        uid = pwent.uid
-        group = grent.name
-        gid = grent.gid
-
         target = "foo"
 
         @m.touch(target)
         stat = File.stat(target)
-        (stat.uid == uid).should be_false
-        (stat.gid == gid).should be_false
+        (stat.uid == @uid).should be_false
+        (stat.gid == @gid).should be_false
 
-        @m.chown(user, group, target).should == target
+        @m.chown(@user, @group, target).should == target
         stat = File.stat(target)
-        (stat.uid == uid).should be_true
-        (stat.gid == gid).should be_true
+        (stat.uid == @uid).should be_true
+        (stat.gid == @gid).should be_true
 
-        @m.chown(uid, group, target).should be_false
+        @m.chown(@uid, @group, target).should be_false
       end
     end
 
     it "should change the ownership of files recursively (chown_R)" do
       @m.mktempdircd do
-        pwent, grent = find_mortal_pwent_and_grent
-        user =  pwent.name
-        uid = pwent.uid
-        group = grent.name
-        gid = grent.gid
-
         dir = "foo/bar"
         file = dir+"/baz"
 
@@ -405,46 +406,40 @@ describe "AutomateIt::ShellManager" do
         File.exists?(file).should be_true
         File.exists?(dir).should be_true
         stat = File.stat(file)
-        (stat.uid == uid).should be_false
-        (stat.gid == gid).should be_false
+        (stat.uid == @uid).should be_false
+        (stat.gid == @gid).should be_false
         stat = File.stat(dir)
-        (stat.uid == uid).should be_false
-        (stat.gid == gid).should be_false
+        (stat.uid == @uid).should be_false
+        (stat.gid == @gid).should be_false
 
-        @m.chown_R(uid, group, dir).should == dir
+        @m.chown_R(@uid, @group, dir).should == dir
         stat = File.stat(file)
-        (stat.uid == uid).should be_true
-        (stat.gid == gid).should be_true
+        (stat.uid == @uid).should be_true
+        (stat.gid == @gid).should be_true
         stat = File.stat(dir)
-        (stat.uid == uid).should be_true
-        (stat.gid == gid).should be_true
+        (stat.uid == @uid).should be_true
+        (stat.gid == @gid).should be_true
 
-        @m.chown_R(uid, group, dir).should be_false
+        @m.chown_R(@uid, @group, dir).should be_false
       end
     end
-    
+
     it "should translate :owner to :user for Cfengine refugees" do
       @m.mktempdircd do
-        pwent, grent = find_mortal_pwent_and_grent
-        user =  pwent.name
-        uid = pwent.uid
-        group = grent.name
-        gid = grent.gid
-
         dir = "foo/bar"
         file = dir+"/baz"
 
         @m.mkdir_p(dir)
         @m.touch(file)
 
-        @m.chperm(dir, :recursive => true, :owner => user, :group => group).should == dir
+        @m.chperm(dir, :recursive => true, :owner => @user, :group => @group).should == dir
 
         stat = File.stat(file)
-        (stat.uid == uid).should be_true
-        (stat.gid == gid).should be_true
+        (stat.uid == @uid).should be_true
+        (stat.gid == @gid).should be_true
         stat = File.stat(dir)
-        (stat.uid == uid).should be_true
-        (stat.gid == gid).should be_true
+        (stat.uid == @uid).should be_true
+        (stat.gid == @gid).should be_true
       end
     end
   else
