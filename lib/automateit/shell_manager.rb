@@ -159,15 +159,19 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   # and #chown in a single command.
   #
   # Options:
-  # * :recursive -- change files and directories recursively, boolean.
-  # * :user -- user name to change ownership to.
-  # * :group -- group name to change ownership to.
-  # * :mode -- mode to use as octal, e.g., <tt>0400</tt> to make a file
+  # * :recursive -- Change files and directories recursively. Defaults to false.
+  # * :user -- User name to change ownership to.
+  # * :group -- Group name to change ownership to.
+  # * :mode -- Mode to use as octal, e.g., <tt>0400</tt> to make a file
   #   readable only to its owner.
-  # * :report -- if set to <tt>:details</tt>, the log shows all files modified, which
-  #   may be useful when only changing a few files. Without arguments, only
-  #   displays the targets, which keeps your screen from being flooded when
-  #   changing the permissions of many files.
+  # * :details -- Reports the files modified, rather than the arguments
+  #   modified. An argument might be a single directory, but this may result in
+  #   modifications to many files within that directory. Use :details for
+  #   situations when there's a need to see all files actually changed. The
+  #   reason :details is off by default is that it will flood the screen with a
+  #   list of all files modified in a large directory, which is overwhelming
+  #   and probably unnecessary unless you actually need to see these details.
+  #   Defaults to false.
   def chperm(targets, opts={}) dispatch(targets, opts) end
 
   # Set the umask to +mode+. If given a block, changes the umask only for the

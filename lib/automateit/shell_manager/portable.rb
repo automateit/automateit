@@ -453,12 +453,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
     return false if modified_entries.empty?
 
-    display_entries = \
-      if opts[:report] == :details
-        modified_entries
-      else
-        targets
-      end
+    display_entries = opts[:details] ? modified_entries : targets
     display_entries = [display_entries].flatten
 
     if opts[:mode]
