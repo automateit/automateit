@@ -99,6 +99,7 @@ module AutomateIt
       # * :files -- Array of filenames that must exist.
       # * :directories -- Array of directories that must exist.
       # * :programs -- Array of programs, checked with +which+, that must exist.
+      # * :callbacks -- Array of lambdas that must return true.
       #
       # Example:
       #   class APT < Plugin::Driver
