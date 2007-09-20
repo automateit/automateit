@@ -190,130 +190,170 @@ module AutomateIt
         or raise ArgumentError.new(":create option not specified")
       interpreter = AutomateIt.new(opts)
       interpreter.instance_eval do
-        # Make +render+ only generate files only if they don't already exist.
+        # +render+ only files that don't exist.
         template_manager.default_check = :exists
 
         mkdir_p(path) do |created|
-          if created
-            display.call PNOTE+"Creating AutomateIt project at: #{path}"
-          else
-            display.call PNOTE+"Found AutomateIt project at: #{path}"
-          end
+          display.call PNOTE+"%s AutomateIt project at: %s" %
+            [created ? "Creating" : "Updating", path]
 
-          mkdir("config") do
-            render(:text => TAGS_CONTENT, :to => "tags.yml")
-            render(:text => FIELDS_CONTENT, :to => "fields.yml")
-            render(:text => ENV_CONTENT, :to => "automateit_env.rb")
-          end
+          render(:text => WELCOME_CONTENT, :to => "README_AutomateIt.txt")
+          render(:text => RAKEFILE_CONTENT, :to => "Rakefile")
 
-          mkdir("dist") do
-            render(:text => DIST_README_CONTENT, :to => "README.txt")
-          end
+          mkdir("config")
+          render(:text => TAGS_CONTENT, :to => "config/tags.yml")
+          render(:text => FIELDS_CONTENT, :to => "config/fields.yml")
+          render(:text => ENV_CONTENT, :to => "config/automateit_env.rb")
 
-          mkdir("lib") do
-            render(:text => BASE_README_CONTENT, :to => "README.txt")
-          end
+          mkdir("dist")
+          render(:text => DIST_README_CONTENT, :to => "dist/README_AutomateIt_dist.txt")
 
-          mkdir("recipes") do
-            render(:text => RECIPE_README_CONTENT, :to => "README.txt")
-          end
+          mkdir("lib")
+          render(:text => BASE_README_CONTENT, :to => "lib/README_AutomateIt_lib.txt")
+
+          mkdir("recipes")
+          render(:text => RECIPE_README_CONTENT, :to => "recipes/README_AutomateIt_recipes.txt")
+          render(:text => RECIPE_HELLO_CONTENT, :to => "recipes/hello.rb")
         end
-        display.call PNOTE+"DONE!"
+
+        if log.info? and not opts[:quiet]
+          puts '-----------------------------------------------------------------------'
+          puts WELCOME_MESSAGE
+          puts '-----------------------------------------------------------------------'
+        end
       end # of interpreter.instance_eval
     end
 
     #---[ Default text content for generated files ]------------------------
 
+    WELCOME_MESSAGE = <<-EOB #:nodoc:
+Welcome to AutomateIt!
+
+Learn:
+* See it in action at http://AutomateIt.org/screenshots
+* Read the tutorial at http://AutomateIt.org/tutorial
+* Read the documentation at http://AutomateIt.org/documentation
+* See the README files created in the project
+
+Run:
+* `automateit -p .` -- Starts interactive shell for project
+* `automateit recipes/hello.rb` -- Runs a recipe called recipes/hello.rb
+* `automateit -n recipes/hello.rb` -- Previews recipe
+
+Rake:
+* `rake` -- Starts interactive shell for project
+* `rake hello` -- Runs sample recipe
+* `rake preview` -- Turns on preview mode
+* `rake preview hello` -- Previews the sample recipe
+
+Changes:
+* Sign up for RSS feed at http://automateit.org/changes
+EOB
+
+    welcome_lines = WELCOME_MESSAGE.split(/\n/)
+    welcome_title = welcome_lines.first
+    welcome_body = welcome_lines[2, welcome_lines.size]
+    WELCOME_CONTENT = <<-EOB #:nodoc:
+#-----------------------------------------------------------------------
+#
+# == #{welcome_title}
+#
+#{welcome_body.map{|t| "# %s" % t}.join("\n")}
+#
+#-----------------------------------------------------------------------
+EOB
+
     TAGS_CONTENT = <<-EOB # :nodoc:
+# Put your roles here
 
 #-----------------------------------------------------------------------
 #
 # == TAGS
 #
-# This is an AutomateIt tags file, used by AutomateIt::TagManager::YAML
+# This is an AutomateIt tags file. Use it to assign tags to hosts so you
+# can manage multiple hosts as a group.
 #
-# Use this file to assign tags to hosts using YAML. For example, to
-# assign the tag "myrole" to two computers, named "host1" and "host2",
-# you'd write:
+# For example, in this file assign the tag "myrole" to two computers
+# named "host1" and "host2":
 #
 #     myrole:
 #       - host1
 #       - host2
 #
-# In your recipes, you can then check if the host has these tags:
+# Then check from a recipe if this host has this tag:
 #
 #     if tagged?("myrole")
-#       # Do stuff if this host has the "myrole" tag
+#       # Code will only run if this host is tagged with "myrole"
 #     end
 #
-# You can also retrieve the tags:
+# You can also retrieve tags:
 #
 #     puts "Tags for this host: \#{tags.inspect}"
 #     # => ["myrole"]
 #     puts "Tags for a specific host: \#{tags_for("host1").inspect}"
 #     # => ["myrole"]
-#     puts "Hosts tagged with a set of tags: \#{hosts_tagged_with("myrole").inspect}"
+#     puts "Hosts with a tag: \#{hosts_tagged_with("myrole").inspect}"
 #     # => ["host1", "host2"]
 #
+# You will likely see additional tags which are automatically added
+# based on the host's operating system, architecture, hostnames, etc.
+#
 # You may use ERB statements within this file.
+#
+# See AutomateIt::TagManager for further details.
 #
 #-----------------------------------------------------------------------
     EOB
 
     FIELDS_CONTENT = <<-EOB #:nodoc:
+# Put your fields here
 
 #-----------------------------------------------------------------------
 #
 # == FIELDS
 #
-# This is an AutomateIt fields file, used by
-# AutomateIt::FieldManager::YAML
+# This is an AutomateIt fields file. Fields are useful for extracting
+# configuration-specific arguments out of your recipe logic, and making
+# them easier to share between recipes and access from other programs.
 #
-# Use this file to create a multi-level hash of key value pairs with
-# YAML. This is useful for extracting configuration-specific arguments
-# out of your recipes and make it easier to share them between recipes
-# and command-line Unix programs.
-#
-# You can write lines to declare these the hash with YAML:
+# For example, declare fields using YAML:
 #
 #   foo: bar
 #   mydaemon:
 #     mykey: myvalue
 #
-# And retrieve values in a recipe with:
+# And retrieve field values from a recipe:
 #
 #   lookup("foo") # => "bar"
 #   lookup("mydaemon") # => {"mykey" => "myvalue"}
 #   lookup("mydaemon#mykey") # => "myvalue"
 #
 # You may use ERB statements within this file. Because this file is
-# loaded after the tags, you can use ERB to provide specific fields for
+# loaded after the tags, you can use ERB to dynamically set fields for
 # specific groups of hosts, e.g.:
 #
 #   magical: <%%= tagged?("magical_hosts") ? true : false %>
+#
+# See AutomateIt::FieldManager for further details.
 #
 #-----------------------------------------------------------------------
     EOB
 
     ENV_CONTENT = <<-EOB #:nodoc:
+# Put your environment commands here
 
 #-----------------------------------------------------------------------
 #
 # == ENVIRONMENT
 #
-# This is an environment file for AutomateIt. It's loaded by the
-# AutomateIt::Interpreter immediately after loading the default tags,
-# fields and the contents of your "lib" directory. This file is loaded
-# every time you invoke the AutomateIt interpreter with this project, so
-# it's a good place to put your custom settings so that you can access
-# them from recipes or an interpreter embedded inside your Ruby code.
+# This is an AutomateIt environment file. Use it to customize AutomateIt
+# and provide settings to recipes, interactive shell, or embedded
+# Interpreters using this project.
 #
-# The "self" in this file is the AutomateIt::Interpreter, so you can
-# execute all the same commands that you'd normally put in a recipe.
-# However, note that because this file is executed each time the
-# interpreter is loaded, you probably want to limit the commands added
-# here to setup your interpreter the way you want it and add convenience
-# methods, and not commands that do actual configuration management.
+# The "self" in this file is an Interpreter instance, so you can execute
+# all the same commands that you'd normally put in a recipe.
+#
+# This file is loaded after the project's tags, fields and libraries.
 #
 #-----------------------------------------------------------------------
     EOB
@@ -324,16 +364,21 @@ module AutomateIt
 # == LIB
 #
 # This is your AutomateIt project's "lib" directory. You can put custom
-# plugins and convenience methods into this directory. For example,
-# you'd put your custom PackageManager plugin here or a file that
-# contains a method definition for a command you want to use frequently.
+# plugins and convenience methods into this directory.
 #
-# These files are loaded every time an AutomateIt interpreter is
-# created. It'll load all the "*.rb" files in this directory, and all
-# the "init.rb" files in subdirectories within this directory. Because
-# these files are loaded each time an interpreter is started, you should
-# try to make sure these contents are loaded quickly and don't cause
-# unintended side-effects.
+# For example, create a convenience method for geteting the time by
+# creating a "lib/now.rb" file with the following contents:
+#
+#   def now
+#     DateTime.now
+#   end
+#
+# This will provide a "now" method that's available to your recipes,
+# interactive shell or embedded interpreter.
+#
+# Libraries are loaded every time an AutomateIt interpreter is started.
+# It loads all "*.rb" files in this directory, and all "init.rb" files
+# in subdirectories of this directory.
 #
 #-----------------------------------------------------------------------
     EOB
@@ -343,15 +388,19 @@ module AutomateIt
 #
 # == DIST
 #
-# This is your AutomateIt project's "dist" directory. You should keep
-# files and templates that you wish to distribute into this directory.
-# You can access this path using the "dist" keyword in your recipes, for
-# example:
+# This is your AutomateIt project's "dist" directory. It's a place for
+# keeping files and templates you plan to distribute.
+#
+# You can retrieve this directory's path using the "dist" method in
+# recipes, for example:
+#
+#     # Display the "dist" directory's path
+#     puts dist
 #
 #     # Render the template file "dist/foo.erb"
 #     render(:file => dist+"/foo.erb", ...)
 #
-#     # Or copy the same file
+#     # Or copy the same file somewhere
 #     cp(dist+"/foo.erb", ...)
 #
 #-----------------------------------------------------------------------
@@ -363,11 +412,49 @@ module AutomateIt
 # == RECIPES
 #
 # This is your AutomateIt project's "recipes" directory. You should put
-# recipes into this directory. You can then execute them by running:
+# recipes into this directory.
 #
-#     automateit your_project_path/recipes/your_recipe.rb
+# For example, create a "recipes/hello.rb" file with these contents:
+#
+#   puts "Hello"
+#
+# And execute it with:
+#
+#     automateit recipes/your_recipe.rb
 #
 #-----------------------------------------------------------------------
+    EOB
+
+    RECIPE_HELLO_CONTENT = <<-'EOB' #:nodoc
+puts "Hello, I'm an #{self.class} -- pleased to meet you!"
+puts "I'm in preview mode" if noop?
+    EOB
+
+    RAKEFILE_CONTENT = <<-EOB #:nodoc
+require "automateit"
+
+# Create an Interpreter for project in current directory.
+@interpreter = AutomateIt.new(:project => ".")
+
+# Include Interpreter's methods into Rake session.
+@interpreter.include_in(self)
+
+task :default => :shell
+
+desc "Interactive AutomateIt shell"
+task :shell do
+  AutomateIt::CLI.run
+end
+
+desc "Run a recipe"
+task :hello do
+  invoke "hello"
+end
+
+desc "Preview action, e.g, 'rake preview hello'"
+task :preview do
+  noop true
+end
     EOB
   end
 end
