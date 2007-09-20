@@ -22,7 +22,10 @@ module AutomateIt
     def self.run(*a)
       args, opts = args_and_opts(*a)
       recipe = args.first || opts[:recipe]
-      opts[:project] ||= recipe ? File.join(File.dirname(recipe), "..") : "."
+      if recipe and not opts[:project]
+        opts[:project] = File.join(File.dirname(recipe), "..")
+        opts[:guessed_project] = true
+      end
       opts[:verbosity] ||= Logger::INFO
       if opts[:create]
         Project::create(opts)

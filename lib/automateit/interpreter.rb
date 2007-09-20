@@ -125,6 +125,10 @@ module AutomateIt
     # Options for internal use:
     # * :parent -- Parent plugin instance.
     # * :log -- QueuedLogger instance.
+    # * :guessed_project -- Boolean of whether the project path was guessed. If
+    #   guessed, won't throw exceptions if project wasn't found at the
+    #   specified path. If not guessed, will throw exception in such a
+    #   situation.
     def setup(opts={})
       super(opts.merge(:interpreter => self))
 
@@ -196,6 +200,8 @@ module AutomateIt
             log.debug(PNOTE+"Loading project env: #{env_file}")
             invoke(env_file)
           end
+        elsif not opts[:guessed_project]
+          raise ArgumentError.new("Couldn't find project at: #{project_path}")
         end
       end
     end
