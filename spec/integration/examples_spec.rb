@@ -24,7 +24,7 @@ else
 
     begin
       # Preview examples to cause a NotImplemented error on unsupported platforms
-      AutomateIt::invoke(params[:installer], :verbosity => Logger::WARN, :preview => true)
+      AutomateIt::invoke(params[:installer], :verbosity => Logger::WARN, :preview => true, :friendly_exceptions => false)
 
       it "should install the example" do
         INTERPRETER.instance_eval do
@@ -47,7 +47,7 @@ else
           end
         end
       end
-    rescue NotImplementedError
+    rescue NotImplementedError => e
       puts "NOTE: Can't check examples on this platform, #{__FILE__}"
     end
   end
