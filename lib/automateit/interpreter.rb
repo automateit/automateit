@@ -342,12 +342,33 @@ module AutomateIt
 
     # Does this platform provide euid (Effective User ID)?
     def euid?
-      Process.respond_to?(:euid)
+      begin
+        euid
+        return true
+      rescue
+        return false
+      end
+    end
+    
+    # Return the effective user id.
+    def euid
+      begin
+        return Process.euid
+      rescue NoMethodError => e
+        output = `id -u 2>&1`
+        raise e unless output and $?.exitstatus.zero?
+        begin
+          return output.match(/(\d+)/)[1].to_i
+        rescue IndexError
+          raise e
+        end
+      end
+    
     end
 
     # Does the current user have superuser (root) privileges?
     def superuser?
-      Process.euid.zero?
+      euid.zero?
     end
 
     # Create an Interpreter with the specified +opts+ and invoke
