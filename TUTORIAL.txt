@@ -1,4 +1,4 @@
-== Get Started! A hands-on tutorial for learning AutomateIt
+== A hands-on tutorial for learning AutomateIt
 
 <em>AutomateIt is an open-source tool for automating the setup and maintenance of Unix systems.</em>
 
