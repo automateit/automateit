@@ -35,22 +35,26 @@
 #   # with the "/tmp/tractags_latest" path as an argument:
 #   package.manager.install({"TracTags" => "/tmp/tractags_latest"}, :with => :egg)
 class AutomateIt::PackageManager < AutomateIt::Plugin::Manager
-  # Are these +packages+ installed? Returns +true+ if all +packages+ are
-  # installed, or an array of installed packages when called with an options
-  # hash that contains <tt>:list => true</tt>
+  # Are these +packages+ installed?
+  #
+  # Options:
+  # * :details -- Returns an array containing the boolean result value and an
+  #   array with a subset of installed +packages+. Boolean, defaults to false.
   def installed?(*packages) dispatch(*packages) end
 
-  # Are these +packages+ not installed? Returns +true+ if none of these
-  # +packages+ are installed, or a array of packages that aren't installed
-  # when called with an options hash that contains <tt>:list => true</tt>
+  # Are these +packages+ not installed? 
+  #
+  # Options:
+  # * :details -- Returns an array containing the boolean result value and an
+  #   array with a subset of +packages+ not installed. Boolean, defaults to false.
   def not_installed?(*packages) dispatch(*packages) end
 
-  # Install these +packages+. Returns +true+ if install succeeded; or
-  # +false+ if all packages were already installed.
+  # Install these +packages+. Returns +true+ if any packages are installed
+  # successfully; or +false+ if all packages were already installed.
   def install(*packages) dispatch(*packages) end
 
-  # Uninstall these +packages+. Returns +true+ if uninstall succeeded; or
-  # +false+ if none of the packages were installed.
+  # Uninstall these +packages+. Returns +true+ if any packages are uninstalled
+  # successfully; or +false+ if none of the packages are installed.
   def uninstall(*packages) dispatch(*packages) end
 end
 
@@ -65,7 +69,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
   # installed and returns an array of packages installed.
   #
   # For example:
-  #   _installed_helper?("package1", "package2", :list => true) do |packages, opts|
+  #   _installed_helper?("package1", "package2", :details => true) do |packages, opts|
   #     # Dummy code which reports that these packages are installed:
   #     ["package1]
   #   end
@@ -78,7 +82,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     available = block.call(packages, opts)
     truth = (packages - available).empty?
-    result = opts[:list] ? available : truth
+    result = opts[:details] ? [truth, available] : truth
     log.debug(PNOTE+"installed?(#{packages.inspect}) => #{truth}: #{available.inspect}")
     return result
   end
@@ -92,10 +96,10 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     packages = _list_normalizer(packages)
     packages = packages.keys if Hash === packages
 
-    available = [installed?(packages, :list => true)].flatten
+    available = [installed?(packages, :details => true)].flatten
     missing = packages - available
     truth = (packages - missing).empty?
-    result = opts[:list] ? missing : truth
+    result = opts[:details] ? [truth, missing] : truth
     log.debug(PNOTE+"not_installed?(#{packages.inspect}) => #{truth}: #{missing.inspect}")
     return result
   end
@@ -123,7 +127,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       else packages
       end
 
-    missing = not_installed?(check_packages, :list => true)
+    missing = not_installed?(check_packages, :details => true)[1]
     return false if missing.blank?
 
     install_packages = \
@@ -134,7 +138,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     block.call(install_packages, opts)
 
     return true if noop?
-    unless (failed = not_installed?(check_packages, :list => true)).empty?
+    unless (failed = not_installed?(check_packages, :details => true)[1]).empty?
       raise ArgumentError.new("Couldn't install: #{failed.join(' ')}")
     else
       return true
@@ -164,7 +168,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       else packages
       end
 
-    present = installed?(check_packages, :list => true)
+    present = installed?(check_packages, :details => true)[1]
     return false if present.blank?
 
     uninstall_packages = \
@@ -175,7 +179,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     block.call(uninstall_packages, opts)
 
     return true if noop?
-    unless (failed = installed?(check_packages, :list => true)).empty?
+    unless (failed = installed?(check_packages, :details => true)[1]).empty?
       raise ArgumentError.new("Couldn't uninstall: #{failed.join(' ')}")
     else
       return true

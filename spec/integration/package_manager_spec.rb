@@ -54,8 +54,8 @@ else
     end
 
     it "should find group of packages" do
-      @d.installed?(@package, @fake_package, :list => true).should == [@package]
-      @d.not_installed?(@package, @fake_package, :list => true).should == [@fake_package]
+      @d.installed?(@package, @fake_package, :details => true).should == [false, [@package]]
+      @d.not_installed?(@package, @fake_package, :details => true).should == [false, [@fake_package]]
       # Leaves behind an installed package
     end
 
