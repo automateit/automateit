@@ -354,19 +354,33 @@ describe "AutomateIt::ShellManager" do
   elsif not INTERPRETER.shell_manager.provides_ownership?
     puts "NOTE: Can't check ownership on this platform, #{__FILE__}"
   elsif INTERPRETER.superuser?
+    # Return a pwent and grent of a non-root user
+    def find_mortal_pwent_and_grent
+      while true
+        pwent = Etc.getpwent
+        break if pwent.uid != 0
+      end
+      Etc.endpwent
+      grent = Etc.getgrgid(pwent.gid)
+      return [pwent, grent]
+    end
+
     it "should change the ownership of files (chown)" do
       @m.mktempdircd do
+        pwent, grent = find_mortal_pwent_and_grent
+        user =  pwent.name
+        uid = pwent.uid
+        group = grent.name
+        gid = grent.gid
+
         target = "foo"
-        uid = 1
-        group = "daemon"
-        gid = Etc.getgrnam(group).gid
 
         @m.touch(target)
         stat = File.stat(target)
         (stat.uid == uid).should be_false
         (stat.gid == gid).should be_false
 
-        @m.chown(uid, group, target).should == target
+        @m.chown(user, group, target).should == target
         stat = File.stat(target)
         (stat.uid == uid).should be_true
         (stat.gid == gid).should be_true
@@ -377,9 +391,12 @@ describe "AutomateIt::ShellManager" do
 
     it "should change the ownership of files recursively (chown_R)" do
       @m.mktempdircd do
-        uid = 1
-        group = "daemon"
-        gid = Etc.getgrnam(group).gid
+        pwent, grent = find_mortal_pwent_and_grent
+        user =  pwent.name
+        uid = pwent.uid
+        group = grent.name
+        gid = grent.gid
+
         dir = "foo/bar"
         file = dir+"/baz"
 
@@ -403,6 +420,31 @@ describe "AutomateIt::ShellManager" do
         (stat.gid == gid).should be_true
 
         @m.chown_R(uid, group, dir).should be_false
+      end
+    end
+    
+    it "should translate :owner to :user for Cfengine refugees" do
+      @m.mktempdircd do
+        pwent, grent = find_mortal_pwent_and_grent
+        user =  pwent.name
+        uid = pwent.uid
+        group = grent.name
+        gid = grent.gid
+
+        dir = "foo/bar"
+        file = dir+"/baz"
+
+        @m.mkdir_p(dir)
+        @m.touch(file)
+
+        @m.chperm(dir, :recursive => true, :owner => user, :group => group).should == dir
+
+        stat = File.stat(file)
+        (stat.uid == uid).should be_true
+        (stat.gid == gid).should be_true
+        stat = File.stat(dir)
+        (stat.uid == uid).should be_true
+        (stat.gid == gid).should be_true
       end
     end
   else

@@ -129,6 +129,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   # See ShellManager#mkdir
   def mkdir(dirs, opts={}, &block)
+    _replace_owner_with_user(opts)
     kind = opts[:parents] ? :mkdir_p : :mkdir
     missing = [dirs].flatten.select{|dir| ! File.directory?(dir)}
     result = false
@@ -395,6 +396,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   # See ShellManager#chperm
   def chperm(targets, opts={})
+    _replace_owner_with_user(opts)
     user = \
       if opts[:user]
         opts[:user] = opts[:user].to_s if opts[:user].is_a?(Symbol)

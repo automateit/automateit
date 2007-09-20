@@ -308,6 +308,12 @@ end
 #
 # Base class for all ShellManager drivers.
 class AutomateIt::ShellManager::BaseDriver < AutomateIt::Plugin::Driver
+  def _replace_owner_with_user(opts)
+    value = opts.delete(:owner)
+    opts[:user] = value  if value and not opts[:user]
+    return opts
+  end
+  protected :_replace_owner_with_user
 end
 
 # Drivers
