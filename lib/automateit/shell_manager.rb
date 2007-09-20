@@ -3,87 +3,9 @@
 # The ShellManager provides Unix-like shell commands for manipulating files and
 # executing commands.
 #
-# === WARNING: Previewing custom code can be dangerous!
-#
-# AutomateIt provides a way to preview commands without actually running them.
-# The USAGE.txt[link:files/USAGE_txt.html] describes the basic concepts and use
-# of preview when used with ShellCommands.
-#
-# However, AutomateIt only provides previewing logic for its own commands.
-# Recipe authors are responsible for providing previewing logic for their own
-# custom code.
-#
-# Here's what not to do with previews:
-#
-#   puts "Hello!"
-#
-# The above +puts+ method will execute in both preview and non-preview modes.
-# To execute custom code only in a specific mode, wrap it with conditionals.
-#
-# For example:
-#
-#  if preview?
-#    puts "This is a preview"
-#  end
-#
-#  preview_for("PREVIEW: Will run custom commands") do
-#    puts "Custom commands"
-#  end
-#
-# When in preview mode, the above recipe will display:
-#
-#  This is a preview
-#  => PREVIEW: Will run custom commands
-#
-# When run normally without preview mode:
-#
-#  Custom commands
-#
-# Therefore, wrap all non-AutomateIt commands (e.g. +system+) that shouldn't be
-# executed during the preview with conditionals.
-#
-# === WARNING: Changing directories during preview can be dangerous!
-#
-# AutomateIt will only *pretend* to make directories in preview mode. In
-# preview mode, it will also only *pretend* to change into non-existent
-# directories when using commands like #cd, #mkdir and #mktempdircd.
-#
-# This can be *disastrous* if you're executing non-AutomateIt commands (e.g.
-# +system+) that use *relative* *paths* and expect to be run inside the
-# newly-created temporary directory because the +chdir+ didn't actually happen.
-#
-# For example:
-#
-#   # DON'T EVER DO THIS!!!
-#   mkdir_p "/tmp/foo/bar" do
-#     system "echo 'I'm going to do: rm -rf *'"
-#   end
-#
-# If that directory didn't already exist, then running the above code in
-# preview mode would cause the +system+ command to actually run! If that wasn't
-# an +echo+ command, it would have deleted the contents of your *current*
-# directory -- not the <tt>/tmp/foo/bar</tt> directory -- because that
-# directory wasn't actually created due to the preview mode!
-#
-# The correct way to write the above example is:
-#
-#   mkdir_p "/tmp/foo/bar" do
-#     preview_for("PREVIEW: Deleting all files in directory /tmp/foo/bar") do
-#       system "echo 'I'm going to do: rm -rf *'"
-#     end
-#   end
-#
-# The Interpreter#preview_for method provides conditional execution of blocks.
-# When running in preview mode, it will display the supplied message and not
-# execute the block containing the +system+ command:
-#
-#   => PREVIEW: Deleting all files in directory /tmp/foo/bar
-#
-# When running without preview mode, the method will not display the message
-# but will call block, generating the following output:
-#
-#   ** echo 'I'm going to do: rm -rf *'"
-#   I'm going to do: rm -rf *
+# *WARNING*: Previewing code can be dangerous. Read
+# previews.txt[link:files/docs/previews_txt.html] for instructions on how to
+# write code that can be safely previewed.
 class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
   alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :cp_R, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch
@@ -186,9 +108,9 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   # changes to the directory for the duration of the block, and then changes
   # back to the previous directory at the end.
   #
-  # CAUTION: Read notes at the top of ShellManager for potentially
-  # problematic situations that may be encountered if using this command in
-  # preview mode!
+  # *WARNING*: Previewing code can be dangerous. Read
+  # previews.txt[link:files/docs/previews_txt.html] for instructions on how to
+  # write code that can be safely previewed.
   def cd(dir, opts={}, &block) dispatch(dir, opts, &block) end
 
   # Returns the current directory.
@@ -201,9 +123,9 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   # * :parents -- Create parents, like "mkdir -p". Boolean.
   # * :mode, :user, :group -- See #chperm
   #
-  # CAUTION: Read notes at the top of ShellManager for potentially
-  # problematic situations that may be encountered if using this command in
-  # preview mode!
+  # *WARNING*: Previewing code can be dangerous. Read
+  # previews.txt[link:files/docs/previews_txt.html] for instructions on how to
+  # write code that can be safely previewed.
   def mkdir(dirs, opts={}, &block) dispatch(dirs, &block) end
 
   # Create a directory or directories with their parents. Returns an array of
@@ -217,9 +139,9 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   #   File.exists?("/tmp/foo") # => true
   #   File.exists?("/tmp/foo/bar") # => true
   #
-  # CAUTION: Read notes at the top of ShellManager for potentially
-  # problematic situations that may be encountered if using this command in
-  # preview mode!
+  # *WARNING*: Previewing code can be dangerous. Read
+  # previews.txt[link:files/docs/previews_txt.html] for instructions on how to
+  # write code that can be safely previewed.
   def mkdir_p(dirs, opts={}, &block) dispatch(dirs, &block) end
 
   # Remove a directory or directories. The directories must be empty or an

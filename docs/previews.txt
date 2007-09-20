@@ -1,0 +1,86 @@
+== Previews
+
+AutomateIt provides a way to preview commands without actually running them.
+Read the TUTORIAL.txt[link:files/TUTORIAL_txt.html] to learn the basic previewing concepts and commands. 
+
+=== WARNING: Previewing code can be dangerous!
+
+AutomateIt only provides logic for previewing its own commands. Recipe authors
+are responsible for providing previewing logic for their own custom code.
+
+Here's what *not* to do with previews:
+
+  puts "Hello!"
+
+The above +puts+ method will execute in both preview and non-preview modes.
+To execute custom code only in a specific mode, wrap it with conditionals.
+
+For example:
+
+ if preview?
+   puts "This is a preview"
+ end
+
+ preview_for("PREVIEW: Will run custom commands") do
+   puts "Custom commands"
+ end
+
+When in preview mode, the above recipe will display:
+
+ This is a preview
+ => PREVIEW: Will run custom commands
+
+When run normally without preview mode:
+
+ Custom commands
+
+Therefore, wrap all non-AutomateIt commands (e.g. +system+) that shouldn't be
+executed during the preview with conditionals.
+
+=== WARNING: Changing directories during preview can be dangerous!
+
+AutomateIt will only *pretend* to make directories in preview mode. In
+preview mode, it will also only *pretend* to change into non-existent
+directories when using commands like #cd, #mkdir and #mktempdircd.
+
+This can be *disastrous* if you're executing non-AutomateIt commands (e.g.
++system+) that use *relative* *paths* and expect to be run inside the
+newly-created temporary directory because the +chdir+ didn't actually happen.
+
+For example:
+
+  # DON'T EVER DO THIS!!!
+  mkdir_p "/tmp/foo/bar" do
+    system "echo 'I'm going to do: rm -rf *'"
+  end
+
+If that directory didn't already exist, then running the above code in
+preview mode would cause the +system+ command to actually run! If that wasn't
+an +echo+ command, it would have deleted the contents of your *current*
+directory -- not the <tt>/tmp/foo/bar</tt> directory -- because that
+directory wasn't actually created due to the preview mode!
+
+The correct way to write the above example is:
+
+  mkdir_p "/tmp/foo/bar" do
+    preview_for("PREVIEW: Deleting all files in directory /tmp/foo/bar") do
+      system "echo 'I'm going to do: rm -rf *'"
+    end
+  end
+
+The Interpreter#preview_for method provides conditional execution of blocks.
+When running in preview mode, it will display the supplied message and not
+execute the block containing the +system+ command:
+
+  => PREVIEW: Deleting all files in directory /tmp/foo/bar
+
+When running without preview mode, the method will not display the message
+but will call block, generating the following output:
+
+  ** echo 'I'm going to do: rm -rf *'"
+  I'm going to do: rm -rf *
+
+=== Conclusion
+
+Keeping the preview issues in mind and wrapping custom code with conditionals
+will help you write code that can be safely previewed.

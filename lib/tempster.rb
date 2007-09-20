@@ -25,8 +25,8 @@ require 'fileutils'
 # +system+) that use *relative* *paths* and expect to be run inside the
 # newly-created temporary directory because the +chdir+ didn't actually happen.
 #
-# Read more on this issue and how to deal with it in the
-# AutomateIt::ShellManager class documentation.
+# Read previews.txt[link:files/docs/previews_txt.html] for instructions on how
+# to write code that can be safely previewed.
 #
 # == Credits
 # * Random string generator taken from
@@ -147,7 +147,7 @@ class Tempster
 
   # Creates a temporary directory.
   #
-  # WARNING: See WARNING at the top of this class's documentation!
+  # *WARNING*: See WARNING text at the top of this class's documentation!
   def self.mktempdir(opts={}, &block)
     _tempster({:kind => :directory}.merge(opts), &block)
 
@@ -156,7 +156,7 @@ class Tempster
   # Creates a temporary directory and changes into it using +chdir+. This is a
   # shortcut for using +mktempdir+ with the <tt>:cd => true</tt> option.
   #
-  # WARNING: See WARNING at the top of this class's documentation!
+  # *WARNING*: See WARNING text at the top of this class's documentation!
   def self.mktempdircd(opts={}, &block)
     _tempster({:kind => :directory, :cd => true}.merge(opts), &block)
   end

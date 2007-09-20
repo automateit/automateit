@@ -1,0 +1,50 @@
+== User-friendly error messages
+
+AutomateIt provides user-friendly error messages that make it easier to fix
+problems in recipes and templates. These pinpoint the cause and show code
+snippets.
+
+For example, one of the sample recipes is executed -- but there's a problem and
+the output is shown below. 
+
+The message is telling us the error happened in the
+'examples/basic/recipes/install.rb' recipe at line 47. The first snippet shows
+the end of a failed TemplateManager +render+ call. 
+
+In the second code snippet, we see there was a problem with the ERB template
+'dist/myapp_server.erb'. This template failed at line 5 because it couldn't
+find a variable called +pat+.
+
+With the help of the second snippet, we quickly see that there's a typo -- that
+bad variable should have been +path+. Problem solved!
+
+  root@kagami> automateit -n examples/basic/recipes/install.rb
+  !! Problem with recipe 'examples/basic/recipes/install.rb' at line 47
+
+     41            :to => "/etc/init.d/myapp_server",
+     42            :mode => 0555,
+     43            :locals => {
+     44               :path => lookup(:path),
+     45               :user => lookup(:user),
+     46               :port => lookup(:port),
+   * 47            }
+     48     )
+     49
+
+  (NestedError) Problem with template 'dist/myapp_server.erb' at line 5:
+
+     1 #!/usr/bin/env ruby
+     2
+     3 user = "<%=user%>"
+     4 port = "<%=port%>"
+   * 5 path = "<%=pat%>"
+     6 pid = "mongrel.pid"
+     7
+
+  (NameError) undefined local variable or method `pat' for #<AutomateIt::TemplateManager::ERB:0xb78a4e8c>
+    /home/igal/workspace/automateit/app/lib/helpful_erb.rb:60:in `result'
+    /home/igal/workspace/automateit/app/lib/automateit/template_manager/erb.rb:105:in `render'
+    (eval):2:in `render'
+    examples/basic/recipes/install.rb:47:in `invoke'
+
+  => Use 'automateit --trace' to see complete backtrace

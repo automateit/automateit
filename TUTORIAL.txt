@@ -376,7 +376,9 @@ To run this recipe with noop mode, pass the <tt>-n</tt> option to the Interprete
 
 Notice how the directory wasn't actually created? This is great because you can see exactly what commands AutomateIt will run without actually having it apply the changes.
 
-WARNING: Previewing non-AutomateIt commands (e.g., +system+) can be dangerous! Please read the warnings in AutomateIt::ShellManager that explain how to correctly write custom code that works in preview mode.
+*WARNING*: Previewing code can be dangerous. Read
+previews.txt[link:files/docs/previews_txt.html] for instructions on how to
+write code that can be safely previewed.
 
 === Conclusion
 

@@ -3,7 +3,7 @@ module AutomateIt
   #
   # The Interpreter runs AutomateIt commands.
   #
-  # The USAGE.txt[link:files/USAGE_txt.html] file provides hands-on examples
+  # The TUTORIAL.txt[link:files/TUTORIAL_txt.html] file provides hands-on examples
   # for using the Interpreter.
   #
   # === Aliased methods
@@ -54,7 +54,9 @@ module AutomateIt
   # * which -- AutomateIt::ShellManager#which
   # * which! -- AutomateIt::ShellManager#which!
   #
+  # [[[ <a name="embedding"> ]]]
   # === Embedding the Interpreter
+  # [[[ </a> ]]]
   #
   # The AutomateIt Interpreter can be embedded inside a Ruby program:
   #
@@ -74,6 +76,10 @@ module AutomateIt
   #     puts superuser?
   #     sh "ls -la"
   #   end
+  #
+  # See the #include_in and #add_method_missing_to methods for instructions on
+  # how to more easily dispatch commands from your program to the Interpreter
+  # instance.
   class Interpreter < Common
     # Plugin instance that instantiated the Interpreter.
     attr_accessor :parent
@@ -531,7 +537,7 @@ module AutomateIt
 
     # Creates wrapper methods in +object+ to dispatch calls to an Interpreter instance.
     #
-    # WARNING: This will overwrite all methods and variables in the target +object+ that have the same names as the Interpreter's methods. You should considerer specifying the +methods+ to limit the number of methods included to minimize surprises due to collisions. If +methods+ is left blank, will create wrappers for all Interpreter methods.
+    # *WARNING*: This will overwrite all methods and variables in the target +object+ that have the same names as the Interpreter's methods. You should considerer specifying the +methods+ to limit the number of methods included to minimize surprises due to collisions. If +methods+ is left blank, will create wrappers for all Interpreter methods.
     #
     # For example, include an Interpreter instance into a Rake session, which will override the FileUtils commands with AutomateIt equivalents:
     #
