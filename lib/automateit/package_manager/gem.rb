@@ -37,6 +37,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
 
   # Special options:
   # * :docs -- If set to false, won't install rdoc or ri.
+  # * :source -- URL source to retrieve Gems from.
   #
   # See PackageManager#install
   def install(*packages)
@@ -60,6 +61,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
       cmd = "gem install -y"
       cmd << " --no-ri" if opts[:ri] == false or opts[:docs] == false
       cmd << " --no-rdoc" if opts[:rdoc] == false or opts[:docs] == false
+      cmd << " --source #{opts[:source]}" if opts[:source]
       cmd << " "+list.join(" ")
       cmd << " " << opts[:args] if opts[:args]
       cmd << " 2>&1"
