@@ -3,7 +3,18 @@
 # The Gem driver for the PackageManager provides a way to manage software
 # packages for RubyGems using the +gem+ command.
 class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
-  depends_on :programs => %w(gem)
+  depends_on \
+    :programs => %w(gem), 
+    :callbacks => [lambda{
+      # TODO PackageManager::Gem -- Misleading #depends_on makes entire driver unavailable, although only #install requires PTY.
+      begin
+        require 'expect'
+        require 'pty'
+        return true
+      rescue LoadError
+        return false
+      end
+    }]
 
   def suitability(method, *args) # :nodoc:
     # Never select GEM as the default driver
