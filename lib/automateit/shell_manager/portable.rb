@@ -129,11 +129,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   # See ShellManager#mkdir
   def mkdir(dirs, opts={}, &block)
-    kind = if opts[:parents]
-             :mkdir_p
-           else
-             :mkdir
-           end
+    kind = opts[:parents] ? :mkdir_p : :mkdir
     missing = [dirs].flatten.select{|dir| ! File.directory?(dir)}
     result = false
     if missing.empty? and not block
