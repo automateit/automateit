@@ -24,7 +24,7 @@ class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
   # See AddressManager#add
   def add(opts)
     announcements = opts[:announcements].to_i || AutomateIt::AddressManager::DEFAULT_ANNOUNCEMENTS
-    raise SecurityEror.new("you must be root") unless Process.euid.zero?
+    raise SecurityError.new("you must be root") unless superuser?
     raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
     return false if has?(opts)
     interpreter.sh(_add_or_remove_command(:add, opts))
@@ -37,7 +37,7 @@ class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
   # See AddressManager#remove
   def remove(opts)
     return false unless has?(opts)
-    raise SecurityEror.new("you must be root") unless Process.euid.zero?
+    raise SecurityError.new("you must be root") unless superuser?
     raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
     return interpreter.sh(_add_or_remove_command(:remove, opts))
   end
