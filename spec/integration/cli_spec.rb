@@ -157,7 +157,7 @@ describe "AutomateIt::CLI" do
       HERE
 
       File.open(recipe, "w+"){|h| h.write(<<-HERE)}
-        lookup("*") 
+        lookup("*")
         lookup("key")
         lookup("hash")
         lookup("hash")["leafkey"]
@@ -204,22 +204,20 @@ describe "AutomateIt::CLI" do
 end
 
 describe AutomateIt::CLI, " without a project" do
-  def on_recipe(&block)
+  def on_recipe(opts={})
     INTERPRETER.mktempdircd do
       recipe = "recipe.rb"
       File.open(recipe, "w+"){|h| h.write("42")}
-      block.call(recipe)
+      args = [recipe]
+      args << opts unless opts.blank?
+      return AutomateIt::CLI.run(*args)
     end
   end
 
   it "should not fail to run a recipe with a non-existent guessed project path" do
-    on_recipe do |recipe|
-      AutomateIt::CLI.run(recipe).should == 42
-    end
+    on_recipe().should == 42
   end
   it "should fail to run a recipe with an non-existent but explicit project path" do
-    on_recipe do |recipe|
-      lambda{ AutomateIt::CLI.run(recipe, :project => "not_a_real_project")}.should raise_error(ArgumentError)
-    end
+    lambda{ on_recipe(:project => "not_a_real_project") }.should raise_error(ArgumentError)
   end
 end
