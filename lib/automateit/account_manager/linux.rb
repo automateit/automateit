@@ -2,7 +2,9 @@
 #
 # A Linux-specific driver for the AccountManager.
 class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portable
-  depends_on :programs => %w(useradd usermod userdel groupadd groupmod groupdel)
+  depends_on \
+    :programs => %w(useradd usermod userdel groupadd groupmod groupdel), 
+    :callbacks => [lambda{AutomateIt::AccountManager::Portable.has_etc?}]
 
   def suitability(method, *args) # :nodoc:
     return available? ? 2 : 0
@@ -16,7 +18,7 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
   def nscd?
     @nscd ||= interpreter.which("nscd")
   end
-
+  
   #.......................................................................
 
   # See AccountManager#add_user

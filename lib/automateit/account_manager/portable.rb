@@ -4,10 +4,26 @@
 # for doing queries and lacks methods such as +add_user+. Platform-specific
 # drivers inherit from this class and provide these methods.
 class ::AutomateIt::AccountManager::Portable < ::AutomateIt::AccountManager::BaseDriver
-  depends_on :nothing
+  depends_on :callbacks => [lambda{AutomateIt::AccountManager::Portable.has_etc?}]
 
   def suitability(method, *args) # :nodoc:
     return 1
+  end
+  
+  # Does this platform provide a way of querying users and groups through 
+  # the 'etc' module?
+  def self.has_etc?
+    begin
+      require 'etc'
+      return defined?(Etc)
+    rescue LoadError
+      return false
+    end
+  end
+  
+  # Alias for AccountManager::Portable.has_etc?
+  def has_etc?
+    self.has_etc?
   end
 
   #.......................................................................
