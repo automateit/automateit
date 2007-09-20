@@ -47,10 +47,7 @@ module AutomateIt
       def superuser?() @interpreter.superuser? end
       
       # See Interpreter#nitpick
-      def nitpick(msg) @interpreter.nitpick(msg) end
-      
-      # See Interpreter#is_nitpick
-      def is_nitpick(value=nil) @interpreter.is_nitpick(value) end
+      def nitpick(value=nil) @interpreter.nitpick(value) end
     end
   end
 end

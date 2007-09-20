@@ -574,18 +574,19 @@ module AutomateIt
       object.instance_eval(text)
     end
 
-    # Get or set mode to display nitpick debug messages? Only useful for debugging AutomateIt internals.
-    def is_nitpick(value=nil)
-      if value.nil?
-        return @is_nitpick == true
-      else
-        @is_nitpick = value
+    # Use to manage nitpick message for debugging AutomateIt internals. 
+    #
+    # Arguments:  
+    # * nil -- Returns boolean of whether nitpick messages will be displayed. 
+    # * Boolean -- Sets nitpick state.
+    # * String or Symbol -- Displays nitpick message if state is on.
+    def nitpick(value=nil)
+      case value
+      when NilClass: @nitpick
+      when TrueClass, FalseClass: @nitpick = value
+      when String, Symbol: puts "%% #{value}" if @nitpick
+      else raise TypeError.new("Unknown nitpick type: #{value.class}")
       end
-    end
-
-    # Display a nitpick debug message. Only useful for debugging Automateit internals.
-    def nitpick(msg)
-      puts "%% #{msg}" if is_nitpick
     end
   end
 end
