@@ -4,7 +4,7 @@
     - (!) Normalized PackageManager methods and ShellManager#chperm to use consistent ':details => true' option.
     - Fixed bug in ShellManager and Tempster that created temporary files and directories in preview mode.
     - Created 'preview' methods and provided clearer documentation for them, these replace the old 'noop' commands.
-    - Made it easier to embed the Interpreter using new methods: 'include_in' and 'add_method_missing_to'. Included Rakefile with default and example projects to demonstrate embedding.
+    - Made it easier to embed the Interpreter using new methods 'include_in' and 'add_method_missing_to'. Included Rakefile with default and example projects to demonstrate embedding.
     - Improved AccountManager, it can set and change passwords on user accounts.
     - Improved TagManager, it lazy-loads tags to speed startup.
     - Improved ShellManager, TemplateManager and EditManager so they translate :owner to :user for Cfengine refugees.
