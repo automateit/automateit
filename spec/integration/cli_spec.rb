@@ -33,6 +33,7 @@ describe "AutomateIt::CLI" do
   end
 
   it "should provide an interactive shell" do
+    # FIXME this seems to break IRB somehow for breakpoints, why?!
     # Mock IRB to run shell and return it to unmocked state when done
     begin
       $irb_under_test = true
@@ -186,6 +187,18 @@ describe "AutomateIt::CLI" do
       HERE
 
       AutomateIt::CLI.run(first).should == 42
+    end
+  end
+
+  it "should be able to run default project" do
+    INTERPRETER.mktempdircd do
+      project = "myproject"
+      AutomateIt::CLI.run(:create => project, :verbosity => Logger::WARN)
+
+      INTERPRETER.cd project do
+        output = `rake -I #{AutomateIt_Lib} preview hello`
+        output.should match(/I'm in preview mode/)
+      end
     end
   end
 end
