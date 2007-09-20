@@ -19,7 +19,9 @@ end
 
 # == EditManager::Basic
 #
-# Provides a way to edit files and strings. See documentation for EditSession.
+# Provides a way to edit files and strings.
+#
+# See documentation for EditSession.
 class AutomateIt::EditManager::Basic < AutomateIt::EditManager::BaseDriver
   depends_on :nothing
 
