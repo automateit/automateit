@@ -25,7 +25,7 @@ def specify(*files)
 
   # Change the ownership of the newly-created coverage directory back to that
   # of the user which owns the top-level directory.
-  if @rcov 
+  if @rcov
     Rake::Task[:chown].invoke
   end
 end
@@ -236,16 +236,23 @@ namespace :install do
   desc "Install Gem from 'pkg' dir without docs, removing existing Gem first"
   task :local do
     load_automateit
-    @interpreter.package_manager.uninstall "automateit", :with => :gem
-    sh "sudo gem install -y pkg/*.gem --no-ri --no-rdoc"
+    Rake::Task[:uninstall].invoke
+    #sh "sudo gem install -y pkg/*.gem --no-ri --no-rdoc"
+    @interpreter.package_manager.install({"automateit" => Dir["pkg/*.gem"].first}, :with => :gem, :docs => false)
   end
 
   desc "Install Gem from website without docs, removing existing Gem first"
   task :remote do
     load_automateit
-    @interpreter.package_manager.uninstall "automateit", :with => :gem
-    sh "sudo gem install -y -r -s http://automateit.org/pub automateit --no-ri --no-rdoc"
+    Rake::Task[:uninstall].invoke
+    #sh "sudo gem install -y -r -s http://automateit.org/pub automateit --no-ri --no-rdoc"
+    @interpreter.package_manager.install("automateit", :source => "http://automateit.org/pub", :with => :gem, :docs => false)
   end
+end
+
+task :uninstall do
+  load_automateit
+  @interpreter.package_manager.uninstall "automateit", :with => :gem
 end
 
 #===[ fin ]=============================================================
