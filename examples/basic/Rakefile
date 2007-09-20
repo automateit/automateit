@@ -5,7 +5,7 @@ require "automateit"
 # Create an Interpreter for project in current directory.
 @interpreter = AutomateIt.new(:project => ".")
 
-# Include methods into Rake session, see "install" task for details.
+# Include Interpreter's 'invoke' and 'noop' methods into Rake session.
 @interpreter.include_in(self, %w(invoke noop))
 
 desc "Install myapp server"
