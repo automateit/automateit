@@ -117,38 +117,65 @@ task :chown do
   end
 end
 
-desc "Generate documentation"
-task :rdoc do
-  # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-  sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib README.txt TUTORIAL.txt TESTING.txt"
-  # Create a tutorial index
-  File.open("doc/tutorial.html", "w+") do |writer|
-    writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
+namespace :rdoc do
+  desc "Generate documentation"
+  task :make do
+    # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
+    sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib docs/*.txt README.txt TUTORIAL.txt TESTING.txt"
+    # Create a tutorial index
+    File.open("doc/tutorial.html", "w+") do |writer|
+      writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
+    end
   end
-end
 
-desc "Generate documentation for specific files in an endless loop"
-task :rdocloop do
-  sources_and_targets = {
-    "doc/files/TUTORIAL_txt.html" => "TUTORIAL.txt"
-  }
-
-  while true
-    different = false
-    for source, target in sources_and_targets
-      if ! File.exists?(target) or (File.exists?(target) and File.mtime(target) > File.mtime(source))
-        different = true
-        break
+  desc "Rewrite RDoc HTML by interpolating custom tags"
+  task :rewrite do
+    require 'cgi'
+    pattern = /(\[{3})\s*(.+?)\s*(\]{3})/m
+    for filename in Dir["doc/**/*.html"]
+      input = File.read(filename)
+      next unless input and input.match(pattern)
+      puts filename
+      output = input.gsub(pattern){|m| CGI.unescapeHTML($2)}
+      if input != output
+        FileUtils.mv(filename, filename+".bak", :verbose => true)
+        File.open(filename, "w+"){|h| h.write(output)}
       end
     end
+  end
 
-    puts "checking %s" % File.mtime(target)
-    puts "different" if different
+  desc "Undo rewrite by restoring backups"
+  task :undo do
+    for filename in Dir["doc/**/*.html.bak"]
+      FileUtils.mv(filename, filename.sub(/\.bak$/, ''), :verbose => true)
+    end
+  end
 
-    sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' %s" % sources_and_targets.values.join(" ") if different
-    sleep 1
+  desc "Generate documentation for specific files in an endless loop"
+  task :loop do
+    sources_and_targets = {
+      "doc/files/TUTORIAL_txt.html" => "TUTORIAL.txt"
+    }
+
+    while true
+      different = false
+      for source, target in sources_and_targets
+        if ! File.exists?(target) or (File.exists?(target) and File.mtime(target) > File.mtime(source))
+          different = true
+          break
+        end
+      end
+
+      puts "checking %s" % File.mtime(target)
+      puts "different" if different
+
+      sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' %s" % sources_and_targets.values.join(" ") if different
+      sleep 1
+    end
   end
 end
+
+task :rdoc => ["rdoc:make", "rdoc:rewrite"]
 
 desc "Profile the specs"
 task :prof do
@@ -187,16 +214,16 @@ spec = Gem::Specification.new do |s|
   s.author = "Igal Koshevoy"
   s.autorequire = "automateit"
   s.bindir = 'bin'
-  s.date = File.mtime('lib/automateit/root.rb')
+  s.date = File.mtime('lib/automateit/constants.rb')
   s.email = "igal@pragmaticraft.org"
   s.executables = Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)}
   s.extra_rdoc_files = %w(README.txt TUTORIAL.txt TESTING.txt CHANGES.txt)
-  s.files = %w(Rakefile gpl.txt env.sh) + FileList["{bin,lib,misc,examples}/**/*"]
+  s.files = %w(Rakefile gpl.txt env.sh) + FileList["{docs,bin,lib,misc,examples}/**/*"]
   s.has_rdoc = true
   s.homepage = "http://automateit.org/"
   s.name = "automateit"
   s.platform = Gem::Platform::RUBY
-  s.rdoc_options << %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' << %w(lib)
+  s.rdoc_options << %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' << %w(lib docs)
   s.require_path = "lib"
   s.rubyforge_project = 'automateit'
   s.summary = "AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems"
