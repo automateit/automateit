@@ -24,6 +24,7 @@ Plugins:
 * AutomateIt::AccountManager -- Manipulates users and groups.
 * AutomateIt::AddressManager -- Manipulates host's network addresses.
 * AutomateIt::EditManager -- Edits files and strings.
+* AutomateIt::EditManager::EditSession -- Commands for editing files.
 * AutomateIt::FieldManager -- Queries configuration variables.
 * AutomateIt::PackageManager -- Manipulates software packages.
 * AutomateIt::PlatformManager -- Queries platform, such as its OS version.
@@ -31,10 +32,6 @@ Plugins:
 * AutomateIt::ShellManager -- Manipulates files and executes Unix commands.
 * AutomateIt::TagManager -- Groups hosts by role and queries membership.
 * AutomateIt::TemplateManager -- Renders templates to files.
-
-Useful drivers:
-* AutomateIt::EditManager::Basic::EditSession -- Commands for editing files.
-* AutomateIt::TemplateManager::ERB -- Commands for rendering files.
 
 === Legal
 
