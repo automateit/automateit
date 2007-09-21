@@ -46,6 +46,11 @@ EOB
     opts[:xml] = v
   end
 
+  parser.on("-h", "--help", "Display this help message") do |v|
+    puts parser
+    exit
+  end
+
   args = parser.parse!.dup
 
   # Clear ARGV so that IRB doesn't try to parse our options
