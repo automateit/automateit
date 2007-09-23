@@ -159,6 +159,23 @@ module AutomateIt
         driver.send(method, *args, &block)
       end
 
+      # Same as #dispatch_to but returns nil if couldn't dispatch, rather than
+      # raising an exception.
+      def dispatch_safely_to(method, *args, &block)
+        begin
+          dispatch_to(method, *args, &block)
+        rescue NotImplementedError
+          nil
+        end
+      end
+
+      # Same as #dispatch but returns nil if couldn't dispatch, rather than
+      # raising an exception.
+      def dispatch_safely(*args, &block)
+        method = caller[0].match(/:in `(.+?)'/)[1].to_sym
+        dispatch_safely_to(method, *args, &block)
+      end
+
       # Returns structure which helps choose a suitable driver for the +method+
       # and +args+. Result is a hash of driver tokens and their suitability
       # levels.
