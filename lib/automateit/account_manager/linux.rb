@@ -3,7 +3,7 @@
 # A Linux-specific driver for the AccountManager.
 class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portable
   depends_on \
-    :programs => %w(useradd usermod userdel groupadd groupmod groupdel), 
+    :programs => %w(passwd useradd usermod userdel groupadd groupmod groupdel), 
     :callbacks => [lambda{AutomateIt::AccountManager::Portable.has_etc?}]
 
   def suitability(method, *args) # :nodoc:
@@ -97,6 +97,10 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
 
   # See AccountManager#passwd
   def passwd(user, password, opts={})
+    require 'open4'
+    require 'expect'
+    require 'pty'
+
     quiet = (opts[:quiet] or not log.info?)
 
     unless users[user]
@@ -108,10 +112,6 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
       end
     end
 
-    require 'open4'
-    require 'expect'
-    require 'pty'
-
     case user
     when Symbol: user = user.to_s
     when Integer: user = users[user]
@@ -119,12 +119,24 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
     else raise TypeError.new("Unknown user type: #{user.class}")
     end
 
-    exitstruct = Open4::popen4("passwd %s 2>&1" % user) do |pid, sin, sout, serr|
-      $expect_verbose = ! quiet
-      2.times do
-        sout.expect(/:/)
-        sin.puts password
-        puts "*" * 12 unless quiet
+    tries = 3
+    begin
+      exitstruct = Open4::popen4("passwd %s 2>&1" % user) do |pid, sin, sout, serr|
+        $expect_verbose = ! quiet
+        2.times do
+          sout.expect(/:/)
+          sin.puts password
+          puts "*" * 12 unless quiet
+        end
+      end
+      ### raise Errno::EPIPE.new
+    rescue Errno::EPIPE => e
+      # TODO AccountManager::Linux#passwd -- EPIPE exception randomly thrown even when command succeeds. How to eliminate it? How to differentiate between this false error and a real one?
+      if tries <= 0
+        raise e
+      else
+        tries -= 1
+        retry
       end
     end
 
