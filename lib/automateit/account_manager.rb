@@ -103,3 +103,4 @@ end
 # Drivers
 require 'automateit/account_manager/portable'
 require 'automateit/account_manager/linux'
+require 'automateit/account_manager/passwd'
