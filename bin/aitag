@@ -69,6 +69,11 @@ EOB
     exit
   end
 
+  parser.on("-v", "--version", "Display version") do |v|
+    puts AutomateIt::VERSION
+    exit 0
+  end
+
   args = parser.parse!.dup
 
   # Clear ARGV so that IRB doesn't try to parse our options

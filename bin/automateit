@@ -60,10 +60,6 @@ EOB
     opts[:verbosity] = Logger::DEBUG
   end
 
-  parser.on("-v", "--version", "Display version") do |v|
-    opts[:version] = v
-  end
-
   parser.on("-T", "--trace", "Display raw exception traces") do |v|
     opts[:friendly_exceptions] = ! v
   end
@@ -73,12 +69,12 @@ EOB
     exit
   end
 
-  args = parser.parse!.dup
-
-  if opts[:version]
-    puts VERSION
+  parser.on("-v", "--version", "Display version") do |v|
+    puts AutomateIt::VERSION
     exit 0
   end
+
+  args = parser.parse!.dup
 
   # Clear ARGV so that IRB doesn't try to parse our options
   opts[:args] = args
