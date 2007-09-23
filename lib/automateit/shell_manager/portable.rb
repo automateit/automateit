@@ -10,7 +10,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   depends_on :nothing
 
   def suitability(method, *args) # :nodoc:
-    return %w(which which!).include?(method.to_s) ? 0 : 1
+    return available? ? 1 : 0
   end
 
   def broken?
@@ -26,24 +26,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     ! broken?
   end
 
-  def provides_symlink?
-    ! broken?
-  end
-
-  def provides_hard_link?
-    ! broken?
-  end
-
   #...[ Custom commands ].................................................
-
-  # Returns hash of verbosity and preview settings for FileUtils commands.
-  def _fileutils_opts
-    opts = {}
-    opts[:verbose] = false # Generate our own log messages
-    opts[:noop] = true if preview?
-    return opts
-  end
-  private :_fileutils_opts
 
   # See ShellManager#sh
   def sh(*commands)
@@ -170,71 +153,6 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     return present
   end
 
-  # See ShellManager#ln
-  def ln(sources, target, opts={})
-    kind = if opts[:symbolic] and opts[:force]
-             :ln_sf
-           elsif opts[:symbolic]
-             :ln_s
-           else
-             :ln
-           end
-    missing = []
-    sources = [sources].flatten
-    if kind == :ln
-      raise TypeError.new("source for hard link must be a String") unless sources.size == 1
-    end
-    for source in sources
-      peer = File.directory?(target) ? File.join(target, File.basename(source)) : target
-      begin
-        peer_lstat = File.lstat(peer)
-        peer_stat = File.stat(peer)
-        source_stat = File.stat(source)
-        case kind
-        when :ln
-          missing << source if peer_stat.ino != source_stat.ino
-        when :ln_s, :ln_sf
-          missing << source if ! peer_lstat.symlink? || peer_stat.ino != source_stat.ino
-        else
-          raise ArgumentError.new("unknown link kind: #{kind}")
-        end
-      rescue Errno::ENOENT
-        missing << source
-      end
-    end
-    return false if missing.empty?
-
-    log.debug(PNOTE+"_ln(%s, %s, %s) # => %s" % [kind, sources.inspect, target.inspect, missing.inspect])
-    missing = missing.first if missing.size == 1
-
-    displayed = "ln"
-    if opts[:symbolic] and opts[:force]
-      displayed << " -sf"
-    else
-      displayed << " -s" if opts[:symbolic]
-      displayed << " -f" if opts[:force]
-    end
-
-    if kind == :ln
-      log.info(PEXEC+"#{displayed} #{missing} #{target}")
-      FileUtils.ln(missing, target, _fileutils_opts) && missing
-    else
-      log.info(PEXEC+"#{displayed} #{String === missing ? missing : missing.join(' ')} #{target}")
-      FileUtils.send(kind, missing, target, _fileutils_opts) && missing
-    end
-    return missing
-  end
-
-  # See ShellManager#ln_s
-  def ln_s(sources, target, opts={})
-    ln(sources, target, {:symbolic => true}.merge(opts))
-  end
-
-  # See ShellManager#ln_sf
-  def ln_sf(sources, target, opts={})
-    ln(sources, target, {:symbolic => true, :force => true}.merge(opts))
-  end
-
   # See ShellManager#install
   def install(source, target, mode=nil)
     cp_rv = nil
@@ -348,7 +266,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   def cp_r(sources, target, opts={})
     cp(sources, target, {:recursive => true}.merge(opts))
   end
-  
+
   # See ShellManager#cp_R
   def cp_R(*args)
     cp_r(*args)

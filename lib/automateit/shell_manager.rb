@@ -11,13 +11,18 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :cp_R, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch
 
   #...[ Detection commands ]..............................................
-  def provides_mode?() dispatch() end
 
-  def provides_ownership?() dispatch() end
+  # See ShellManager#provides_mode?
+  def provides_mode?() dispatch_safely end
 
-  def provides_symlink?() dispatch() end
+  # See ShellManager#provides_mode?
+  def provides_ownership?() dispatch_safely end
 
-  def provides_hard_link?() dispatch() end
+  # See ShellManager#provides_mode?
+  def provides_symlink?() dispatch_safely end
+
+  # See ShellManager#provides_mode?
+  def provides_link?() dispatch_safely end
 
   #...[ Custom commands ].................................................
 
@@ -237,8 +242,20 @@ class AutomateIt::ShellManager::BaseDriver < AutomateIt::Plugin::Driver
     return opts
   end
   protected :_replace_owner_with_user
+
+  # Returns hash of verbosity and preview settings for FileUtils commands.
+  def _fileutils_opts
+    opts = {}
+    opts[:verbose] = false # Generate our own log messages
+    opts[:noop] = true if preview?
+    return opts
+  end
+  private :_fileutils_opts
 end
 
 # Drivers
 require 'automateit/shell_manager/portable'
-require 'automateit/shell_manager/unix'
+require 'automateit/shell_manager/which'
+require 'automateit/shell_manager/base_link'
+require 'automateit/shell_manager/symlink'
+require 'automateit/shell_manager/link'

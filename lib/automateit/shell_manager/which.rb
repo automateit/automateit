@@ -1,11 +1,8 @@
-# == ShellManager::Unix
+# == ShellManager::Which
 #
-# A ShellManager driver for providing shell commands for manipulating files
-# and executing commands on Unix-like systems.
-#
-# It includes all the functionality of the ShellManager::Portable driver
-# plus additional commands.
-class AutomateIt::ShellManager::Unix < AutomateIt::ShellManager::Portable
+# A ShellManager driver providing access to the +which+ command found on
+# Unix-like systems.
+class AutomateIt::ShellManager::Which < AutomateIt::ShellManager::BaseDriver
   depends_on :programs => %w(which)
 
   def suitability(method, *args) # :nodoc:
