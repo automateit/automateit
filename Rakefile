@@ -1,5 +1,3 @@
-# TODO reoganize this messy Rakefile
-
 require 'spec/rake/spectask'
 require 'rake/gempackagetask'
 
@@ -74,6 +72,11 @@ task "verbose" do
   ENV["SPEC_OPTS"] = "-fs"
 end
 
+desc "Profile the specs"
+task :prof do
+  sh "ruby-prof -f prof.txt `which spec` spec/unit/*.rb"
+end
+
 #---[ Lines of code ]---------------------------------------------------
 
 class Numeric
@@ -118,94 +121,6 @@ end
 
 task :sloc do
   sh "sloccount lib spec misc examples bin"
-end
-
-#---[ misc ]------------------------------------------------------------
-
-desc "Chown files if needed"
-task :chown do
-  if automateit.superuser?
-    stat = File.stat("..")
-    #AutomateIt.new(:noop => false).chown_R(stat.uid, stat.gid, Dir["*"], :report => :details)
-    automateit.chown_R(stat.uid, stat.gid, [Dir["*"], Dir[".*"]].flatten, :details => true)
-  end
-end
-
-namespace :rdoc do
-  desc "Generate documentation"
-  task :make do
-    # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-    sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib docs/*.txt README.txt TUTORIAL.txt TESTING.txt"
-    # Create a tutorial index
-    File.open("doc/tutorial.html", "w+") do |writer|
-      writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
-    end
-  end
-
-  desc "Rewrite RDoc HTML by interpolating custom tags"
-  task :rewrite do
-    require 'cgi'
-    pattern = /(\[{3})\s*(.+?)\s*(\]{3})/m
-    for filename in Dir["doc/**/*.html"]
-      input = File.read(filename)
-      next unless input and input.match(pattern)
-      puts filename
-      output = input.gsub(pattern){|m| CGI.unescapeHTML($2)}
-      if input != output
-        FileUtils.mv(filename, filename+".bak", :verbose => true)
-        File.open(filename, "w+"){|h| h.write(output)}
-      end
-    end
-  end
-
-  desc "Undo rewrite by restoring backups"
-  task :undo do
-    for filename in Dir["doc/**/*.html.bak"]
-      FileUtils.mv(filename, filename.sub(/\.bak$/, ''), :verbose => true)
-    end
-  end
-
-  desc "Generate documentation for specific files in an endless loop"
-  task :loop do
-    sources_and_targets = {
-      "doc/files/TUTORIAL_txt.html" => "TUTORIAL.txt"
-    }
-
-    while true
-      different = false
-      for source, target in sources_and_targets
-        if ! File.exists?(target) or (File.exists?(target) and File.mtime(target) > File.mtime(source))
-          different = true
-          break
-        end
-      end
-
-      puts "checking %s" % File.mtime(target)
-      puts "different" if different
-
-      sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' %s" % sources_and_targets.values.join(" ") if different
-      sleep 1
-    end
-  end
-end
-
-task :rdoc => ["rdoc:make", "rdoc:rewrite"]
-
-desc "Profile the specs"
-task :prof do
-  sh "ruby-prof -f prof.txt `which spec` spec/unit/*.rb"
-end
-
-desc "List aliased_methods for inclusion into rdoc"
-task :aliased_methods do
-  automateit.instance_eval do
-    methods_and_plugins = []
-    plugins.values.each{|plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| methods_and_plugins << [method.to_s, plugin.class.to_s]}}
-
-    for method, plugin in methods_and_plugins.sort_by{|x| x[0]}
-      puts "  # * %s -- %s#%s" % [method, plugin, method]
-    end
-  end
 end
 
 #---[ RubyGems ]--------------------------------------------------------
@@ -280,6 +195,90 @@ end
 
 task :uninstall do
   automateit.package_manager.uninstall "automateit", :with => :gem
+end
+
+#---[ RDoc ]------------------------------------------------------------
+
+namespace :rdoc do
+  desc "Generate documentation"
+  task :make do
+    # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
+    sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib docs/*.txt README.txt TUTORIAL.txt TESTING.txt"
+    # Create a tutorial index
+    File.open("doc/tutorial.html", "w+") do |writer|
+      writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
+    end
+  end
+
+  desc "Rewrite RDoc HTML by interpolating custom tags"
+  task :rewrite do
+    require 'cgi'
+    pattern = /(\[{3})\s*(.+?)\s*(\]{3})/m
+    for filename in Dir["doc/**/*.html"]
+      input = File.read(filename)
+      next unless input and input.match(pattern)
+      puts filename
+      output = input.gsub(pattern){|m| CGI.unescapeHTML($2)}
+      if input != output
+        FileUtils.mv(filename, filename+".bak", :verbose => true)
+        File.open(filename, "w+"){|h| h.write(output)}
+      end
+    end
+  end
+
+  desc "Undo rewrite by restoring backups"
+  task :undo do
+    for filename in Dir["doc/**/*.html.bak"]
+      FileUtils.mv(filename, filename.sub(/\.bak$/, ''), :verbose => true)
+    end
+  end
+
+  desc "Generate documentation for specific files in an endless loop"
+  task :loop do
+    sources_and_targets = {
+      "doc/files/TUTORIAL_txt.html" => "TUTORIAL.txt"
+    }
+
+    while true
+      different = false
+      for source, target in sources_and_targets
+        if ! File.exists?(target) or (File.exists?(target) and File.mtime(target) > File.mtime(source))
+          different = true
+          break
+        end
+      end
+
+      puts "checking %s" % File.mtime(target)
+      puts "different" if different
+
+      sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' %s" % sources_and_targets.values.join(" ") if different
+      sleep 1
+    end
+  end
+end
+
+task :rdoc => ["rdoc:make", "rdoc:rewrite"]
+
+desc "List aliased_methods for inclusion into rdoc"
+task :aliased_methods do
+  automateit.instance_eval do
+    methods_and_plugins = []
+    plugins.values.each{|plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| methods_and_plugins << [method.to_s, plugin.class.to_s]}}
+
+    for method, plugin in methods_and_plugins.sort_by{|x| x[0]}
+      puts "  # * %s -- %s#%s" % [method, plugin, method]
+    end
+  end
+end
+
+#---[ Misc ]------------------------------------------------------------
+
+desc "Chown files if needed"
+task :chown do
+  if automateit.superuser?
+    stat = File.stat("..")
+    automateit.chown_R(stat.uid, stat.gid, FileList["*", ".*"], :details => true)
+  end
 end
 
 #===[ fin ]=============================================================
