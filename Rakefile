@@ -1,19 +1,34 @@
-require 'spec/rake/spectask'
-
 # TODO reoganize this messy Rakefile
+
+require 'spec/rake/spectask'
+require 'rake/gempackagetask'
 
 task :default => :spec
 
-def load_automateit
-  @interpreter ||= begin
+#---[ Wrappers ]--------------------------------------------------------
+
+# Return an AutomateIt interpreter
+def automateit
+  return @automateit ||= begin
     $LOAD_PATH.unshift('lib')
     require 'automateit'
     AutomateIt.new
   end
 end
 
-#---[ run specs ]-------------------------------------------------------
+# Run a hoe +task+.
+#
+def hoe(task)
+  # XXX Hoe provides many tasks I don't need, don't like the implementation of,
+  # or don't like their names. I'd use Rake's 'import' and 'invoke' but the Hoe
+  # tasks have names that clash with the ones in this Rakefile. The lame
+  # workaround is to invoke Rake via shell, rather than through Ruby.
+  sh "rake -f Hoe.rake #{task}"
+end
 
+#---[ RSpec ]-----------------------------------------------------------
+
+# Run rspec on the +files+
 def specify(*files)
   Spec::Rake::SpecTask.new(:spec_internal) do |t|
     t.rcov = @rcov
@@ -59,7 +74,7 @@ task "verbose" do
   ENV["SPEC_OPTS"] = "-fs"
 end
 
-#---[ calculate LOC ]---------------------------------------------------
+#---[ Lines of code ]---------------------------------------------------
 
 class Numeric
   def commify() (s=self.to_s;x=s.length;s).rjust(x+(3-(x%3))).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/,'\1,').strip end
@@ -109,11 +124,10 @@ end
 
 desc "Chown files if needed"
 task :chown do
-  load_automateit
-  if @interpreter.superuser?
+  if automateit.superuser?
     stat = File.stat("..")
     #AutomateIt.new(:noop => false).chown_R(stat.uid, stat.gid, Dir["*"], :report => :details)
-    @interpreter.chown_R(stat.uid, stat.gid, [Dir["*"], Dir[".*"]].flatten, :report => :details)
+    automateit.chown_R(stat.uid, stat.gid, [Dir["*"], Dir[".*"]].flatten, :details => true)
   end
 end
 
@@ -183,9 +197,8 @@ task :prof do
 end
 
 desc "List aliased_methods for inclusion into rdoc"
-task :am do
-  load_automateit
-  @interpreter.instance_eval do
+task :aliased_methods do
+  automateit.instance_eval do
     methods_and_plugins = []
     plugins.values.each{|plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| methods_and_plugins << [method.to_s, plugin.class.to_s]}}
 
@@ -197,54 +210,23 @@ end
 
 #---[ RubyGems ]--------------------------------------------------------
 
-# TODO figure out certificates and signing
-# FIXME executables are left behind after uninstall :(
-=begin
-rm -rf /usr/lib/ruby/gems/*/gems/automateit-*/ /usr/bin/{automateit,field_lookup} /usr/lib/ruby/gems/*/doc/automateit-*/
-gem install -y pkg/automateit-*.gem --no-ri --no-rdoc
-gem install -y pkg/automateit-*.gem
-gem uninstall -a -x automateit
-=end
-Gem::manage_gems
-require 'rake/gempackagetask'
-spec = Gem::Specification.new do |s|
-  load_automateit
-  s.add_dependency("activesupport", ">= 1.4")
-  s.add_dependency("open4", ">= 0.9")
-  s.author = "Igal Koshevoy"
-  s.autorequire = "automateit"
-  s.bindir = 'bin'
-  s.date = File.mtime('lib/automateit/constants.rb')
-  s.email = "igal@pragmaticraft.org"
-  s.executables = Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)}
-  s.extra_rdoc_files = %w(README.txt TUTORIAL.txt TESTING.txt CHANGES.txt)
-  s.files = %w(Rakefile gpl.txt env.sh) + FileList["{docs,bin,lib,misc,examples}/**/*"]
-  s.has_rdoc = true
-  s.homepage = "http://automateit.org/"
-  s.name = "automateit"
-  s.platform = Gem::Platform::RUBY
-  s.rdoc_options << %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' << %w(lib docs)
-  s.require_path = "lib"
-  s.rubyforge_project = 'automateit'
-  s.summary = "AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems"
-  s.test_files = FileList["{spec}/**/*"].to_a
-  s.version = AutomateIt::VERSION.to_s
-end
-
-Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.need_tar = true
-end
-
 desc "Regenerate Gem"
 task :regem do
-  raise "Can't recreate gems unless a directory with all previous gems is available at ../gems" unless File.directory?("../gems")
+  archive_path = "../gem_archive"
+  has_archive = File.directory?(archive_path)
+  puts "WARNING: Archive of previously released gems at '#{archive_path}' is not available, do not upload without these." unless has_archive
   rm_r Dir["pkg/*"]
   mkdir_p "pkg/pub/gems"
-  cp "../gems/*.gem", "pkg/pub/gems" unless Dir["../gem/*.gem"].empty?
+  cp FileList["#{archive_path}/*.gem"], "pkg/pub/gems" if has_archive and not Dir["#{archive_path}/*.gem"].empty?
   Rake::Task[:gem].invoke
   cp Dir["pkg/*.gem"], "pkg/pub/gems"
-  cp Dir["pkg/*.gem"], "../gems/"
-  sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb"
+  cp Dir["pkg/*.gem"], "#{archive_path}" if has_archive
+  sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb" if has_archive
+end
+
+desc "Generate manifest"
+task :manifest do
+  hoe(:manifest)
 end
 
 desc "RFC-822 time for right now, optional D=x where x is delta like '1.day' ago"
@@ -257,30 +239,47 @@ task :now do
   puts time.to_s(:rfc822)
 end
 
-#---[ Install ]---------------------------------------------------------
+namespace :gem do
+  desc "View Gem metadata"
+  task :metadata do
+    sh "cd pkg/; tar xvf *.gem; gunzip *.gz; less metadata"
+  end
+end
+
+task :gem do
+  hoe(:gem)
+end
+
+#---[ Install and uninstall ]-------------------------------------------
+
+=begin
+# Uninstall is similar to:
+gem uninstall -a -x automateit
+rm -rf /usr/lib/ruby/gems/*/gems/automateit-*/ /usr/bin/{automateit,field_lookup} /usr/lib/ruby/gems/*/doc/automateit-*/
+
+# Install is similar to:
+gem install -y pkg/automateit-*.gem --no-ri --no-rdoc
+=end
 
 namespace :install do
   desc "Install Gem from 'pkg' dir without docs, removing existing Gem first"
   task :local do
-    load_automateit
     Rake::Task[:uninstall].invoke
     #sh "sudo gem install -y pkg/*.gem --no-ri --no-rdoc"
-    @interpreter.package_manager.install({"automateit" => Dir["pkg/*.gem"].first}, :with => :gem, :docs => false)
+    puts automateit.package_manager.install({"automateit" => Dir["pkg/*.gem"].first}, :with => :gem, :docs => false)
   end
 
   desc "Install Gem from website without docs, removing existing Gem first"
   task :remote do
-    load_automateit
     Rake::Task[:uninstall].invoke
     #sh "sudo gem install -y -r -s http://automateit.org/pub automateit --no-ri --no-rdoc"
-    @interpreter.package_manager.install("automateit", :source => "http://automateit.org/pub", :with => :gem, :docs => false)
+    sh "gem sources -r http://automateit.org/pub"
+    automateit.package_manager.install("automateit", :source => "http://automateit.org/pub", :with => :gem, :docs => false)
   end
 end
 
 task :uninstall do
-  load_automateit
-  @interpreter.package_manager.uninstall "automateit", :with => :gem
-  @interpreter.sh "gem sources -r http://automateit.org/pub"
+  automateit.package_manager.uninstall "automateit", :with => :gem
 end
 
 #===[ fin ]=============================================================
