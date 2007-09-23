@@ -98,58 +98,6 @@ describe AutomateIt::ShellManager, " in general" do
     end
   end
 
-  unless INTERPRETER.shell_manager.provides_symlink?
-    puts "NOTE: Can't check symlinks on this platform, #{__FILE__}"
-  else
-    it "should create hard links when needed (ln)" do
-      @m.mktempdircd do
-        source = "foo"
-        target = "bar"
-        @m.touch(source)
-        File.exists?(source).should be_true
-        File.exists?(target).should be_false
-
-        @m.ln(source, target).should == source
-        File.stat(target).nlink.should > 1
-
-        @m.ln(source, target).should be_false
-      end
-    end
-
-    it "should create symlinks when needed (ln_s)" do
-      @m.mktempdircd do
-        source = "foo"
-        target = "bar"
-        @m.touch(source)
-        File.exists?(source).should be_true
-        File.exists?(target).should be_false
-
-        @m.ln_s(source, target).should == source
-        File.lstat(target).symlink?.should be_true
-
-        @m.ln(source, target).should be_false
-      end
-    end
-
-    it "should create symlinks that replace existing entry (ln_sf)" do
-      @m.mktempdircd do
-        source = "foo"
-        intermediate = "baz"
-        target = "bar"
-        @m.touch(source)
-        File.exists?(source).should be_true
-        File.exists?(target).should be_false
-
-        @m.ln_s(intermediate, target).should == intermediate
-        File.lstat(target).symlink?.should be_true
-
-        @m.ln_sf(source, target).should == source
-        File.lstat(target).symlink?.should be_true
-        File.readlink(target).should == source
-      end
-    end
-  end
-
   it "should install a file to a file (install)" do
     @m.mktempdircd do
       source = "foo"
@@ -358,7 +306,7 @@ describe AutomateIt::ShellManager, " in general" do
   end
 end
 
-describe AutomateIt::ShellManager, " when changing permissions" do
+describe AutomateIt::ShellManager, " when managing permissions" do
   if not INTERPRETER.euid?
     puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
   elsif not INTERPRETER.shell_manager.provides_ownership?
@@ -452,5 +400,72 @@ describe AutomateIt::ShellManager, " when changing permissions" do
     end
   else
     puts "NOTE: Must be root to check 'chown' in #{__FILE__}"
+  end
+end
+
+describe AutomateIt::ShellManager, " when managing hard links" do
+  if not INTERPRETER.shell_manager.available?(:ln)
+    puts "NOTE: Can't check hard links on this platform, #{__FILE__}"
+  else
+    it_should_behave_like "AutomateIt::ShellManager"
+
+    it "should create hard links when needed (ln)" do
+      @m.mktempdircd do
+        source = "foo"
+        target = "bar"
+        @m.touch(source)
+        File.exists?(source).should be_true
+        File.exists?(target).should be_false
+
+        @m.ln(source, target).should == source
+        File.stat(target).nlink.should > 1
+
+        @m.ln(source, target).should be_false
+      end
+    end
+  end
+end
+
+describe AutomateIt::ShellManager, " when managing symbolic links" do
+  if not INTERPRETER.shell_manager.available?(:ln_s)
+    puts "NOTE: Can't check symbolic links on this platform, #{__FILE__}"
+  else
+    it_should_behave_like "AutomateIt::ShellManager"
+
+    it "should create symlinks when needed (ln_s)" do
+      @m.mktempdircd do
+        source = "foo"
+        target = "bar"
+        @m.touch(source)
+        File.exists?(source).should be_true
+        File.exists?(target).should be_false
+
+        @m.ln_s(source, target).should == source
+        File.symlink?(target).should be_true
+        Pathname.new(target).realpath == Pathname.new(source).realpath
+
+        @m.ln_s(source, target).should be_false
+      end
+    end
+
+    it "should create symlinks that replace existing entry (ln_sf)" do
+      @m.mktempdircd do
+        source = "foo"
+        intermediate = "baz"
+        target = "bar"
+        @m.touch(source)
+        @m.touch(intermediate)
+        File.exists?(source).should be_true
+        File.exists?(intermediate).should be_true
+        File.exists?(target).should be_false
+
+        @m.ln_s(intermediate, target).should == intermediate
+        File.symlink?(target).should be_true
+
+        @m.ln_sf(source, target).should == source
+        File.symlink?(target).should be_true
+        Pathname.new(target).realpath == Pathname.new(source).realpath
+      end
+    end
   end
 end
