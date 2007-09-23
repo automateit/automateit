@@ -1,9 +1,13 @@
 0.70921:
     Date: Fri, 21 Sep 2007 18:29:24 -0700
     Desc:
-    - Improved bin programs (e.g., automateit) to display help with "-h" option, previously only supported "--help".
-    - Improved EditSession and its documentation with refactoring.
-    - Improved TemplateManager, moved common logic into BaseDriver.
+    - Improved AccountManager::Linux to work around a race condition in PTY/Expect that happens about 1% of the time when setting a password.
+    - Improved executables (e.g., bin/automateit) to display help with "-h", in addition to "--help".
+    - Improved executables (e.g., bin/automateit) to display version with "-v" and "--version".
+    - Refactored EditSession and its documentation.
+    - Refactored TemplateManager, moved common logic into BaseDriver.
+    - Refactored Rakefile for clarity.
+    - Replaced GemSpec with Hoe in preparation to uploading AutomateIt to RubyForge.
 
 0.70919:
     Date: Wed, 19 Sep 2007 22:08:42 -0700
