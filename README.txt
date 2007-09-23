@@ -1,6 +1,6 @@
 == AutomateIt
 
-<em>AutomateIt is an open-source tool for automating the setup and maintenance of Unix systems.</em>
+<em>AutomateIt is an open-source tool for automating the setup and maintenance of servers.</em>
 
 Information about AutomateIt is best read in the following order:
 1. http://AutomateIt.org -- website explaining what it is and why it's useful
@@ -11,7 +11,7 @@ Information about AutomateIt is best read in the following order:
 
 === Quick links
 
-Unix commands, run with <tt>--help</tt> for details:
+Commands, run these with <tt>--help</tt> for help:
 * +automateit+ or +ai+ -- Run a recipe or create a project.
 * +aitag+ -- Query project's tags.
 * +aifield+ -- Query project's fields.

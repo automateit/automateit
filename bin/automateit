@@ -17,7 +17,7 @@ OptionParser.new do |parser|
   PROG = File.basename($0)
   opts = {}
   parser.banner = <<EOB
-#{PROG} - tool for automating the setup and maintenance of Unix-like systems
+#{PROG} - tool for automating the setup and maintenance of servers
 
 Usage: #{PROG} [options] [recipe]
 

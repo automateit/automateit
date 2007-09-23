@@ -1,6 +1,6 @@
 == A hands-on tutorial for learning AutomateIt
 
-<em>AutomateIt is an open-source tool for automating the setup and maintenance of Unix systems.</em>
+<em>AutomateIt is an open-source tool for automating the setup and maintenance of servers.</em>
 
 This hands-on guide will teach you to use AutomateIt and explain where to find more detailed instructions.
 
