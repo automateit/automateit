@@ -1,3 +1,10 @@
+0.70922:
+    Date: Sat, 22 Sep 2007 22:56:39 -0700
+    Desc:
+    - Refactored AccountManager::Linux and extracted Passwd driver.
+    - Refactored Shellmanager::Portable and extracted Which, Link and Symlink drivers.
+    - Improved Plugin::Driver, added a depends_on :libraries option.
+
 0.70921:
     Date: Fri, 21 Sep 2007 18:29:24 -0700
     Desc:
