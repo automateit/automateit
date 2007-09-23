@@ -35,6 +35,12 @@
 #   # with the "/tmp/tractags_latest" path as an argument:
 #   package.manager.install({"TracTags" => "/tmp/tractags_latest"}, :with => :egg)
 class AutomateIt::PackageManager < AutomateIt::Plugin::Manager
+  # Alias for #install
+  def add(*packages) dispatch_to(:install, *packages) end
+
+  # Alias for #uninstall
+  def remove(*packages) dispatch_to(:uninstall, *packages) end
+
   # Are these +packages+ installed?
   #
   # Options:
