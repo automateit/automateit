@@ -100,6 +100,7 @@ module AutomateIt
       # * :directories -- Array of directories that must exist.
       # * :programs -- Array of programs, checked with +which+, that must exist.
       # * :callbacks -- Array of lambdas that must return true.
+      # * :libraries -- Array of libraries to +require+.
       #
       # Example:
       #   class APT < Plugin::Driver
@@ -140,7 +141,8 @@ module AutomateIt
         elsif is_available.nil?
           all_present = true
           missing = {}
-          for kind in [:files, :directories, :programs, :callbacks]
+          for kind in opts.keys
+          #IK# for kind in [:files, :directories, :programs, :callbacks, :requires, :libraries]
             next unless opts[kind]
             for item in [opts[kind]].flatten
               present = \
@@ -152,9 +154,16 @@ module AutomateIt
                 when :programs
                   # XXX Find less awkward way to check if a program exists. Can't use +shell_manager.which+ because that will use +dispatch+ and go into an infinite loop checking +available?+. The +which+ command isn't available on all platforms, so that failure must be handled as well.
                   begin
-                    interpreter.shell_manager[:unix].which!(item)
+                    interpreter.shell_manager[:which].which!(item)
                     true
                   rescue ArgumentError, NotImplementedError, NoMethodError
+                    false
+                  end
+                when :requires, :libraries
+                  begin
+                    require item
+                    true
+                  rescue LoadError
                     false
                   end
                 when :callbacks
