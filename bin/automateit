@@ -63,7 +63,7 @@ EOB
   parser.on("-T", "--trace", "Display raw exception traces") do |v|
     opts[:friendly_exceptions] = ! v
   end
-  
+
   parser.on("-h", "--help", "Display this help message") do |v|
     puts parser
     exit
