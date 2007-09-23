@@ -1,3 +1,10 @@
+0.70921:
+    Date: Fri, 21 Sep 2007 18:29:24 -0700
+    Desc:
+    - Improved bin programs (e.g., automateit) to display help with "-h" option, previously only supported "--help".
+    - Improved EditSession and its documentation with refactoring.
+    - Improved TemplateManager, moved common logic into BaseDriver.
+
 0.70919:
     Date: Wed, 19 Sep 2007 22:08:42 -0700
     Desc:
