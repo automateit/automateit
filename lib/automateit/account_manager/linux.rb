@@ -3,10 +3,11 @@
 # A Linux-specific driver for the AccountManager.
 class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portable
   depends_on \
-    :programs => %w(passwd useradd usermod userdel groupadd groupmod groupdel), 
+    :programs => %w(useradd usermod userdel groupadd groupmod groupdel),
     :callbacks => [lambda{AutomateIt::AccountManager::Portable.has_etc?}]
 
   def suitability(method, *args) # :nodoc:
+    # Level must be higher than Portable
     return available? ? 2 : 0
   end
 
@@ -18,7 +19,7 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
   def nscd?
     @nscd ||= interpreter.which("nscd")
   end
-  
+
   #.......................................................................
 
   # See AccountManager#add_user
@@ -47,7 +48,7 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
       end
     end
 
-    passwd(username, opts[:passwd]) if opts[:passwd]
+    interpreter.account_manager.passwd(username, opts[:passwd]) if opts[:passwd]
 
     return users[username]
   end
@@ -93,54 +94,6 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
     interpreter.sh(cmd)
     interpreter.sh("nscd --invalidate group") if nscd?
     return removeable
-  end
-
-  # See AccountManager#passwd
-  def passwd(user, password, opts={})
-    require 'open4'
-    require 'expect'
-    require 'pty'
-
-    quiet = (opts[:quiet] or not log.info?)
-
-    unless users[user]
-      if preview?
-        log.info(PNOTE+"Setting password for user: #{user}")
-        return true
-      else
-        raise ArgumentError.new("No such user: #{user}")
-      end
-    end
-
-    case user
-    when Symbol: user = user.to_s
-    when Integer: user = users[user]
-    when String: # leave it alone
-    else raise TypeError.new("Unknown user type: #{user.class}")
-    end
-
-    tries = 3
-    begin
-      exitstruct = Open4::popen4("passwd %s 2>&1" % user) do |pid, sin, sout, serr|
-        $expect_verbose = ! quiet
-        2.times do
-          sout.expect(/:/)
-          sin.puts password
-          puts "*" * 12 unless quiet
-        end
-      end
-      ### raise Errno::EPIPE.new
-    rescue Errno::EPIPE => e
-      # TODO AccountManager::Linux#passwd -- EPIPE exception randomly thrown even when command succeeds. How to eliminate it? How to differentiate between this false error and a real one?
-      if tries <= 0
-        raise e
-      else
-        tries -= 1
-        retry
-      end
-    end
-
-    return exitstruct.exitstatus.zero?
   end
 
   #.......................................................................
