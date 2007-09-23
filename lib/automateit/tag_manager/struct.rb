@@ -30,6 +30,7 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
         hostnames = interpreter.address_manager.hostnames # SLOW 0.4s
         @tags.merge(hostnames)
         @tags.merge(tags_for(hostnames))
+        @tags.merge(interpreter.address_manager.addresses)
       rescue NotImplementedError => e
         log.debug("Can't find AddressManager for this platform: #{e}")
       end
