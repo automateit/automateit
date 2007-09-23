@@ -132,10 +132,10 @@ task :regem do
   puts "WARNING: Archive of previously released gems at '#{archive_path}' is not available, do not upload without these." unless has_archive
   rm_r Dir["pkg/*"]
   mkdir_p "pkg/pub/gems"
-  cp FileList["#{archive_path}/*.gem"], "pkg/pub/gems" if has_archive and not Dir["#{archive_path}/*.gem"].empty?
+  cp FileList["#{archive_path}/*.gem"], "pkg/pub/gems", :preserve => true if has_archive and not Dir["#{archive_path}/*.gem"].empty?
   Rake::Task[:gem].invoke
-  cp Dir["pkg/*.gem"], "pkg/pub/gems"
-  cp Dir["pkg/*.gem"], "#{archive_path}" if has_archive
+  cp Dir["pkg/*.gem"], "pkg/pub/gems", :preserve => true
+  cp Dir["pkg/*.gem"], "#{archive_path}", :preserve => true if has_archive
   sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb" if has_archive
 end
 
