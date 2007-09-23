@@ -296,15 +296,15 @@ module AutomateIt
     #   end
     #
     # In preview mode, this displays:
-    #   
+    #
     #   => FOO
     #
     # When not previewing, displays:
     #
     #   BAR
     def preview_for(message, &block)
-      if preview? 
-        log.info(message) 
+      if preview?
+        log.info(message)
         :preview
       else
         block.call
@@ -355,7 +355,7 @@ module AutomateIt
         return false
       end
     end
-    
+
     # Return the effective user id.
     def euid
       begin
@@ -369,7 +369,7 @@ module AutomateIt
           raise e
         end
       end
-    
+
     end
 
     # Does the current user have superuser (root) privileges?
@@ -623,10 +623,10 @@ module AutomateIt
       object.instance_eval(text)
     end
 
-    # Use to manage nitpick message for debugging AutomateIt internals. 
+    # Use to manage nitpick message for debugging AutomateIt internals.
     #
-    # Arguments:  
-    # * nil -- Returns boolean of whether nitpick messages will be displayed. 
+    # Arguments:
+    # * nil -- Returns boolean of whether nitpick messages will be displayed.
     # * Boolean -- Sets nitpick state.
     # * String or Symbol -- Displays nitpick message if state is on.
     def nitpick(value=nil)
