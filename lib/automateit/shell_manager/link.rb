@@ -4,7 +4,7 @@
 # Unix-like systems.
 class AutomateIt::ShellManager::Link < AutomateIt::ShellManager::BaseLink
   depends_on :callbacks => [lambda{
-      File.respond_to?(:link)
+      RUBY_PLATFORM !~ /mswin/i and File.respond_to?(:link)
     }]
 
   def suitability(method, *args) # :nodoc:
