@@ -188,7 +188,7 @@ namespace :install do
   task :remote do
     Rake::Task[:uninstall].invoke
     #sh "sudo gem install -y -r -s http://automateit.org/pub automateit --no-ri --no-rdoc"
-    sh "gem sources -r http://automateit.org/pub"
+    sh "gem sources -r http://automateit.org/pub" rescue nil
     automateit.package_manager.install("automateit", :source => "http://automateit.org/pub", :with => :gem, :docs => false)
   end
 end
