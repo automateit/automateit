@@ -182,7 +182,9 @@ describe AutomateIt::CLI, " with a project" do# {{{
 
   it "should be able to run default project" do
     with_project do
-      output = `rake -I #{AutomateIt_Lib} preview hello`
+      # XXX How to determine which rake to use!?
+      rake = RUBY_PLATFORM =~ /mswin/i ? "rake.bat" : "rake" 
+      output = `#{rake} -I #{AutomateIt_Lib} preview hello`
       output.should match(/I'm in preview mode/)
     end
   end
