@@ -2,26 +2,26 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
-1oo Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
+100 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 
-1oo Edit -- Display summary of edits, return with :details as [rv, list]
-1o1 CLI -- Add tags via command-line
+101 CLI -- Add tags via command-line
+100 Edit -- Display summary of edits, return with :details as [rv, list]
+100 Shell -- Incorporate which.cmd so #which can work on Windows
+100 Interpreter#invoke and HelpfulERB -- Extract error context code into class
 
-1oo Interpreter#invoke and HelpfulERB -- Extract error context code into class
+001 Interpreter#superuser? -- Add `id` workaround for JRuby's lack of euid
 
-oo1 Interpreter#superuser? -- Add `id` workaround for JRuby's lack of euid
-
-ooo Shell#chperm -- With symbolic mode, wrap `chmod -v` as temporary workaround?
-ooo Changes -- Write parser and new format so I can use "#" symbol
-ooo FreeBSD -- Write driver for PackageManager::Ports
-ooo Darwin -- Write drivers, e.g. PackageManager for Fink, MacPorts, Pkgsrc
+000 Shell#chperm -- With symbolic mode, wrap `chmod -v` as temporary workaround?
+000 Changes -- Write parser and new format so I can use "#" symbol
+000 FreeBSD -- Write driver for PackageManager::Ports
+000 Darwin -- Write drivers, e.g. PackageManager for Fink, MacPorts, Pkgsrc
 
 ??? Shell -- Return false or list, never single item?
 ??? Shell -- Extract FileManager? change docs
 ??? Driver -- How to determine if a manager or driver method is available? Manager#available?, Manager#available and Driver#suitable? only say if it should be a default.
 
 #===[ Web ]=============================================================
-1oo Index: Call for pilot users, driver authors
-ooo CSS: Highlight active menu by setting a class, e.g., current_about.
-ooo Kattare is redirecting to www, why?
-ooo Add error page
+100 Index: Call for pilot users, driver authors
+000 CSS: Highlight active menu by setting a class, e.g., current_about.
+000 Kattare is redirecting to www, why?
+000 Add error page

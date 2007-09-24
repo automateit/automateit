@@ -1,3 +1,9 @@
+0.70923:
+    Date: Sun, 23 Sep 2007 16:01:03 -0700
+    Desc:
+    - Fixed hard link and symlink detection on Windows, spec will now skip these examples.
+    - Fixed cli_spec so it can invoke Windows version of rake.
+
 0.70922:
     Date: Sat, 22 Sep 2007 22:56:39 -0700
     Desc:
