@@ -165,6 +165,11 @@ task :gem do
   hoe(:gem)
 end
 
+task :publish do
+  automateit
+  hoe("release VERSION=#{AutomateIt::VERSION}")
+end
+
 #---[ Install and uninstall ]-------------------------------------------
 
 =begin
@@ -184,12 +189,25 @@ namespace :install do
     puts automateit.package_manager.install({"automateit" => Dir["pkg/*.gem"].first}, :with => :gem, :docs => false)
   end
 
+  desc "Install Gem from RubyForge without docs, removing existing Gem first"
+  task :rf do
+    install_wrapper "http://gems.rubyforge.org"
+  end
+
   desc "Install Gem from website without docs, removing existing Gem first"
-  task :remote do
+  task :site do
+    install_wrapper "http://automateit.org/pub", :source => "http://automateit.org/pub", :reset => true
+  end
+
+  # Options:
+  # * :url -- URL to clear
+  # * :opts -- Hash to pass to PackageManager#install
+  def install_wrapper(url, opts={})
     Rake::Task[:uninstall].invoke
-    #sh "sudo gem install -y -r -s http://automateit.org/pub automateit --no-ri --no-rdoc"
-    sh "gem sources -r http://automateit.org/pub" rescue nil
-    automateit.package_manager.install("automateit", :source => "http://automateit.org/pub", :with => :gem, :docs => false)
+    sh "gem sources -r #{url}" rescue nil if opts.delete(:reset)
+    opts[:with] ||= :gem
+    opts[:docs] ||= false
+    automateit.package_manager.install("automateit", opts)
   end
 end
 
