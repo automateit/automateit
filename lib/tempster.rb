@@ -32,27 +32,35 @@ require 'fileutils'
 # * Random string generator taken from
 #   http://pleac.sourceforge.net/pleac_ruby/numbers.html
 class Tempster
-  DEFAULT_NAME = "tempster"
+  DEFAULT_PREFIX = "tempster"
   DEFAULT_FILE_MODE = 0600
   DEFAULT_DIRECTORY_MODE = 0700
   DEFAULT_ARMOR_LENGTH = 10
   ARMOR_CHARACTERS = ["A".."Z","a".."z","0".."9"].collect{|r| r.to_a}.join
 
+  # Alias for ::tempster.
+  def self._tempster(opts={}, &block) # :nodoc:
+    tempster(opts, &block)
+  end
+
   # Options:
-  # * :name -- Name prefix to usse, defaults to "tempster".
   # * :kind -- Create a :file or :directory, required.
+  # * :prefix -- String to prefix the temporary name with, defaults to "tempster".
+  # * :suffix -- String to suffix the temporary name with, defaults is no suffix.
+  # * :name -- Same as :prefix
   # * :dir -- Base directory to create temporary entries in, uses system-wide temporary directory (e.g., <tt>/tmp</tt>) by default.
   # * :cd -- Change into the newly directory created using +ch+ within the block, and then switch back to the previous directory. Only used when a block is given and the :kind is :directory. Default is false. See WARNING at the top of this class's documentation!
   # * :noop -- no-operation mode, pretends to do actions without actually creating or deleting temporary entries. Default is false. WARNING: See WARNING at the top of this class's documentation!
   # * :verbose -- Print status messages about creating and deleting the temporary entries. Default is false.
   # * :delete -- Delete the temporary entries when exiting block. Default is true when given a block, false otherwise. If you don't use a block, you're responsible for deleting the entries yourself.
   # * :tries -- Number of tries to create a temporary entry, usually it'll succeed on the first try. Default is 10.
-  # * :armor -- Length of armor to add to the name. These are random characters padding out the temporary entry names to prevent them from using existing files. If you have a very short armor, you're likely to get a collision and the algorithm will have to try again for the specified number of +tries+.
+  # * :armor -- Length of armor to append to the prefix. These are random characters padding out the temporary entry names to prevent them from using existing files. If you have a very short armor, you're likely to get a collision and the algorithm will have to try again for the specified number of +tries+.
   # * :message_callback -- +lambda+ called when there's a message, e.g., <tt>lambda{|message| puts message}</tt>, regardless of :verbose state. By default :messaging is nil and messages are printed to STDOUT only when :verbose is true.
   # * :message_prefix -- String to put in front of messages, e.g., "# "
-  def self._tempster(opts={}, &block)
-    name = opts.delete(:name) || DEFAULT_NAME
+  def self.tempster(opts={}, &block)
     kind = opts.delete(:kind) or raise ArgumentError.new("'kind' option not specified")
+    prefix = opts.delete(:prefix) || opts.delete(:name) || DEFAULT_PREFIX
+    suffix = opts.delete(:suffix) || nil
     dir = opts.delete(:dir) || Dir.tmpdir
     cd = opts.delete(:cd) || false
     noop =  opts.delete(:noop) || false
@@ -82,7 +90,10 @@ class Tempster
     success = false
     for i in 1..tries
       begin
-        path = File.join(dir, name+"_"+_armor_string(armor))
+        name = prefix+"_"+_armor_string(armor)
+        name << suffix if suffix
+        path = File.join(dir, name)
+
         unless noop
           case kind
           when :file
@@ -94,13 +105,9 @@ class Tempster
             raise ArgumentError.new("unknown kind: #{kind}")
           end
         end
-        # XXX Should we pretend that it's mktemp? Or give users something more useful?
-        # messager.puts("mktemp -m 0%o%s -p %s %s # => %s" % [mode, kind == :directory ? ' -d' : '', dir, name, path])
-        if block
-          messager.puts("mktempster --mode=0%o --kind=%s --dir=%s --name=%s" % [mode, kind, dir, name])
-        else
-          messager.puts("mktempster --mode=0%o --kind=%s --dir=%s --name=%s # => %s" % [mode, kind, dir, name, path])
-        end
+        message = "mktempster --mode=0%o --kind=%s --dir=%s --prefix=%s" % [mode, kind, dir, prefix]
+        message << (" --suffix=%s" % suffix) if suffix
+        message << (" # => %s" % path) if block
         success = true
         break
       rescue Errno::EEXIST
@@ -142,14 +149,14 @@ class Tempster
 
   # Creates a temporary file.
   def self.mktemp(opts={}, &block)
-    _tempster({:kind => :file}.merge(opts), &block)
+    tempster({:kind => :file}.merge(opts), &block)
   end
 
   # Creates a temporary directory.
   #
   # *WARNING*: See WARNING text at the top of this class's documentation!
   def self.mktempdir(opts={}, &block)
-    _tempster({:kind => :directory}.merge(opts), &block)
+    tempster({:kind => :directory}.merge(opts), &block)
 
   end
 
@@ -158,7 +165,7 @@ class Tempster
   #
   # *WARNING*: See WARNING text at the top of this class's documentation!
   def self.mktempdircd(opts={}, &block)
-    _tempster({:kind => :directory, :cd => true}.merge(opts), &block)
+    tempster({:kind => :directory, :cd => true}.merge(opts), &block)
   end
 
   class Messager
