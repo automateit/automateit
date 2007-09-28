@@ -138,7 +138,7 @@ describe "AutomateIt::EditManager for files" do
   it "should edit a file" do
     File.should_receive(:read).with(@filename).and_return(@input)
     File.should_receive(:open).with(@filename, "w+").and_return(true)
-    result = @a.edit(:file => @filename) do
+    result = @a.edit(:file => @filename, :backup => false) do
       append "APPEND"
     end
     result.should be_true
@@ -146,7 +146,7 @@ describe "AutomateIt::EditManager for files" do
 
   it "should not rewrite an unchanged file" do
     File.should_receive(:read).with(@filename).and_return(@input)
-    result = @a.edit(:file => @filename) do
+    result = @a.edit(:file => @filename, :backup => false) do
       # Do nothing
     end
     result.should be_false
@@ -154,7 +154,7 @@ describe "AutomateIt::EditManager for files" do
 
   it "should default to editing a file" do
     File.should_receive(:read).with(@filename).and_return(@input)
-    result = @a.edit(@filename) do
+    result = @a.edit(@filename, :backup => false) do
       # Do nothing
     end
     result.should be_false

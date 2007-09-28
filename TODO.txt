@@ -2,14 +2,14 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
+101 Download -- Add OpenURI wrapper from gTag
+101 Edit and Shell -- Add #backup command
+101 CLI -- Add tags via command-line
 100 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 
-101 CLI -- Add tags via command-line
 100 Edit -- Display summary of edits, return with :details as [rv, list]
 100 Shell -- Incorporate which.cmd so #which can work on Windows
 100 Interpreter#invoke and HelpfulERB -- Extract error context code into class
-
-001 Interpreter#superuser? -- Add `id` workaround for JRuby's lack of euid
 
 000 Shell#chperm -- With symbolic mode, wrap `chmod -v` as temporary workaround?
 000 Changes -- Write parser and new format so I can use "#" symbol

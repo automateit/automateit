@@ -28,6 +28,42 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   #...[ Custom commands ].................................................
 
+  # See ShellManager#backup
+  def backup(*sources)
+    targets = []
+    for source in sources
+      is_dir = File.directory?(source)
+
+      tempster_opts = {
+        :verbose => false,
+        :noop => noop?,
+        :delete => false,
+        :dir => File.dirname(source),
+        :prefix => "%s.%s" % [File.basename(source), Time.now.to_i],
+        :suffix => ".bak",
+        :kind => is_dir ? :directory : :file,
+      }
+
+      target = ::Tempster.tempster(tempster_opts)
+
+      if is_dir
+        cp_opts = {}
+        cp_opts[:recursive] = true if is_dir
+        cp_opts[:preserve] = true if superuser?
+
+        source_children = _directory_contents(source)
+        #puts "sc: %s" % source_children.inspect
+
+        interpreter.cp_r(source_children, target, cp_opts)
+      else
+        interpreter.cp(source, target)
+      end
+
+      targets << target
+    end
+    return sources.size == 1 ? targets.first : targets
+  end
+
   # See ShellManager#sh
   def sh(*commands)
     args, opts = args_and_opts(*commands)
@@ -186,13 +222,8 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       Find.find(parent) do |child|
         source_fn = File.directory?(child) ? child+"/" : child
         target_dir = File.directory?(target)
-        target_fn = \
-          if target_dir
-            #File.join(target, source_fn.match(/#{parent}\/?(.*)$/)[1])
-            File.join(target, source_fn)
-          else
-            target
-          end
+        target_fn = peer_for(source_fn, target)
+        
         log.debug(PNOTE+"comparing %s => %s" % [source_fn, target_fn])
         source_st = File.stat(source_fn)
         is_copy = false

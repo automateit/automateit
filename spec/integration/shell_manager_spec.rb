@@ -42,6 +42,60 @@ end
 describe AutomateIt::ShellManager, " in general" do
   it_should_behave_like "AutomateIt::ShellManager"
 
+  it "should backup a file (backup)" do
+    @m.mktempdircd do
+      source = "myfile"
+      @m.touch(source)
+
+      target = @m.backup(source)
+
+      target.should_not be_nil
+      target.should_not == source
+      File.exists?(target).should be_true
+    end
+  end
+
+  it "should backup a directory with files (backup)" do
+    @m.mktempdircd do
+      dir = "mydir"
+      file = File.join(dir, "myfile")
+      @m.mkdir(dir)
+      @m.touch(file)
+
+      target_dir = @m.backup(dir)
+
+      target_dir.should_not be_nil
+      target_dir.should_not == dir
+      File.exists?(target_dir).should be_true
+      File.directory?(target_dir).should be_true
+
+      target_file = File.join(target_dir, File.basename(file))
+      File.exists?(target_file).should be_true
+      File.directory?(target_file).should be_false
+    end
+  end
+
+  it "should backup multiple files and directories (backup)" do
+    @m.mktempdircd do
+      @m.mkdir_p("foo/bar/baz")
+      @m.touch("foo/bar/baz/feh")
+      @m.mkdir_p("foo/bar/qux")
+      @m.touch("foo/bar/qux/meh")
+      @m.mkdir_p("qux/foo/bar")
+      @m.touch("qux/foo/bar/bah")
+
+      results = @m.backup("foo", "qux")
+      results.should_not be_blank
+
+      results[0].should =~ %r{#{File::SEPARATOR}foo\..+\.bak$}
+      File.exists?(results[0]+"/bar/baz/feh")
+      File.exists?(results[0]+"/bar/baz/meh")
+
+      results[1].should =~ %r{#{File::SEPARATOR}qux\..+\.bak$}
+      File.exists?(results[1]+"/foo/bar/bah")
+    end
+  end
+
   it "should change directories (cd)" do
     before = Dir.pwd
     target = Pathname.new("/").expand_path.to_s

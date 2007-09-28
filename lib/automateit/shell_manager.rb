@@ -7,7 +7,7 @@
 # previews.txt[link:files/docs/previews_txt.html] for instructions on how to
 # write code that can be safely previewed.
 class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
-  alias_methods :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
+  alias_methods :backup, :sh, :which, :which!, :mktemp, :mktempdir, :mktempdircd, :chperm, :umask
   alias_methods :cd, :pwd, :mkdir, :mkdir_p, :rmdir, :ln, :ln_s, :ln_sf, :cp, :cp_r, :cp_R, :mv, :rm, :rm_r, :rm_rf, :install, :chmod, :chmod_R, :chown, :chown_R, :touch
 
   #...[ Detection commands ]..............................................
@@ -25,6 +25,27 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   def provides_link?() dispatch_safely end
 
   #...[ Custom commands ].................................................
+
+  # Backup +sources+ if they exist. Returns the names of the backups created.
+  #
+  # These backups are copies of the original sources saved into the same
+  # directories as the originals. The pathnames of these copies are timestamped
+  # and guaranteed to be unique, so you can have multiple backups of the same
+  # sources.
+  #
+  # *WARNING*: This method is not conditional. It will make a backup every time
+  # it's called if the sources exist. Therefore, only execute this method when
+  # its needed.
+  #
+  # For example, backup a file:
+  #
+  #   backup("/tmp/myfile") # => "/tmp/myfile.1190994237_M2xhLrC6Sj.bak
+  #
+  # In the above example, the backup's name contains two special strings. The
+  # "1190994237" is the time the backup was made in seconds since the Epoch.
+  # The "M2xhLrC6Sj" is a random string used to guarantee the uniqueness of
+  # this backup in case two are made at exactly the same time.
+  def backup(*sources) dispatch(*sources) end
 
   # Execute a shell command.
   def sh(*commands) dispatch(*commands) end
@@ -250,7 +271,29 @@ class AutomateIt::ShellManager::BaseDriver < AutomateIt::Plugin::Driver
     opts[:noop] = true if preview?
     return opts
   end
-  private :_fileutils_opts
+  protected :_fileutils_opts
+
+  # Return array of all the directory's top-level contents, including hidden
+  # files with "." prefix on UNIX. Directories are returned just as a name,
+  # you'll need to expand those separately if needed.
+  def _directory_contents(directory)
+    return Dir[directory+"/{,.}*"].reject{|t| t =~ /(^|#{File::SEPARATOR})\.{1,2}$/}
+  end
+  protected :_directory_contents
+
+  # Returns derived filename to use as a peer given the +source+ and +target+.
+  # This is necessary for differentiating between directory and file targets.
+  #
+  # For example:
+  #
+  #   # Get the peer for an extant target directory:
+  #   peer_for("foo", "/tmp") # => "/tmp/foo"
+  #
+  #   # Get the peer for anything else:
+  #   peer_for("foo", "/bar") # => "/bar"
+  def peer_for(source, target)
+    return FileUtils.send(:fu_each_src_dest, source, target){|a, b| b}
+  end
 end
 
 # Drivers

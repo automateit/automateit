@@ -84,6 +84,7 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   # * :params -- Hash to make available to editor session.
   # * :create -- Create the file if it doesn't exist? Defaults to false.
   # * :mode, :user, :group -- Set permissions on generated file, see ShellManager#chperm
+  # * :backup -- Make a backup of original file? Defaults to true.
   #
   # Edit a string:
   #
@@ -130,7 +131,10 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
     raise ArgumentError.new("no block given") unless block
     instance_eval(&block)
     if @filename
-      _write if different?
+      if different?
+        _backup
+        _write
+      end
 
       chperm_opts = {}
       for key in [:owner, :user, :group, :mode]
@@ -281,6 +285,7 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   # Write contents to #filename. Used by the #edit command to write the buffer
   # to a file.
   def _write
+    return false unless @filename
     log.info(PNOTE+"Edited '#{@filename}'")
     if preview?
       true
@@ -289,4 +294,11 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
     end
   end
   protected :_write
+
+  # Backup the original file.
+  def _backup
+    return false unless @filename and File.exists?(@filename)
+    result = backup(@filename)
+    log.info(PNOTE+"Saved '#{@filename}' to '#{result}'")
+  end
 end # class EditSession
