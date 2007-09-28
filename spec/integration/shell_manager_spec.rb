@@ -252,6 +252,25 @@ describe AutomateIt::ShellManager, " in general" do
     end
   end
 
+  it "should create files and change their timestamps (touch)" do
+    @m.mktempdircd do
+      target = "foo"
+      File.exists?(target).should be_false
+
+      @m.touch(target)
+      File.exists?(target).should be_true
+      before = File.mtime(target)
+
+      @m.touch(target)
+      after = File.mtime(target)
+      before.should <= after
+    end
+  end
+end
+
+describe AutomateIt::ShellManager, " when managing modes" do
+  it_should_behave_like "AutomateIt::ShellManager"
+
   unless INTERPRETER.shell_manager.provides_mode?
     puts "NOTE: Can't check permission modes on this platform, #{__FILE__}"
   else
@@ -290,20 +309,6 @@ describe AutomateIt::ShellManager, " in general" do
     end
   end
 
-  it "should create files and change their timestamps (touch)" do
-    @m.mktempdircd do
-      target = "foo"
-      File.exists?(target).should be_false
-
-      @m.touch(target)
-      File.exists?(target).should be_true
-      before = File.mtime(target)
-
-      @m.touch(target)
-      after = File.mtime(target)
-      before.should <= after
-    end
-  end
 end
 
 describe AutomateIt::ShellManager, " when managing permissions" do
