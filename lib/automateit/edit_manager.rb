@@ -299,7 +299,10 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   # Backup the original file.
   def _backup
     return false unless @filename and File.exists?(@filename)
-    result = backup(@filename)
+    result = nil
+    log.silence(Logger::WARN) do
+      result = backup(@filename)
+    end
     log.info(PNOTE+"Saved '#{@filename}' to '#{result}'")
   end
   protected :_backup
