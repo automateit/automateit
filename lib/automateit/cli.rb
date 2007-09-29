@@ -50,15 +50,17 @@ module AutomateIt
         irb.context.workspace.instance_variable_set(:@binding, interpreter.send(:binding))
 
         # Tab completion
+        message = "<CTRL-D> to quit"
         begin
           require 'irb/completion'
           irb.context.auto_indent_mode = true
           irb.context.load_modules << 'irb/completion' unless irb.context.load_modules.include?('irb/completion')
           irb.context.instance_eval{ @use_readline = true }
-          display.call PNOTE+"<CTRL-D> to quit, <Tab> to auto-complete"
+          message << ", <Tab> to auto-complete"
         rescue LoadError
-          display.call PNOTE+"<CTRL-D> to quit"
+          # Ignore
         end
+        display.call PNOTE+message
 
         # Set prompt
         unless opts[:custom_prompt] == false
