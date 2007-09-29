@@ -64,14 +64,18 @@ EOB
     opts[:xml] = v
   end
 
-  parser.on("-h", "--help", "Display this help message") do |v|
-    puts parser
-    exit
+  parser.on("-a", "--add TAGS", "Add list of space separated tags") do |v|
+    opts[:tags] = [v.split].flatten
   end
 
   parser.on("-v", "--version", "Display version") do |v|
     puts AutomateIt::VERSION
     exit 0
+  end
+
+  parser.on("-h", "--help", "Display this help message") do |v|
+    puts parser
+    exit
   end
 
   args = parser.parse!.dup
@@ -80,7 +84,10 @@ EOB
   opts[:args] = args
   ARGV.clear
 
-  interpreter = AutomateIt.new(:project => opts[:project])
+  interpreter = AutomateIt.new(
+    :project => opts[:project],
+    :tags => opts[:tags]
+  )
   result = nil
 
   unless opts[:tags] or opts[:tags_for] or opts[:tagged?] or opts[:hosts_tagged_with]
@@ -125,4 +132,3 @@ EOB
 
   exit 0
 end
-

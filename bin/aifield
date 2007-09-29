@@ -46,14 +46,18 @@ EOB
     opts[:xml] = v
   end
 
-  parser.on("-h", "--help", "Display this help message") do |v|
-    puts parser
-    exit
+  parser.on("-a", "--add TAGS", "Add list of space separated tags") do |v|
+    opts[:tags] = [v.split].flatten
   end
 
   parser.on("-v", "--version", "Display version") do |v|
     puts AutomateIt::VERSION
     exit 0
+  end
+
+  parser.on("-h", "--help", "Display this help message") do |v|
+    puts parser
+    exit
   end
 
   args = parser.parse!.dup

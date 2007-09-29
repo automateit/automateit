@@ -124,9 +124,8 @@ module AutomateIt
     # * :verbosity -- Alias for :log_level
     # * :log_level -- Log level to use, defaults to Logger::INFO.
     # * :preview -- Turn on preview mode, defaults to false.
-    # * :project -- Set project path.
-    # * :friendly_exceptions -- Throw user-friendly exceptions that make it
-    #   easier to see errors in recipes, defaults to true.
+    # * :project -- Project directory to use.
+    # * :tags -- Array of tags to add to this run.
     #
     # Options for internal use:
     # * :parent -- Parent plugin instance.
@@ -135,6 +134,8 @@ module AutomateIt
     #   guessed, won't throw exceptions if project wasn't found at the
     #   specified path. If not guessed, will throw exception in such a
     #   situation.
+    # * :friendly_exceptions -- Throw user-friendly exceptions that make it
+    #   easier to see errors in recipes, defaults to true.
     def setup(opts={})
       super(opts.merge(:interpreter => self))
 
@@ -210,6 +211,8 @@ module AutomateIt
           raise ArgumentError.new("Couldn't find project at: #{project_path}")
         end
       end
+
+      tags.merge(opts[:tags]) if opts[:tags]
     end
 
     # Hash of plugin tokens to plugin instances for this Interpreter.

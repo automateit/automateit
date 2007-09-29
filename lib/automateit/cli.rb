@@ -15,6 +15,7 @@ module AutomateIt
     #   AutomateIt::CLI.run(:eval => "42")
     #
     # Options:
+    # * :tags -- Array of tags to add for this run.
     # * :project -- Project directory to load.
     # * :recipe -- Recipe file to execute.
     # * :eval -- Evaluate this string.
@@ -26,7 +27,9 @@ module AutomateIt
         opts[:project] = File.join(File.dirname(recipe), "..")
         opts[:guessed_project] = true
       end
+
       opts[:verbosity] ||= Logger::INFO
+
       if opts[:create]
         Project::create(opts)
       elsif code = opts.delete(:eval)

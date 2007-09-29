@@ -33,6 +33,12 @@ Examples:
 
   # Eval a string
   #{PROG} -e "puts tags.to_a.inspect"
+  
+  # Add a tag
+  #{PROG} -a mytag -e "puts tags.to_a.inspect"
+  
+  # Add tags
+  #{PROG} -a 'mytag othertag' -e "puts tags.to_a.inspect"
 
 Options:
 EOB
@@ -52,6 +58,10 @@ EOB
     opts[:eval] = v
   end
 
+  parser.on("-a", "--add TAGS", "Add list of space separated tags") do |v|
+    opts[:tags] = [v.split].flatten
+  end
+
   parser.on("-q", "--quiet", "Print only errors") do |v|
     opts[:verbosity] = Logger::ERROR
   end
@@ -64,14 +74,14 @@ EOB
     opts[:friendly_exceptions] = ! v
   end
 
-  parser.on("-h", "--help", "Display this help message") do |v|
-    puts parser
-    exit
-  end
-
   parser.on("-v", "--version", "Display version") do |v|
     puts AutomateIt::VERSION
     exit 0
+  end
+
+  parser.on("-h", "--help", "Display this help message") do |v|
+    puts parser
+    exit
   end
 
   args = parser.parse!.dup
