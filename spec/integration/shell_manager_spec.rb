@@ -5,6 +5,10 @@ describe AutomateIt::ShellManager, :shared => true do
     @a = AutomateIt.new(:verbosity => Logger::WARN)
     @m = @a.shell_manager
   end
+
+  before(:each) do
+    @a.preview = false
+  end
 end
 
 describe AutomateIt::ShellManager, " with sh and which" do
@@ -114,6 +118,38 @@ describe AutomateIt::ShellManager, " in general" do
     Dir.pwd.should == before
   end
 
+  it "should change back to a directory when there's an error (cd)" do
+    before = Dir.pwd
+    target = Pathname.new("/").expand_path.to_s
+    lambda {
+      @m.cd(target) do
+        raise "42"
+      end
+    }.should raise_error("42")
+    Dir.pwd.should == before
+  end
+
+  it "should fail to change to a non-existend directory (cd)" do
+    lambda{ @m.cd("qweljkrusfauweqr") }.should raise_error(Errno::ENOENT)
+  end
+
+  it "should not fail to change to a non-existent directory in preview mode (cd)" do
+    @m.preview = true
+    @m.cd("qweljkrusfauweqr").should_not be_nil
+  end
+
+  it "should return if there's an error when pretending to cd into a non-existent directory in preview mode (cd)" do
+    @m.preview = true
+    before = Dir.pwd
+    lambda {
+      @m.cd("qweljkrusfauweqr") do
+        Dir.pwd.should == before
+        raise "42"
+      end
+    }.should raise_error("42")
+    Dir.pwd.should == before
+  end
+
   it "should locate the current directory (pwd)" do
     @m.pwd.should == Dir.pwd
   end
@@ -127,6 +163,26 @@ describe AutomateIt::ShellManager, " in general" do
       File.directory?(target).should be_true
 
       @m.mkdir(target).should be_false
+    end
+  end
+
+  it "should create a directory and cd into it (mkdir)" do
+    @m.mktempdircd do
+      target = "foo"
+      @m.mkdir(target) do |path|
+        path.should == target
+        File.basename(Dir.pwd).should == target
+      end
+    end
+  end
+
+  it "should fail to cd into multiple created directories (mkdir)" do
+    @m.mktempdircd do
+      lambda {
+        @m.mkdir(%w(foo bar baz)) do |path|
+          violated
+        end
+      }.should raise_error(ArgumentError)
     end
   end
 
@@ -151,6 +207,20 @@ describe AutomateIt::ShellManager, " in general" do
       File.directory?(target).should be_false
     end
   end
+
+  it "should create a temporary file (mktemp)" do
+    @m.mktempdir do
+      item = nil
+      @m.mktemp do |path|
+        item = path
+        File.exists?(item).should be_true
+      end
+      File.exists?(item).should be_false
+    end
+  end
+
+  #it "should create a temporary directory (mktempdir)"
+  #it "should create a temporary directory and cd into it (mktempdircd)"
 
   it "should install a file to a file (install)" do
     @m.mktempdircd do
@@ -241,10 +311,6 @@ describe AutomateIt::ShellManager, " in general" do
       @a.cp(source_dir, target_dir).should be_false
     end
   end
-
-  # TODO implement umask spec
-
-  # TODO implement gap
 
   it "should move files (mv)" do
     @m.mktempdircd do
@@ -361,6 +427,8 @@ describe AutomateIt::ShellManager, " when managing modes" do
         @m.chmod_R(mode, dir).should be_false
       end
     end
+
+    #it "should set the default mask (umask)" # TODO 
   end
 
 end
