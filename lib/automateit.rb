@@ -64,3 +64,4 @@ require 'automateit/package_manager' # requires shell
 require 'automateit/template_manager'
 require 'automateit/edit_manager'
 require 'automateit/account_manager'
+require 'automateit/download_manager'

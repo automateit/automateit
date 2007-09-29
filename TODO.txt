@@ -2,7 +2,6 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
-101 Download -- Add OpenURI wrapper from gTag
 101 CLI -- Add tags via command-line
 100 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 
