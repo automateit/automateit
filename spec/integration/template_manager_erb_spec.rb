@@ -9,7 +9,11 @@ describe "AutomateIt::TemplateManager::ERB" do
     @d.available?.should be_true
   end
 
-  it "should set mode when rendering" do
+  before(:each) do
+    @a.preview = false
+  end
+
+  it "should set file's mode when rendering" do
     @a.mktempdircd do
       source = "foo"
       target = "bar"
@@ -26,6 +30,19 @@ describe "AutomateIt::TemplateManager::ERB" do
       else
         puts "NOTE: Can't check permission modes on this platform, #{__FILE__}"
       end
+    end
+  end
+
+  it "should fail to render non-existent file" do
+    @a.mktempdircd do
+      lambda { @a.render(:file => "foo", :to => "bar") }.should raise_error(Errno::ENOENT)
+    end
+  end
+
+  it "should not raise error with non-existent file in preview mode" do
+    @a.mktempdircd do
+      @a.preview = true
+      @a.render(:file => "foo", :to => "bar").should be_true
     end
   end
 end
