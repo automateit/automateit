@@ -274,11 +274,11 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   # into the buffer.
   def _read
     @contents = \
-    if writing? or (preview? and @filename and File.exists?(@filename))
-      File.read(@filename)
-    else
-      nil
-    end
+      if writing? or (preview? and @filename and _exists?)
+        File.read(@filename)
+      else
+        nil
+      end
   end
   protected :_read
 
@@ -301,4 +301,11 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
     result = backup(@filename)
     log.info(PNOTE+"Saved '#{@filename}' to '#{result}'")
   end
+  protected :_backup
+
+  # Does the file exist?
+  def _exists?
+    File.exists?(@filename)
+  end
+  protected :_exists?
 end # class EditSession
