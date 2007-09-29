@@ -50,7 +50,8 @@ class MyManager::MyFirstDriver < MyManager::BaseDriver
   def suitability(method, *args)
     case method
     when :mymethod
-      return args.first[:one] == 1 ? 10 : 0
+      value = args.first ? args.first[:one] : nil
+      return value == 1 ? 10 : 0
     else
       return -1
     end
@@ -69,7 +70,8 @@ class MyManager::MySecondDriver < MyManager::BaseDriver
   def suitability(method, *args)
     case method
     when :mymethod
-      return args.first[:one] == 1 ? 5 : 0
+      value = args.first ? args.first[:one] : nil
+      return value == 1 ? 5 : 0
     else
       return -1
     end
@@ -112,6 +114,14 @@ describe "MyManager" do
     @m = MyManager.new
   end
 
+  it "should have a class token" do
+    MyManager.token.should == :my_manager
+  end
+
+  it "should have an instance token" do
+    @m.token.should == :my_manager
+  end
+
   it "should have drivers" do
     for driver in [MyManager::MyUnsuitableDriver, MyManager::MyFirstDriver, MyManager::MySecondDriver]
       @m.class.driver_classes.should include(driver)
@@ -146,7 +156,7 @@ describe "MyManager" do
 end
 
 describe "MyManager's drivers" do
-  before(:all) do
+  before(:each) do
     @m = MyManager.new
   end
 
@@ -186,6 +196,18 @@ describe "MyManager's drivers" do
     lambda { @m.driver_for(:mymethod, :one => 9) }.should raise_error(NotImplementedError)
   end
 
+  it "should claim availability for suitable method" do
+    @m.available?(:mymethod, :one => 1).should be_true
+  end
+
+  it "should not claim availability of unsuitable method" do
+    @m.available?(:mymethod, :one => 9).should be_false
+  end
+
+  it "should not claim availability of non-existent method" do
+    @m.available?(:asdf).should be_false
+  end
+
   it "should dispatch_to suitable driver" do
     @m.dispatch_to(:mymethod, :one => 1).should == 1
     @m.mymethod(:one => 1).should == 1
@@ -196,10 +218,24 @@ describe "MyManager's drivers" do
     lambda { @m.mymethod(:one => 9) }.should raise_error(NotImplementedError)
   end
 
-  it "should dispatch_to to default driver regardless of suitability" do
+  it "should dispatch_to default driver regardless of suitability" do
     @m.default(:my_unimplemented_driver)
     lambda { @m.dispatch_to(:mymethod, :one => 1) }.should raise_error(NoMethodError)
     lambda { @m.mymethod(:one => 1) }.should raise_error(NoMethodError)
+  end
+
+  it "should dispatch_to default= driver regardless of suitability" do
+    @m.default = :my_unimplemented_driver
+    lambda { @m.dispatch_to(:mymethod, :one => 1) }.should raise_error(NoMethodError)
+    lambda { @m.mymethod(:one => 1) }.should raise_error(NoMethodError)
+  end
+
+  it "should dispatch to a driver using :with option" do
+    @m.mymethod(:one => 1, :with => :my_first_driver).should == 1
+  end
+
+  it "should dispatch safely to non-suitable drivers" do
+    @m.dispatch_safely_to(:asdf).should be_nil
   end
 
   it "should have an interpreter instance" do
