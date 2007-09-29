@@ -198,7 +198,6 @@ describe "AutomateIt::EditManager for files in preview mode" do
   it "should not write changes" do
     File.should_receive(:exists?).any_number_of_times.with(@filename).and_return(true)
     File.should_receive(:read).with(@filename).and_return(@input)
-    @a.shell_manager.should_receive(:cp).and_return(true)
     result = @a.edit(:file => @filename, :backup => false) do
       append "APPEND"
     end

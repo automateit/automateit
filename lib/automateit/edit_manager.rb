@@ -111,10 +111,11 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
       @filename = args.first
     else
       raise ArgumentError.new("no file or text specified for editing") unless opts[:file] or opts[:text]
-      @filename = opts.delete(:file)
-      @contents = opts.delete(:text)
+      @filename = opts[:file]
+      @contents = opts[:text]
     end
-    @params = opts.delete(:params) || {}
+    @params = opts[:params] || {}
+    @is_backup = opts[:backup].nil? ? true : opts[:backup]
     @comment_prefix = "# "
     @comment_suffix = ""
     begin
@@ -132,7 +133,7 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
     instance_eval(&block)
     if @filename
       if different?
-        _backup
+        _backup if @is_backup
         _write
       end
 
