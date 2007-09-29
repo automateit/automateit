@@ -27,6 +27,7 @@ module AutomateIt
   # * cp -- AutomateIt::ShellManager#cp
   # * cp_r -- AutomateIt::ShellManager#cp_r
   # * edit -- AutomateIt::EditManager#edit
+  # * download -- AutomateIt::DownloadManager#download
   # * hosts_tagged_with -- AutomateIt::TagManager#hosts_tagged_with
   # * install -- AutomateIt::ShellManager#install
   # * ln -- AutomateIt::ShellManager#ln
