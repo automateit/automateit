@@ -292,7 +292,7 @@ class AutomateIt::ShellManager::BaseDriver < AutomateIt::Plugin::Driver
   #   # Get the peer for anything else:
   #   peer_for("foo", "/bar") # => "/bar"
   def peer_for(source, target)
-    return FileUtils.send(:fu_each_src_dest, source, target){|a, b| b}
+    return FileUtils.send(:fu_each_src_dest0, source, target){|a, b| b}
   end
 end
 

@@ -192,7 +192,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     chmod_rv = nil
     log.silence(Logger::WARN) do
       cp_rv = cp(source, target)
-      chmod_rv = chmod(mode, target) if mode
+      chmod_rv = chmod(mode, peer_for(source, target)) if mode
     end
 
     return false unless cp_rv or chmod_rv

@@ -24,7 +24,7 @@ class AutomateIt::ShellManager::BaseLink < AutomateIt::ShellManager::BaseDriver
     end
 
     for source in sources
-      peer = File.directory?(target) ? File.join(target, File.basename(source)) : target
+      peer = peer_for(source, target)
       begin
         peer_stat = File.stat(peer)
         source_stat = File.stat(source)
