@@ -124,11 +124,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
         if writing? or File.directory?(dir)
           FileUtils.cd(dir, &block)
         else
-          begin
-            block.call(true)
-          rescue Exception => e
-            raise e
-          end
+          block.call(true)
         end
       rescue Exception => e
         raise e
@@ -160,6 +156,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       cmd = kind.to_s.gsub(/_/, ' -')
       log.info(PEXEC+"#{cmd} #{missing.join(" ")}")
       result = [FileUtils.send(kind, missing, _fileutils_opts)].flatten
+      result = result.first if [dirs].flatten.size == 1
     end
     if block
       if missing.size > 1
@@ -223,7 +220,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
         source_fn = File.directory?(child) ? child+"/" : child
         target_dir = File.directory?(target)
         target_fn = peer_for(source_fn, target)
-        
+
         log.debug(PNOTE+"comparing %s => %s" % [source_fn, target_fn])
         source_st = File.stat(source_fn)
         is_copy = false
