@@ -187,6 +187,9 @@ class Tempster
   end
 end
 
+=begin
+# Mostly recreated this in spec/integration/tempster_spec.rb
+
 if __FILE__ == $0
   # TODO Tempster -- write a spec
 
@@ -244,3 +247,4 @@ if __FILE__ == $0
   puts "after dir exists?: %s" % File.directory?(path)
   puts "after pwd: "+Dir.pwd
 end
+=end
