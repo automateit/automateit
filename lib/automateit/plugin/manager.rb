@@ -38,12 +38,8 @@ module AutomateIt
 
       # Methods to alias into the Interpreter, specified as an array of symbols.
       def self.alias_methods(*methods)
-        if methods.empty?
-          self.aliased_methods
-        else
-          self.aliased_methods ||= Set.new
-          self.aliased_methods.merge(methods.flatten)
-        end
+        self.aliased_methods ||= Set.new
+        self.aliased_methods.merge(methods.flatten)
       end
 
       # Drivers for this manager as a hash of driver tokens to driver
