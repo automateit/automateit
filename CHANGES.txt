@@ -1,3 +1,12 @@
+0.70928:
+    Date: Fri, 28 Sep 2007 23:18:37 -0700
+    Desc:
+    - (%) Fixed #cp, #ln and #install when called with relative path source and directory target. These tried to create items which included the relative path, rather than discarding it.
+    - (+) Added an "--add TAGS" feature to executables: automateit, aifield, aitag. This makes it easy to define tag(s) for a specific run.
+    - (+) Added #backup command to save copies of files, it's now used by default when using #edit to modify a file.
+    - (+) Added #download command to retrieve data via HTTP and FTP to a file or directory.
+    - Improved specs and provided coverage for more exception handling.
+
 0.70923:
     Date: Sun, 23 Sep 2007 16:01:03 -0700
     Desc:
