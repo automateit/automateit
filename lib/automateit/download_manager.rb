@@ -29,16 +29,17 @@ module AutomateIt
 
       # See DownloadManager#download
       def download(source, opts={})
-        return false if preview?
         target = opts[:to] || File.basename(source)
         target = File.join(target, File.basename(source)) if File.directory?(target)
-        open(target, "w+") do |writer|
-          open(source) do |reader|
-            writer.write(reader.read)
-            log.info(PNOTE+"Downloaded #{target}")
+        log.info(PNOTE+"Downloading #{target}")
+        if writing?
+          open(target, "w+") do |writer|
+            open(source) do |reader|
+              writer.write(reader.read)
+            end
           end
         end
-        return true
+        return writing?
       end
     end
   end
