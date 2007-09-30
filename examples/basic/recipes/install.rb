@@ -6,7 +6,7 @@ if tagged?("rails_servers | myapp_servers")
     package_manager.install("build-essential", "ruby1.8-dev", "libsqlite3-dev")
   elsif tagged?("fedoracore | fedora | centos")
     # Install equivalent packages on Fedora and similar OSes
-    package_manager.install("gcc", "'ruby-devel", "sqlite-devel")
+    package_manager.install("gcc", "ruby-devel", "sqlite-devel")
   else
     # Fail if running on another platform
     raise NotImplementedError.new("no packages specified for this platform")
