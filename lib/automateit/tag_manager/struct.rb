@@ -89,7 +89,7 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
       else
         raise TypeError.new("invalid hostnames argument type: #{hostnames.class}")
       end
-    return @struct.inject(Set.new) do |sum, role_and_members|
+    result = @struct.inject(Set.new) do |sum, role_and_members|
       role, members = role_and_members
       members_aliases = members.inject(Set.new) do |aliases, member|
         aliases.merge(interpreter.address_manager.hostnames_for(member)); aliases
@@ -97,5 +97,6 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
       sum.add(role) unless (hostnames & members_aliases).empty?
       sum
     end
+    return result.to_a.sort
   end
 end
