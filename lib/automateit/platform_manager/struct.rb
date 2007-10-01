@@ -63,8 +63,10 @@ class AutomateIt::PlatformManager::Struct < AutomateIt::PlatformManager::BaseDri
 
   # See PlatformManager#tags
   def tags
-    results = @struct.values
-    results << query("os#arch") rescue IndexError
+    results = []
+    for key in %w(os arch distro os#arch)
+      results << query(key) rescue IndexError
+    end
 
     release_query = \
       if single_vendor?
