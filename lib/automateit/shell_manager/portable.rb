@@ -319,10 +319,23 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       else
         :rm
       end
+
     present = [targets].flatten.select{|entry| File.exists?(entry)}
     return false if present.empty?
+
+    msg = "rm"
+    if opts[:recursive] and opts[:force]
+      msg << " -rf"
+    elsif opts[:recursive]
+      msg << " -r"
+    elsif opts[:force]
+      msg << " -f"
+    end
+    msg << " " << present.join(' ')
+    log.info(PEXEC+msg)
+
     present = present.first if present.size == 0
-    log.info(PEXEC+"#{kind} #{String === present ? present : present.join(' ')}")
+
     FileUtils.send(kind, present, _fileutils_opts)
     return present
   end
