@@ -23,7 +23,7 @@ Execution:
 Plugins:
 * AutomateIt::AccountManager -- Manipulates users and groups.
 * AutomateIt::AddressManager -- Manipulates host's network addresses.
-* AutomateIt::EditManager -- Edits files and strings.
+* AutomateIt::DownloadManager -- Downloads files.
 * AutomateIt::EditManager::EditSession -- Commands for editing files.
 * AutomateIt::FieldManager -- Queries configuration variables.
 * AutomateIt::PackageManager -- Manipulates software packages.
