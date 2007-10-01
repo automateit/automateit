@@ -33,10 +33,10 @@ Examples:
 
   # Eval a string
   #{PROG} -e "puts tags.to_a.inspect"
-  
+
   # Add a tag
   #{PROG} -a mytag -e "puts tags.to_a.inspect"
-  
+
   # Add tags
   #{PROG} -a 'mytag othertag' -e "puts tags.to_a.inspect"
 
@@ -96,11 +96,19 @@ EOB
   argscopy = args.clone
   optscopy = opts.clone
 
+  # Display newline at the end
+  newline = true
+
   begin
     rv = AutomateIt::CLI.run(opts)
+  rescue SystemExit
+    # Don't display errors when 'exit' is run
+    newline = false
   rescue Exception => e
     msg = nil
-    if opts[:friendly_exceptions] != false and e.is_a?(AutomateIt::Error)
+    if e.is_a?(AutomateIt::Error) and e.cause.to_s =~ /IRB_EXIT/
+      # Don't display errors interpreter is closed with 'CTRL-D'
+    elsif opts[:friendly_exceptions] != false and e.is_a?(AutomateIt::Error)
       # Friendly message
       msg = PERROR+e.message
       msg << "\n\n"+PNOTE+"Use 'automateit --trace' to see complete backtrace"
@@ -115,12 +123,10 @@ EOB
     end
     puts msg
     exit 1
-  rescue SysExit => e
-    # Don't display errors when exit gets called
   end
   if optscopy[:create] or optscopy[:eval] or argscopy.size > 0
     exit rv ? 0 :1
-  else
+  elsif newline
     # CTRL-D ends the line prematurely, so add a newline
     puts
   end
