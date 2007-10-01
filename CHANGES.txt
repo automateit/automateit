@@ -1,3 +1,12 @@
+0.70930:
+    Date: Sun, 30 Sep 2007 15:10:43 -0700
+    Desc:
+    - Fixed ShellManager#rm to display output like 'rm -rf' rather than 'rm_rf'.
+    - Fixed #tags, removed the standalone tag for the distro's version (e.g., "7.04"), it must now be qualified with the distro's name, "ubuntu_7.04".
+    - Improved bin/automateit so it doesn't display error trace when user types 'exit' into irb.
+    - Improved comments in basic/examples recipes.
+    - Improved #tag_for to return a sorted Array instead of a Set.
+
 0.70928:
     Date: Fri, 28 Sep 2007 23:18:37 -0700
     Desc:
