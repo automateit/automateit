@@ -303,7 +303,7 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
     log.silence(Logger::WARN) do
       result = backup(@filename)
     end
-    log.info(PNOTE+"Saved '#{@filename}' to '#{result}'")
+    log.debug(PNOTE+"Saved '#{@filename}' to '#{result}'")
   end
   protected :_backup
 
