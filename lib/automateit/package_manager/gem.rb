@@ -85,6 +85,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
       uninstall_needed = false
       begin
         require 'expect'
+        require 'open4'
         exitstruct = Open4::popen4(cmd) do |pid, sin, sout, serr|
           $expect_verbose = opts[:quiet] ? false : true
 

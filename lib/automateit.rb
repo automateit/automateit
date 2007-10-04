@@ -15,7 +15,6 @@ require 'yaml'
 
 # Gems
 require 'rubygems'
-require 'open4'
 require 'erb'
 
 # Load ActiveSupport pieces individually to save ~0.5s

@@ -55,6 +55,7 @@ class ::AutomateIt::AccountManager::Passwd < ::AutomateIt::AccountManager::BaseD
   def _passwd_raw(user, password, opts={})
     quiet = (opts[:quiet] or not log.info?)
 
+    require 'open4'
     return Open4::popen4("passwd %s 2>&1" % user) do |pid, sin, sout, serr|
       $expect_verbose = ! quiet
       2.times do
