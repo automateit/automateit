@@ -49,7 +49,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       if is_dir
         cp_opts = {}
         cp_opts[:recursive] = true if is_dir
-        cp_opts[:preserve] = true if superuser?
+        cp_opts[:preserve] = :try
 
         source_children = _directory_contents(source)
         #puts "sc: %s" % source_children.inspect
@@ -210,8 +210,16 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       opt = opt.to_sym
       fu_opts[opt] = opts[opt] if opts[opt]
     end
-    #fu_opts[:verbose] = true
-    fu_opts_with_preserve = {:preserve => opts[:preserve]}.merge(fu_opts)
+
+    fu_opts_with_preserve = fu_opts.clone
+    fu_opts_with_preserve[:preserve] = \
+      if opts[:preserve] == :try
+        fsim = File::Stat.instance_methods
+        (fsim.include?("uid") and fsim.include?("gid") and
+         fsim.include?("mode") and fsim.include?("atime"))
+      else
+        opts[:preserve]
+      end
 
     changed = []
     sources_a = [sources].flatten
@@ -454,9 +462,48 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
   end
 
   # See ShellManager#touch
-  def touch(targets)
-    log.info(PEXEC+"touch #{String === targets ? targets : targets.join(' ')}")
-    FileUtils.touch(targets, _fileutils_opts)
-    return targets
+  def touch(targets, opts={})
+    like = opts.delete(:like)
+    stamp = opts.delete(:stamp)
+    quiet = opts.delete(:quiet) == true ? true : false
+    time = \
+      if stamp
+        stamp
+      elsif like
+        begin
+          File.stat(like).mtime
+        rescue Errno::ENOENT => e
+          if preview?
+            Time.now
+          else
+            raise e
+          end
+        end
+      else
+        Time.now
+      end
+
+    unless quiet
+      msg = PEXEC << "touch"
+      msg << " --reference %s" % like if like
+      msg << " --stamp %s" % stamp if stamp
+      msg << " " << [targets].flatten.join(" ")
+      log.info(msg)
+    end
+
+    results = []
+    for target in [targets].flatten
+      begin
+        stat = File.stat(target)
+        next if stat.mtime.to_i == time.to_i
+      rescue Errno::ENOENT
+        File.open(target, "a"){} unless preview?
+      end
+      File.utime(time, time, target) unless preview?
+      results << target
+    end
+
+    return false if results.empty?
+    return targets.is_a?(String) ? results.first : results
   end
 end

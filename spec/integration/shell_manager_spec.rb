@@ -371,6 +371,10 @@ describe AutomateIt::ShellManager, " in general" do
       File.exists?(dir).should be_false
     end
   end
+end
+
+describe AutomateIt::ShellManager, " when touching files" do
+  it_should_behave_like "AutomateIt::ShellManager"
 
   it "should create files and change their timestamps (touch)" do
     @m.mktempdircd do
@@ -384,6 +388,79 @@ describe AutomateIt::ShellManager, " in general" do
       @m.touch(target)
       after = File.mtime(target)
       before.should <= after
+    end
+  end
+
+  it "should touch files with a specific timestamp (touch)" do
+    @m.mktempdircd do
+      target = "foo"
+      stamp = Time.now - 60
+      stamp.should_not == Time.now
+
+      @m.touch(target, :stamp => stamp).should == target
+      stat = File.stat(target)
+      stamp.to_i.should == stat.mtime.to_i
+
+      @m.touch(target, :stamp => stamp).should be_false
+    end
+  end
+
+  it "should touch files with a timestamp like other files (touch)" do
+    @m.mktempdircd do
+      source = "foo"
+      target = "bar"
+      stamp = Time.now - 60
+      stamp.should_not == Time.now
+      @m.touch(source, :stamp => stamp)
+
+      @m.touch(target, :like => source).should == target
+      stat = File.stat(target)
+      stamp.to_i.should == stat.mtime.to_i
+
+      @m.touch(target, :like => source).should be_false
+    end
+  end
+
+  it "should not change timestamps in preview mode (touch)" do
+    @m.mktempdircd do
+      target = "foo"
+      @m.touch(target)
+      stamp = File.stat(target).mtime
+
+      begin
+        @m.preview = true
+        @m.touch(target)
+        File.stat(target).mtime.to_i == stamp.to_i
+      ensure
+        @m.preview = false
+      end
+    end
+  end
+
+  it "should raise errors when setting timestamps like non-existing files (touch)" do
+    @m.mktempdircd do
+      source = "source"
+      target = "target"
+      File.exists?(source).should be_false
+      File.exists?(target).should be_false
+
+      lambda { @m.touch(target, :like => source) }.should raise_error(Errno::ENOENT)
+    end
+  end
+
+  it "should not raise errors when setting timestamps like non-existing files in preview mode (touch)" do
+    @m.mktempdircd do
+      source = "source"
+      target = "target"
+      File.exists?(source).should be_false
+      File.exists?(target).should be_false
+
+      begin
+        @m.preview = true
+        @m.touch(target, :like => source).should == target
+      ensure
+        @m.preview = false
+      end
     end
   end
 end
@@ -428,7 +505,7 @@ describe AutomateIt::ShellManager, " when managing modes" do
       end
     end
 
-    #it "should set the default mask (umask)" # TODO 
+    #it "should set the default mask (umask)" # TODO
   end
 
 end

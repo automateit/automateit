@@ -1,3 +1,10 @@
+0.71003:
+    Date: Wed, 03 Oct 2007 01:17:32 -0700
+    Desc:
+    - Fixed bug in #backup on JRuby because it lacks methods to query properties. It now copies the file and timestamp, but not the owner/group/mode because these can't be queried on JRuby.
+    - Improved #cp with new :preserve => :try option so that properties are preserved when possible, but no exception is thrown when these can't be preserved.
+    - Improved #touch with options for :like and :stamp options.
+
 0.70930:
     Date: Sun, 30 Sep 2007 15:10:43 -0700
     Desc:

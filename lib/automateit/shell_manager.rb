@@ -195,8 +195,11 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   # +false+ if all are present.
   #
   # Options:
-  # * :preserve -- preserve file modification time and ownership, boolean.
-  # * :recursive -- copy files and directories recursively, boolean.
+  # * :preserve -- Preserve file modification time and ownership. Defaults to
+  #   false. Can be +true+, +false+, or :try. If :try, the properties will be
+  #   preserved if possible on the platform, whereas +true+ will raise an
+  #   exception if not available.
+  # * :recursive -- Copy files and directories recursively, boolean.
   def cp(sources, target, opts={}) dispatch(sources, target, opts) end
 
   # Copy the +sources+ to the +target+ recursively. Returns an array of
@@ -250,7 +253,11 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
   # Create the +targets+ as files if needed and update their modification
   # time. Unlike most other commands provided by ShellManager, this one will
   # always modify the targets. Returns an array of targets modified.
-  def touch(targets) dispatch(targets) end
+  #
+  # Options:
+  # * :like -- Touch the targets like this file. Defaults to none.
+  # * :stamp -- Set the targets to the specified timestamp. Defaults to Time.now.
+  def touch(targets, opts={}) dispatch(targets, opts) end
 end
 
 # == ShellManager::BaseDriver
