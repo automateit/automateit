@@ -234,7 +234,7 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   # Comment out lines matching the String or Regexp +query+.
   def comment(query, opts={})
     query = Regexp.escape(query) if query.is_a?(String)
-    query = Regexp.new("^([^\n]*%s[^\n]*)(\n*)" % query)
+    query = Regexp.new("^(?!#{comment_prefix})([^\n]*%s[^\n]*)(\n*)" % query)
     return false unless @contents.match(query)
     @contents.gsub!(query, "%s%s%s%s" % [@comment_prefix, $1, @comment_suffix, $2])
   end
