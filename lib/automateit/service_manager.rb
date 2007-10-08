@@ -23,15 +23,29 @@ class AutomateIt::ServiceManager < AutomateIt::Plugin::Manager
   def running?(service, opts={}) dispatch_to(:started?, service, opts) end
 
   # Start this +service+ if it's not running.
+  #
+  # Options:
+  # * :wait -- Same as :wait option for #started?
+  # * :force -- Start service without checking if it's running.
   def start(service, opts={}) dispatch(service, opts) end
 
   # Stop this +service+ if it's running.
+  #
+  # Options:
+  # * :wait -- Same as :wait option for #stopped?
+  # * :force -- Stop service without checking if it's running.
   def stop(service, opts={}) dispatch(service, opts) end
 
   # Restart this +service+ if it's running, or start it if it's stopped.
+  #
+  # Options:
+  # * :wait -- Maxmimum seconds to wait for service to STOP.
+  # * :pause -- Maximum seconds to wait for service to START before stopping
+  #   it. Only set this if you just started the service and then decided to
+  #   restart it.
   def restart(service, opts={}) dispatch(service, opts) end
 
-  # If +is_restart+, #restart the service, otherwise #start it. 
+  # If +is_restart+, #restart the service, otherwise #start it.
   #
   # Example:
   #  modified = edit "/etc/myapp.conf" {#...}

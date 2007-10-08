@@ -23,12 +23,12 @@ else
       @service_name = "automateit_service_sysv_test"
       @service_file = "/etc/init.d/"+@service_name
       @source_file = File.join(File.dirname(__FILE__), "..", "extras", @service_name)
-
-      FileUtils.cp(@source_file, @service_file)
-      FileUtils.chmod(0755, @service_file)
     end
 
     before(:each) do
+      FileUtils.cp(@source_file, @service_file)
+      FileUtils.chmod(0755, @service_file)
+
       @m.stop(@service_name, :quiet => true) if @m.running?(@service_name)
     end
 
@@ -62,6 +62,23 @@ else
     it "should identify a running service" do
       @m.start(@service_name, :quiet => true).should be_true
       @m.running?(@service_name).should be_true
+    end
+
+    it "should wait for service to restart" do
+      # NOTE: Test depends on race condition because checks must pass before the service starts
+
+      timeout = 1
+      wait = timeout+2
+      @a.edit(@service_file, :backup => false) do
+        replace "touch $STATE", "sleep #{timeout} && touch $STATE &"
+      end
+
+      @m.start(@service_name, :quiet => true).should be_true
+      @m.started?(@service_name).should be_false # Still starting
+      @m.started?(@service_name, :wait => wait).should be_true
+      @m.restart(@service_name, :quiet => true, :wait => wait).should be_true
+      @m.started?(@service_name).should be_false
+      @m.started?(@service_name, :wait => wait).should be_true
     end
 
     if @has_enable

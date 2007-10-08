@@ -76,6 +76,7 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
     end
     return result
   end
+  protected :_started_and_stopped_helper
 
   # See ServiceManager#started?
   def started?(service, opts={})
@@ -89,8 +90,7 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
 
   # See ServiceManager#start
   def start(service, opts={})
-    # TODO maybe add a :wait option?
-    if started?(service) and not opts[:force]
+    if not opts[:force] and started?(service, :wait => opts[:wait])
       # Already started
       return false
     else
@@ -102,8 +102,7 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
 
   # See ServiceManager#stop
   def stop(service, opts={})
-    # TODO maybe add a :wait option?
-    if stopped?(service) and not opts[:force]
+    if not opts[:force] and stopped?(service, :wait => opts[:wait])
       # Already stopped
       return false
     else
@@ -115,8 +114,17 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
 
   # See ServiceManager#restart
   def restart(service, opts={})
-    stop(service, opts) if running?(service)
-    return start(service, opts)
+    if started?(service, :wait => opts[:pause])
+      # We're certain that service is started
+      stop_opts = opts.clone
+      stop_opts[:force] = true # Don't check again
+      stop(service, stop_opts)
+    end
+
+    # We're certain that service is stopped
+    start_opts = opts.clone
+    start_opts[:force] = true # Don't check again
+    return start(service, start_opts)
   end
 
   # See ServiceManager#enabled?

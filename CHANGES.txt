@@ -1,7 +1,10 @@
 0.71006:
     Date: Sat, 06 Oct 2007 17:55:37 -0700
     Desc:
-    - Fixed EditSession#delete to delete lines matching substrings rather than exact matches.
+    - (%) Fixed EditSession#delete to delete lines matching substrings rather than exact matches.
+    - Fixed EditSession#comment to not comment already commented-out lines.
+    - Fixed SessionManager#start and #stop so these don't check status when called with :force option.
+    - Improved SessionManager#restart to use :wait option.
     - Improved #download to accept array or hash as arguments.
 
 0.71003:
