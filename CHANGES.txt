@@ -2,6 +2,7 @@
     Date: Sat, 06 Oct 2007 17:55:37 -0700
     Desc:
     - Fixed EditSession#delete to delete lines matching substrings rather than exact matches.
+    - Improved #download to accept array or hash as arguments.
 
 0.71003:
     Date: Wed, 03 Oct 2007 01:17:32 -0700

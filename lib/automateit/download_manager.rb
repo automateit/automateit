@@ -9,7 +9,7 @@ module AutomateIt
     #
     # Options:
     # * :to -- Saves source to this filename or directory. Defaults to current directory.
-    def download(source, opts={}) dispatch(source, opts) end
+    def download(*arguments) dispatch(*arguments) end
 
     # == DownloadManager::BaseDriver
     #
@@ -28,8 +28,10 @@ module AutomateIt
       end
 
       # See DownloadManager#download
-      def download(source, opts={})
-        target = opts[:to] || File.basename(source)
+      def download(*arguments)
+        args, opts = args_and_opts(*arguments)
+        source = args[0] or raise ArgumentError.new("No source specified")
+        target = args[1] || opts[:to] || File.basename(source)
         target = File.join(target, File.basename(source)) if File.directory?(target)
         log.info(PNOTE+"Downloading #{target}")
         if writing?
