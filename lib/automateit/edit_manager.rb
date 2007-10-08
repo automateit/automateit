@@ -217,7 +217,7 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   # Delete lines matching the String or Regexp +query+
   def delete(query, opts={})
     query = Regexp.escape(query) if query.is_a?(String)
-    query = Regexp.new(query+"\n?")
+    query = Regexp.new("^[^\n]*%s[^\n]*\n?" % query)
     @contents.gsub!(query, "")
   end
 

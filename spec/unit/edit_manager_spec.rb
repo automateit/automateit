@@ -6,12 +6,12 @@ describe "AutomateIt::EditManager for strings" do
   end
 
   before(:each) do
-    @input = "This\nis\n\a\nstring."
+    @input = "This\nis\na\nstring."
   end
 
   it "should pass contents" do
     @a.edit(:text => @input) do
-      contents.should == "This\nis\n\a\nstring."
+      contents.should == "This\nis\na\nstring."
     end
   end
 
@@ -67,9 +67,10 @@ describe "AutomateIt::EditManager for strings" do
 
   it "should delete lines" do
     output = @a.edit(:text => @input) do
-      delete "This"
+      delete "is"
     end
-    output.should_not =~ /This/
+    output.should_not =~ /is/
+    output.should == "a\nstring."
   end
 
   it "should comment lines" do
