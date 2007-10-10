@@ -155,7 +155,7 @@ class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
           log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because contents are the same")
           return false
         else
-          log.info(PNOTE+"Rendering '#{target_filename} because its contents changed")
+          log.info(PNOTE+"Rendering '#{target_filename}' because its contents changed")
         end
       when :timestamp
         log.info(PNOTE+"Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
