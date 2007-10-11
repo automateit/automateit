@@ -3,8 +3,10 @@
 # A Linux-specific driver for the AccountManager.
 class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portable
   depends_on \
-    :programs => %w(useradd usermod userdel groupadd groupmod groupdel),
-    :callbacks => [lambda{AutomateIt::AccountManager::Portable.has_etc?}]
+    :programs => %w(uname useradd usermod userdel groupadd groupmod groupdel),
+    :callbacks => [lambda{
+      `uname -s`.match(/linux/i) && AutomateIt::AccountManager::Portable.has_etc?
+    }]
 
   def suitability(method, *args) # :nodoc:
     # Level must be higher than Portable
