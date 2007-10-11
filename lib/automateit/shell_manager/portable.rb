@@ -421,6 +421,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     display_entries = opts[:details] ? modified_entries : targets
     display_entries = [display_entries].flatten
 
+    # FIXME ShellManager#chperm -- only display chmod/chown log messages when these are changed
     if opts[:mode]
       msg = "chmod"
       msg << " -R" if opts[:recursive]
