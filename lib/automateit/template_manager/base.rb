@@ -160,6 +160,7 @@ class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
       when :timestamp
         log.info(PNOTE+"Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
       end
+      # FIXME TemplateManager#render -- backup replaced files with default :backup option
       result = _write(target_filename, output)
       return result
     ensure
