@@ -97,11 +97,16 @@ task :loclines do
     if path.match(/(\bbin\b|.*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|erb|po|haml|sass)$)/)
       data = File.read(path)
       bytes += data.size
-      lines += data.scan(/^.+$/).size
+      ### lines += data.scan(/^.*\w.*$/).size # Skip spaces
+      lines += data.scan(/^\s*(?!#)\w.*$/).size # Skip blanks and comments
     end
   end
   puts "Lines: "+lines.commify
   puts "Bytes: "+bytes.commify
+end
+
+task :loccount do
+  sh ""
 end
 
 desc "Display the lines of code changed in the repository"
