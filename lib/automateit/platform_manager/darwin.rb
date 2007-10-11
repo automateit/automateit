@@ -2,10 +2,10 @@
 #
 # A PlatformManager driver for Apple's Darwin.
 class AutomateIt::PlatformManager::Darwin < AutomateIt::PlatformManager::Struct
-  depends_on :files => ["/usr/sbin/scutil"], :programs => ["which"]
+  depends_on :files => ["/usr/sbin/scutil"], :programs => ["which", "uname"]
 
   def suitability(method, *args) # :nodoc:
-    # Must be higher than PlatformManager::Struct
+    # Must be higher than PlatformManager::Uname
     return available? ? 3 : 0
   end
 
