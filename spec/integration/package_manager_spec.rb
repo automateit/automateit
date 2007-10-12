@@ -86,6 +86,10 @@ else
   end
 
   targets.each_pair do |driver_token, package|
+    # Run the following from the shell to skip package tests:
+    #   export AUTOMATEIT_SPEC_SKIP_PACKAGES=1
+    next unless ENV["AUTOMATEIT_SPEC_SKIP_PACKAGES"].nil?
+
     driver = INTERPRETER.package_manager[driver_token]
     if driver.available?
       describe driver.class.to_s do
