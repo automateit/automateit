@@ -50,6 +50,7 @@ describe "AutomateIt::TemplateManager::ERB" do
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
     @d.should_receive(:_mtime).once.with(@source).and_return(timestamp+1)
     @d.should_receive(:_mtime).once.with(@target).and_return(timestamp)
+    @d.should_receive(:_backup).once.with(@target).and_return(true)
     @d.should_receive(:_write).once.with(@target, "my template content").and_return(true)
 
     @a.render(@source, @target, :check => :timestamp).should be_true
@@ -74,6 +75,7 @@ describe "AutomateIt::TemplateManager::ERB" do
     @d.should_receive(:_mtime).once.with("foo").and_return(timestamp+1)
     @d.should_receive(:_mtime).once.with(@source).and_return(timestamp)
     @d.should_receive(:_mtime).once.with(@target).and_return(timestamp)
+    @d.should_receive(:_backup).once.with(@target).and_return(true)
     @d.should_receive(:_write).once.with(@target, "my template content").and_return(true)
 
     @a.render(@source, @target, :check => :timestamp, :dependencies => ["foo"]).should be_true
@@ -95,6 +97,7 @@ describe "AutomateIt::TemplateManager::ERB" do
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_read).once.with(@target).and_return("my old content")
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
+    @d.should_receive(:_backup).once.with(@target).and_return(true)
     @d.should_receive(:_write).once.with(@target, "my template content").and_return(true)
 
     @a.render(@source, @target, :check => :timestamp, :dependencies => ["foo"], :force => true).should be_true
@@ -121,6 +124,7 @@ describe "AutomateIt::TemplateManager::ERB" do
     @d.should_receive(:_exists?).once.with(@target).and_return(true)
     @d.should_receive(:_read).once.with(@target).and_return("my old content")
     @d.should_receive(:_read).once.with(@source).and_return("my template content")
+    @d.should_receive(:_backup).once.with(@target).and_return(true)
     @d.should_receive(:_write).once.with(@target, "my template content").and_return(true)
 
     @a.render(@source, @target, :check => :compare).should be_true

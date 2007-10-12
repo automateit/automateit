@@ -1,6 +1,6 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-describe "AutomateIt::TemplateManager::ERB" do
+describe AutomateIt::TemplateManager::ERB do
   before(:all) do
     @a = AutomateIt.new(:verbosity => Logger::WARN)
     @m = @a.template_manager
@@ -15,8 +15,8 @@ describe "AutomateIt::TemplateManager::ERB" do
 
   it "should set file's mode when rendering" do
     @a.mktempdircd do
-      source = "foo"
-      target = "bar"
+      source = "source"
+      target = "target"
       mode1 = 0646 if INTERPRETER.shell_manager.provides_mode?
       mode2 = 0100646
       File.open(source, "w+"){|h| h.write("<%=variable%>")}
@@ -35,14 +35,31 @@ describe "AutomateIt::TemplateManager::ERB" do
 
   it "should fail to render non-existent file" do
     @a.mktempdircd do
-      lambda { @a.render(:file => "foo", :to => "bar") }.should raise_error(Errno::ENOENT)
+      lambda { @a.render(:file => "source", :to => "target") }.should raise_error(Errno::ENOENT)
     end
   end
 
   it "should not raise error with non-existent file in preview mode" do
     @a.mktempdircd do
       @a.preview = true
-      @a.render(:file => "foo", :to => "bar").should be_true
+      @a.render(:file => "source", :to => "target").should be_true
+    end
+  end
+
+  it "should not backup non-existing files" do
+    @a.mktempdircd do
+      @a.render(:text => "source", :to => "target").should be_true
+
+      Dir.entries(".").grep(/\w/).size.should == 1
+    end
+  end
+
+  it "should backup existing files" do
+    @a.mktempdircd do
+      @a.touch "target"
+      @a.render(:text => "source", :to => "target").should be_true
+
+      Dir.entries(".").grep(/\w/).size.should == 2
     end
   end
 end

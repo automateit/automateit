@@ -17,9 +17,10 @@ class AutomateIt::TemplateManager < AutomateIt::Plugin::Manager
   # * :text -- Read the template from this string.
   # * :to -- Render to a file, otherwise returns the rendered string.
   # * :locals -- Hash of variables passed to template as local variables.
-  # * :dependencies -- When checking timestamps, include this Array of
-  #   filenames when checking timestamps.
-  # * :force -- Boolean to force rendering without checking timestamps.
+  # * :dependencies -- Array of filenames to check timestamps on, only used
+  #   when :check is :timestamp.
+  # * :backup -- Make a backup? Default is true.
+  # * :force -- Render without making a check. Default is false.
   # * :check -- Determines when to render, otherwise uses value of
   #   +default_check+, possible values:
   #   * :compare -- Only render if rendered template is different than the

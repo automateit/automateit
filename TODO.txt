@@ -2,6 +2,16 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
+f=finished
+d=disabled
+
+Solaris 10
+f Create PlatformManager::SunOS
+d Create AccountManager::SunOS and prevent ::Linux from being used because it has the same commands but with different args
+- Create ServiceManager::SMF 
+- Create PackageManager::Blastwave
+- Create PackageManager::SunPkg
+
 100 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 
 100 Edit -- Display summary of edits, return with :details as [rv, list]
@@ -9,12 +19,10 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 100 Interpreter#invoke and HelpfulERB -- Extract error context code into class
 
 000 Shell#chperm -- With symbolic mode, wrap `chmod -v` as temporary workaround?
-000 Changes -- Write parser and new format so I can use "#" symbol
 000 FreeBSD -- Write driver for PackageManager::Ports
 000 Darwin -- Write drivers, e.g. PackageManager for Fink, MacPorts, Pkgsrc
 
 ??? Shell -- Return false or list, never single item?
-??? Shell -- Extract FileManager? change docs
 ??? Driver -- How to determine if a manager or driver method is available? Manager#available?, Manager#available and Driver#suitable? only say if it should be a default.
 
 #===[ Web ]=============================================================

@@ -16,6 +16,10 @@ class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
     end
   end
 
+  #.......................................................................
+
+  protected
+
   # Return Array of +dependencies+ newer than +filename+. Will be empty if
   # +filename+ is newer than all of the +dependencies+.
   def _newer(filename, *dependencies)
@@ -26,13 +30,11 @@ class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
     end
     return updated
   end
-  protected :_newer
 
   # Does +filename+ exist?
   def _exists?(filename)
     return File.exists?(filename)
   end
-  protected :_exists?
 
   # Return the contents of +filename+.
   def _read(filename)
@@ -47,20 +49,22 @@ class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
       end
     end
   end
-  protected :_read
 
   # Write +contents+ to +filename+.
   def _write(filename, contents)
     File.open(filename, "w+"){|writer| writer.write(contents)} if writing?
     return true
   end
-  protected :_write
+
+  # Backup +filename+.
+  def _backup(filename)
+    interpreter.backup(filename)
+  end
 
   # Return the modification date for +filename+.
   def _mtime(filename)
     return _exists? ? File.mtime(filename) : nil
   end
-  protected :_mtime
 
   # Render a template specified in the block. It takes the same arguments and
   # returns the same results as the #render call.
@@ -84,6 +88,7 @@ class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
     source_filename = args[0] || opts[:file]
     target_filename = args[1] || opts[:to]
     source_text = opts[:text]
+    opts[:backup] = true if opts[:backup].nil?
 
     raise ArgumentError.new("No source specified with :file or :text") if not source_filename and not source_text
     raise Errno::ENOENT.new(source_filename) if writing? and source_filename and not _exists?(source_filename)
@@ -160,7 +165,8 @@ class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
       when :timestamp
         log.info(PNOTE+"Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
       end
-      # FIXME TemplateManager#render -- backup replaced files with default :backup option
+
+      _backup(target_filename) if target_exists and opts[:backup]
       result = _write(target_filename, output)
       return result
     ensure
@@ -169,5 +175,4 @@ class AutomateIt::TemplateManager::BaseDriver < AutomateIt::Plugin::Driver
       end
     end
   end
-  protected :_render_helper
 end
