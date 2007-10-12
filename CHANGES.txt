@@ -7,6 +7,7 @@
     - Improved #render, added default :backup option to save files before overwriting them.
     - Improved #backup, added :quiet option to prevent output.
     - Improved #chperm, it now displays the exact changes made rather than approximations.
+    - Improved ServiceManager::SysV spec to validate :wait and :pause options with safe mocks.
 
 0.71006:
     Date: Sat, 06 Oct 2007 17:55:37 -0700
