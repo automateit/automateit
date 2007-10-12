@@ -485,11 +485,11 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       end
 
     unless quiet
-      msg = PEXEC << "touch"
+      msg = "touch"
       msg << " --reference %s" % like if like
       msg << " --stamp %s" % stamp if stamp
       msg << " " << [targets].flatten.join(" ")
-      log.info(msg)
+      log.info(PEXEC+msg)
     end
 
     results = []
