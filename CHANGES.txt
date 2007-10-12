@@ -4,6 +4,7 @@
     - (%) Fixed #touch, it worked fine but was corrupting log output
     - (%) Fixed AccountManager::Linux, it now only runs when the OS detected is Linux.
     - Added PlatformManager::SunOS.
+    - Added AddressManager::SunOS.
     - Improved #render, added default :backup option to save files before overwriting them.
     - Improved #backup, added :quiet option to prevent output.
     - Improved #chperm, it now displays the exact changes made rather than approximations.

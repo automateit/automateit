@@ -158,8 +158,50 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
   def bin2dec(s)
     return s.to_i(2)
   end
+
+  # See AddressManager#has?
+  def has?(opts)
+    raise ArgumentError.new(":device or :address must be specified") unless opts[:device] or opts[:address]
+    result = true
+    result &= interfaces.include?(opts[:device]) if opts[:device] and not opts[:label]
+    result &= interfaces.include?(opts[:device]+":"+opts[:label]) if opts[:device] and opts[:label]
+    result &= addresses.include?(opts[:address]) if opts[:address]
+    return result
+  end
+
+  protected
+
+  def _add_helper(opts, &block)
+    opts[:announcements] = opts[:announcements].to_i || AutomateIt::AddressManager::DEFAULT_ANNOUNCEMENTS
+    raise SecurityError.new("you must be root") unless superuser?
+    raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
+    return false if has?(opts)
+    block.call(opts)
+    return true
+  end
+
+  def _remove_helper(opts, &block)
+    return false unless has?(opts)
+    raise SecurityError.new("you must be root") unless superuser?
+    raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
+    return block.call(opts)
+  end
+
+  def _normalize_opts(opts)
+    # Accept common alternative names
+    opts[:mask] ||= opts[:netmask] if opts[:netmask]
+    opts[:alias] ||= opts[:alias] if opts[:alias]
+    opts[:device] ||= opts[:interface] if opts[:interface]
+
+    if opts[:mask] and not opts[:mask].match(/\./)
+      opts[:mask] = cidr_to_mask(opts[:mask])
+    end
+
+    return opts
+  end
 end
 
 # Drivers
 require 'automateit/address_manager/portable'
 require 'automateit/address_manager/linux'
+require 'automateit/address_manager/sunos'

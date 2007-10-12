@@ -4,32 +4,24 @@ if not INTERPRETER.euid?
   puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
 elsif not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
-elsif not INTERPRETER.address_manager[:linux].available?
-  puts "NOTE: Can't check AddressManager::Linux on this platform, #{__FILE__}"
 else
-  describe "AutomateIt::AddressManager::Linux" do
+  describe AutomateIt::AddressManager, :shared => true do
     before(:all) do
+      # Should examples be independent? True is correct and lets you run a
+      # single example. False is evil and requires you to run the entire suite,
+      # but it's much faster. On Linux false yields a 5x speed-up.
+      @independent = false
+
       @a = AutomateIt.new(:verbosity => Logger::WARN)
       @m = @a.address_manager
-
-      @properties = {
-        :device => "eth0",
-        :label => "xxxx",
-        :address => "10.0.0.249",
-        :mask => "24",
-        :announcements => 1,
-      }
-
-      @device_and_label = @properties[:device]+":"+@properties[:label]
-
-      if @m.interfaces.include?(@device_and_label) \
-          or @m.addresses.include?(@properties[:address])
-        raise "ERROR: This computer already has the device/address used for testing! Either disable #{@device_and_label} and #{@properties[:address]}, or change the spec to test using different properties."
-      end
     end
 
     after(:all) do
       @m.remove(@properties)
+    end
+
+    after(:each) do
+      @m.remove(@properties) if @independent
     end
 
     it "should find interfaces for top-level device" do
@@ -50,36 +42,41 @@ else
 
     it "should add an address" do
       @m.add(@properties).should be_true
-      # Leaves active interface behind for other tests
     end
 
     it "should find added interface" do
-      # Depends on active interface being created by earlier test
+      @m.add(@properties).should be_true if @independent
+
       @m.interfaces.should include(@device_and_label)
     end
 
     it "should find added IP address" do
-      # Depends on active interface being created by earlier test
+      @m.add(@properties).should be_true if @independent
+
       @m.addresses.should include(@properties[:address])
     end
 
     it "should find added address using a properties bundle" do
-      # Depends on user to be created by previous tests
+      @m.add(@properties).should be_true if @independent
+
       @m.has?(@properties).should be_true
     end
 
     it "should find added address using the IP address" do
-      # Depends on user to be created by previous tests
+      @m.add(@properties).should be_true if @independent
+
       @m.has?(:address => @properties[:address]).should be_true
     end
 
     it "should find added address using device and label" do
-      # Depends on user to be created by previous tests
+      @m.add(@properties).should be_true if @independent
+
       @m.has?(:device => @properties[:device], :label => @properties[:label]).should be_true
     end
 
     it "should remove an address" do
-      # Depends on active interface being created by earlier test
+      @m.add(@properties).should be_true if @independent
+
       @m.remove(@properties).should be_true
     end
 
@@ -114,6 +111,49 @@ else
     it "should be able to infer hostname variants" do
       @m.hostnames_for("kagami.lucky-channel").should == ["kagami", "kagami.lucky-channel"]
       @m.hostnames_for("kagami").should == ["kagami"]
+    end
+  end
+
+  #---[ Targets ]---------------------------------------------------------
+
+  %w(linux sunos).each do |driver_name|
+    driver_token = driver_name.to_sym
+    driver = INTERPRETER.address_manager[driver_token]
+    if driver.available?
+      describe driver.class.to_s do
+        it_should_behave_like "AutomateIt::AddressManager"
+
+        before(:all) do
+
+          @properties = {
+            :device => @m.interfaces.reject{|t| t =~ /^lo\d+$/}.first,
+            :label => "1",
+            :address => "10.0.0.249",
+            :mask => "24",
+          }
+
+          case driver_token
+          when :sunos
+            # Accept defaults
+          when :linux
+            @properties[:label] = "atst"
+            @properties[:announcements] = 1
+          else
+            raise ArgumentError.new("Unknown AddressManager driver: #{driver_token}")
+          end
+
+          @device_and_label = @properties[:device]+":"+@properties[:label]
+
+          if @m.interfaces.include?(@device_and_label) \
+              or @m.addresses.include?(@properties[:address])
+            raise "ERROR: This computer already has the device/address used for testing! Either disable #{@device_and_label} and #{@properties[:address]}, or change the spec to test using different properties."
+          end
+
+          @d = @m[driver_token]
+        end
+      end
+    else
+      puts %{NOTE: Can't check %s on this platform, #{__FILE__}} % driver.class
     end
   end
 end
