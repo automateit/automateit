@@ -393,6 +393,8 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       end
 
     modified_entries = []
+    modified_ownership = false
+    modified_permission = false
     Find.find(*targets) do |path|
       modified = false
       stat = writing? || File.exists?(path) ? File.stat(path) : nil
@@ -401,15 +403,18 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
         mode = opts[:mode] | (stat.directory? ? DIRECTORY_MASK : FILE_MASK) if stat
         unless stat and (mode ^ stat.mode).zero?
           modified = true
+          modified_permission = true
           File.chmod(mode, path) if writing?
         end
       end
       if user and (not stat or user != stat.uid)
         modified = true
+        modified_ownership = true
         File.chown(user, nil, path) if writing?
       end
       if group and (not stat or group != stat.gid)
         modified = true
+        modified_ownership = true
         File.chown(nil, group, path) if writing?
       end
       modified_entries << path if modified
@@ -421,20 +426,18 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     display_entries = opts[:details] ? modified_entries : targets
     display_entries = [display_entries].flatten
 
-    # FIXME ShellManager#chperm -- only display chmod/chown log messages when these are changed
-    if opts[:mode]
+    if modified_permission
       msg = "chmod"
       msg << " -R" if opts[:recursive]
       msg << " 0%o" % opts[:mode] if opts[:mode]
       msg << " " << display_entries.join(' ')
       log.info(PEXEC+msg)
     end
-    if opts[:user] or opts[:group]
+    if modified_ownership
       msg = "chown"
       msg << " -R" if opts[:recursive]
       msg << " %s" % opts[:user] if opts[:user]
       msg << ":" if opts[:user] and opts[:group]
-      msg << " " unless opts[:user] and opts[:group]
       msg << "%s" % opts[:group] if opts[:group]
       msg << " " << display_entries.join(' ')
       log.info(PEXEC+msg)
