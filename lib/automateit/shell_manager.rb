@@ -28,6 +28,9 @@ class AutomateIt::ShellManager < AutomateIt::Plugin::Manager
 
   # Backup +sources+ if they exist. Returns the names of the backups created.
   #
+  # Options:
+  # * :quiet -- Don't display output? Default is false.
+  #
   # These backups are copies of the original sources saved into the same
   # directories as the originals. The pathnames of these copies are timestamped
   # and guaranteed to be unique, so you can have multiple backups of the same

@@ -30,6 +30,8 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   # See ShellManager#backup
   def backup(*sources)
+    sources, opts = args_and_opts(*sources)
+
     targets = []
     for source in sources
       is_dir = File.directory?(source)
@@ -46,17 +48,19 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
       target = ::Tempster.tempster(tempster_opts)
 
-      if is_dir
-        cp_opts = {}
-        cp_opts[:recursive] = true if is_dir
-        cp_opts[:preserve] = :try
+      log.silence(opts[:quiet] ? Logger::WARN : log.level) do
+        if is_dir
+          cp_opts = {}
+          cp_opts[:recursive] = true if is_dir
+          cp_opts[:preserve] = :try
 
-        source_children = _directory_contents(source)
-        #puts "sc: %s" % source_children.inspect
+          source_children = _directory_contents(source)
+          #puts "sc: %s" % source_children.inspect
 
-        interpreter.cp_r(source_children, target, cp_opts)
-      else
-        interpreter.cp(source, target)
+          interpreter.cp_r(source_children, target, cp_opts)
+        else
+          interpreter.cp(source, target)
+        end
       end
 
       targets << target
