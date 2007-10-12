@@ -633,6 +633,10 @@ module AutomateIt
     # * nil -- Returns boolean of whether nitpick messages will be displayed.
     # * Boolean -- Sets nitpick state.
     # * String or Symbol -- Displays nitpick message if state is on.
+    #
+    # Example:
+    #   nitpick true
+    #   nitpick "I'm nitpicking"
     def nitpick(value=nil)
       case value
       when NilClass: @nitpick
