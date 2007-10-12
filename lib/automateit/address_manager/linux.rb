@@ -14,7 +14,7 @@ class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
   # See AddressManager#add
   def add(opts)
     _add_helper(opts) do |opts|
-      interpreter.sh(_add_or_remove_command(:add, opts))
+      interpreter.sh(_ifconfig_helper(:add, opts))
       if interpreter.which("arping")
         interpreter.sh("arping -q -c #{opts[:announcements]} -w #{opts[:announcements]} -I #{opts[:device]} #{opts[:address]}")
       end
@@ -24,26 +24,9 @@ class AutomateIt::AddressManager::Linux < AutomateIt::AddressManager::BaseDriver
   # See AddressManager#remove
   def remove(opts)
     _remove_helper(opts) do |opts|
-      interpreter.sh(_add_or_remove_command(:remove, opts))
+      interpreter.sh(_ifconfig_helper(:remove, opts))
     end
   end
-
-  def _add_or_remove_command(action, opts)
-    _raise_unless_available
-    action = :del if action.to_sym == :remove
-
-    _normalize_opts(opts)
-
-    ipcmd = "ifconfig"
-    ipcmd << " %s" % opts[:device] if opts[:device] and not opts[:label]
-    ipcmd << " %s:%s" % [opts[:device], opts[:label]] if opts[:device] and opts[:label]
-    ipcmd << " %s" % opts[:address]
-    ipcmd << " netmask %s" % opts[:mask] if opts[:mask]
-    ipcmd << " up" if action == :add
-    ipcmd << " down" if action == :del
-    return ipcmd
-  end
-  protected :_add_or_remove_command
 
   # See AddressManager#interfaces
   def interfaces()
