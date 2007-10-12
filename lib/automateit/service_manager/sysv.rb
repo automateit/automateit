@@ -60,7 +60,7 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
       end
 
     result = tell(service, :status, :check => true)
-    ### puts "k %s r %s e %s" % [kind, result, expected]
+    nitpick("_sash top: k=%s r=%s e=%s" % [kind, result, expected])
     return result if expected == result
     if opts[:wait]
       timeout = Time.now + opts[:wait]
@@ -69,6 +69,7 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
           [kind, service, timeout - Time.now])
         sleep 0.5
         result = tell(service, :status, :check => true)
+        nitpick("_sash rep: k=%s r=%s e=%s" % [kind, result, expected])
         break if expected == result
       end
       log.info(PNOTE+" ServiceManager#%s finished waiting for '%s', got: %s" %
