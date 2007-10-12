@@ -245,6 +245,11 @@ describe "MyManager's drivers" do
   it "should share object instances" do
     @m[:my_first_driver].should == @m.interpreter.my_manager[:my_first_driver]
   end
+
+  it "should have a manager" do
+    @m[:my_first_driver].manager.should == @m
+  end
+
 end
 
 describe AutomateIt::Interpreter do

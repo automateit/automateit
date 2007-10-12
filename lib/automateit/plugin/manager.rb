@@ -80,7 +80,8 @@ module AutomateIt
         end
         self.class.driver_classes.each do |driver_class|
           driver_token = driver_class.token
-          @drivers[driver_token].setup(:interpreter => @interpreter)
+          @drivers[driver_token].setup(
+            :interpreter => @interpreter, :manager => self)
         end
       end
 

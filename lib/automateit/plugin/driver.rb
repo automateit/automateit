@@ -45,6 +45,18 @@ module AutomateIt
       cattr_accessor :classes
       self.classes = {}
 
+      # Returns the Plugin::Manager instance for this Driver.
+      attr_accessor :manager
+
+      # Setup a Driver.
+      #
+      # Options:
+      # * :manager -- The Plugin::Manager instance controlling this driver.
+      def setup(opts={})
+        self.manager = opts[:manager] if opts[:manager]
+        super(opts)
+      end
+
       # Retrieve the manager token for this driver
       def self.manager_token
         fragments = base_driver.to_s.split(/::/)
@@ -70,10 +82,14 @@ module AutomateIt
         if subclass.base_driver?
           # Ignore, base drivers should never be registered
         elsif base_driver
-          manager = subclass.manager_token
-          classes[manager] ||= []
-          classes[manager] << subclass unless classes[manager].include?(subclass)
-          ### puts "manager %s / driver %s" % [manager, subclass]
+          manager_token = subclass.manager_token
+          classes[manager_token] ||= []
+
+          unless classes[manager_token].include?(subclass)
+            classes[manager_token] << subclass
+          end
+
+          ### puts "manager_token %s / driver %s" % [manager_token, subclass]
         else
           # XXX Should this really raise an exception?
           raise TypeError.new("Can't determine manager for driver: #{subclass}")
@@ -197,6 +213,7 @@ module AutomateIt
           raise NotImplementedError.new("Missing dependencies -- %s" % msg)
         end
       end
+      protected :_raise_unless_available
 
       # What is this driver's suitability for automatic detection? The Manager
       # queries its drivers when there isn't a driver specified with a
