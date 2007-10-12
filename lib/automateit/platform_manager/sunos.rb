@@ -2,6 +2,10 @@
 #
 # A PlatformManager driver for SunOS.
 class AutomateIt::PlatformManager::SunOS < AutomateIt::PlatformManager::Uname
+  def self.token
+    :sunos
+  end
+
   depends_on \
     :programs => %w(uname),
     :callbacks => [lambda {
