@@ -41,13 +41,7 @@ else
     def add_user
       # SunOS /home entries don't exist until you add them to auto_home, so
       # work around this by using a directory we know can be used
-      home = \
-        if INTERPRETER.tagged?(:sunos)
-          require 'tmpdir'
-          File.join(Dir.tmpdir, @username)
-        else
-          nil
-        end
+      home = INTERPRETER.tagged?(:sunos) ? "/var/tmp/#{@username}" : nil
 
       return @m.add_user(@username, :passwd => "asdf", :shell => "/bin/false",
          :home => home, :quiet => @quiet)
@@ -195,6 +189,7 @@ else
 
     it "should add groups to a user" do
       add_user if @independent
+      add_group if @independent
 
       @m.add_groups_to_user(@groupname, @username).should == [@groupname]
     end

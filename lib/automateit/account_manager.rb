@@ -112,5 +112,6 @@ require 'automateit/account_manager/passwd' # FIXME replace
 require 'automateit/account_manager/passwd_expect'
 require 'automateit/account_manager/nscd'
 require 'automateit/account_manager/portable' # FIXME rename to etc
-require 'automateit/account_manager/linux' # FIXME merge linux and sunos
-require 'automateit/account_manager/sunos' # FIXME merge linux and sunos
+#require 'automateit/account_manager/linux' # FIXME merge linux and sunos
+#require 'automateit/account_manager/sunos' # FIXME merge linux and sunos
+require 'automateit/account_manager/posix'
