@@ -20,21 +20,30 @@ else
       @username =  "aitestus"
       @groupname = "aitestgr"
 
-      raise "User named '#{@username}' found. If this isn't a real user, delete it so that the test can contineu. If this is a real user, change the spec to test with a user that shouldn't exist." if @m.users[@username]
-      raise "Group named '#{@groupname}' found. If this isn't a real group, delete it so that the test can contineu. If this is a real group, change the spec to test with a group that shouldn't exist." if @m.groups[@groupname]
+      begin
+        raise "User named '#{@username}' found. If this isn't a real user, delete it so that the test can contineu. If this is a real user, change the spec to test with a user that shouldn't exist." if @m.users[@username]
+        raise "Group named '#{@groupname}' found. If this isn't a real group, delete it so that the test can contineu. If this is a real group, change the spec to test with a group that shouldn't exist." if @m.groups[@groupname]
+      rescue Exception => e
+        @fail = true
+        raise e
+      end
     end
 
     after(:all) do
-      @m.remove_user(@username, :quiet => true)
-      @m.remove_group(@username, :quiet => true)
-      @m.remove_group(@groupname, :quiet => true)
-    end
-
-    after(:each) do
-      if @independent
+      unless @fail
         @m.remove_user(@username, :quiet => true)
         @m.remove_group(@username, :quiet => true)
         @m.remove_group(@groupname, :quiet => true)
+      end
+    end
+
+    after(:each) do
+      unless @fail
+        if @independent
+          @m.remove_user(@username, :quiet => true)
+          @m.remove_group(@username, :quiet => true)
+          @m.remove_group(@groupname, :quiet => true)
+        end
       end
     end
 

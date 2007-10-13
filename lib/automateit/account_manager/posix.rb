@@ -43,8 +43,6 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portab
     end
   end
 
-  # FIXME change groups args to groupnames to avoid collisions with #groups
-
   # See AccountManager#add_groups_to_user
   def add_groups_to_user(groups, username)
     return _add_groups_to_user_helper(groups, username) do |missing, username|
@@ -58,8 +56,7 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portab
   # See AccountManager#remove_groups_from_user
   def remove_groups_from_user(groups, username)
     return _remove_groups_from_user_helper(groups, username) do |present, username|
-      # FIXME really?
-      matches = groups_for_user(username).to_a - groups.to_a
+      matches = (groups_for_user(username) - [groups].flatten).uniq
       cmd = "usermod -G #{matches.join(',')} #{username}"
       interpreter.sh(cmd)
     end
@@ -69,16 +66,24 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portab
 
   # See AccountManager#add_group
   def add_group(groupname, opts={})
-    return false if has_group?(groupname)
-    cmd = "groupadd"
-    cmd << " -g #{opts[:gid]}" if opts[:gid]
-    cmd << " #{groupname}"
-    interpreter.sh(cmd)
+    modified = false
+    unless has_group?(groupname)
+      modified = true
 
-    manager.invalidate(:groups)
+      cmd = "groupadd"
+      cmd << " -g #{opts[:gid]}" if opts[:gid]
+      cmd << " #{groupname}"
+      interpreter.sh(cmd)
 
-    add_users_to_group(opts[:members], groupname) if opts[:members]
-    return groups[groupname]
+      manager.invalidate(:groups)
+    end
+
+    if opts[:members]
+      modified = true
+      add_users_to_group(opts[:members], groupname)
+    end
+
+    return modified ? groups[groupname] : false
   end
 
   # TODO AccountManager#update_group -- implement
@@ -99,7 +104,7 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portab
   def add_users_to_group(users, groupname)
     _add_users_to_group_helper(users, groupname) do |missing, groupname|
       for username in missing
-        targets = (groups_for_user(username) + missing).uniq
+        targets = (groups_for_user(username) + [groupname]).uniq
         cmd = "usermod -G #{targets.join(',')} #{username}"
         interpreter.sh(cmd)
       end
