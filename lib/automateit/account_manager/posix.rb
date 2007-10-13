@@ -48,8 +48,9 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portab
   # See AccountManager#add_groups_to_user
   def add_groups_to_user(groups, username)
     return _add_groups_to_user_helper(groups, username) do |missing, username|
-      # FIXME -a not posix, must list all groups
-      cmd = "usermod -a -G #{missing.join(',')} #{username}"
+      targets = (groups_for_user(username) + missing).uniq
+
+      cmd = "usermod -G #{targets.join(',')} #{username}"
       interpreter.sh(cmd)
     end
   end
@@ -57,6 +58,7 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portab
   # See AccountManager#remove_groups_from_user
   def remove_groups_from_user(groups, username)
     return _remove_groups_from_user_helper(groups, username) do |present, username|
+      # FIXME really?
       matches = groups_for_user(username).to_a - groups.to_a
       cmd = "usermod -G #{matches.join(',')} #{username}"
       interpreter.sh(cmd)
