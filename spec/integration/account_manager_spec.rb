@@ -194,6 +194,13 @@ else
       @m.add_groups_to_user(@groupname, @username).should == [@groupname]
     end
 
+    it "should add users to group" do
+      add_user if @independent
+      add_group if @independent
+
+      @m.add_users_to_group(@username, @groupname).should == [@username]
+    end
+
     it "should remove groups from user" do
       add_user_with_group if @independent
 

@@ -99,8 +99,8 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portab
   def add_users_to_group(users, groupname)
     _add_users_to_group_helper(users, groupname) do |missing, groupname|
       for username in missing
-        # FIXME -a is not POSIX
-        cmd = "usermod -a -G #{groupname} #{username}"
+        targets = (groups_for_user(username) + missing).uniq
+        cmd = "usermod -G #{targets.join(',')} #{username}"
         interpreter.sh(cmd)
       end
     end
