@@ -1,5 +1,5 @@
-0.71010:
-    Date: Wed, 10 Oct 2007 21:51:35 -0700
+0.71012:
+    Date: Fri, 12 Oct 2007 03:54:30 -0700
     Desc:
     - (%) Fixed #touch, it worked fine but was corrupting log output
     - (%) Fixed AccountManager::Linux, it now only runs when the OS detected is Linux.
