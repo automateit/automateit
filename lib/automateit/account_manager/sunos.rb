@@ -1,11 +1,15 @@
-# == AccountManager::Linux
+# == AccountManager::SunOS
 #
-# A Linux-specific driver for the AccountManager.
-class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portable
+# A SunOS-specific driver for the AccountManager.
+class ::AutomateIt::AccountManager::SunOS < ::AutomateIt::AccountManager::Portable
+  def self.token
+    :sunos
+  end
+
   depends_on \
     :programs => %w(uname useradd usermod userdel groupadd groupmod groupdel),
     :callbacks => [lambda{
-      `uname -s`.match(/linux/i) && AutomateIt::AccountManager::Portable.has_etc?
+      `uname -s`.match(/sunos/i) && AutomateIt::AccountManager::Portable.has_etc?
     }]
 
   def suitability(method, *args) # :nodoc:
@@ -18,16 +22,32 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
   # See AccountManager#add_user
   def add_user(username, opts={})
     return _add_user_helper(username, opts) do |username, opts|
+=begin
+      # FIXME move this to ::BaseDriver
+      # TODO: How to efficiently find unused UID/GID? SunOS useradd doesn't check if the GID is available, and because it tries adding at UID 100, it's almost certain to fail because there are system groups at that level. Morons.
+      unless opts[:uid] and opts[:gid]
+        for i in 1000..60000
+          if users[i].nil? and groups[i].nil?
+            opts[:uid] = i
+            break
+          end
+        end
+
+        raise IndexError.new("Can't find unused UID/GID") unless opts[:uid]
+      end
+=end
+
       cmd = "useradd"
-      cmd << " --comment #{opts[:description] || username}"
-      cmd << " --home #{opts[:home]}" if opts[:home]
-      cmd << " --create-home" unless opts[:create_home] == false
-      cmd << " --groups #{opts[:groups].join(' ')}" if opts[:groups]
-      cmd << " --shell #{opts[:shell] || "/bin/bash"}"
-      cmd << " --uid #{opts[:uid]}" if opts[:uid]
-      cmd << " --gid #{opts[:gid]}" if opts[:gid]
+      cmd << " -c #{opts[:description] || username}"
+      cmd << " -d #{opts[:home]}" if opts[:home]
+      # TODO -m fails on SunOS if auto_home wasn't updated first :(
+      cmd << " -m" unless opts[:create_home] == false
+      cmd << " -G #{opts[:groups].join(' ')}" if opts[:groups]
+      cmd << " -s #{opts[:shell] || "/bin/bash"}"
+      cmd << " -u #{opts[:uid]}" if opts[:uid]
+      cmd << " -g #{opts[:gid]}" if opts[:gid]
       cmd << " #{username} < /dev/null"
-      cmd << " > /dev/null" if opts[:quiet]
+      cmd << " > /dev/null 2>&1 | grep -v blocks" if opts[:quiet]
       interpreter.sh(cmd)
     end
   end
@@ -50,7 +70,8 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
   # See AccountManager#add_groups_to_user
   def add_groups_to_user(groups, username)
     return _add_groups_to_user_helper(groups, username) do |missing, username|
-      cmd = "usermod -a -G #{missing.join(',')} #{username}"
+      matches = [groups_for_user(username).to_a, groups.to_a].flatten.uniq
+      cmd = "usermod -G #{matches.join(',')} #{username}"
       interpreter.sh(cmd)
     end
   end
@@ -97,8 +118,12 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
   # See AccountManager#add_users_to_group
   def add_users_to_group(users, groupname)
     _add_users_to_group_helper(users, groupname) do |missing, groupname|
+      u2g = users_to_groups
       for username in missing
-        cmd = "usermod -a -G #{groupname} #{username}"
+        groups = Set.new(groupname)
+        groups.merge(u2g[username]) if u2g[username]
+        groups = groups.to_a
+        cmd = "usermod -G #{groups.join(',')} #{username}"
         interpreter.sh(cmd)
       end
     end
@@ -110,10 +135,10 @@ class ::AutomateIt::AccountManager::Linux < ::AutomateIt::AccountManager::Portab
       u2g = users_to_groups
       for username in present
         user_groups = u2g[username]
-        # FIXME tries to include non-present groups, should use some variant of present 
         cmd = "usermod -G #{(user_groups.to_a-[groupname]).join(',')} #{username}"
         interpreter.sh(cmd)
       end
     end
   end
 end
+

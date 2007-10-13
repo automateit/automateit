@@ -3,6 +3,17 @@
 # The AccountManager provides a way of managing system accounts, such as Unix
 # users and groups.
 class AutomateIt::AccountManager < AutomateIt::Plugin::Manager
+  # Invalidate system cache for +database+. The +database+ can be either :users
+  # or :groups. This is necessary on operating systems that lack logic to
+  # notify their caching system that an entry changed. If the OS doesn't need
+  # invalidation, will do nothing and return false.
+  #
+  # This method is primarily for the sake of driver authors, recipe authors
+  # will probably never need to use this.
+  def invalidate(database) dispatch_safely(database) end
+
+  #-----------------------------------------------------------------------
+
   # Find a user account. Method returns a query helper which takes a
   # +username+ as an index argument and returns a Struct::Passwd entry as
   # described in Etc::getpwent if the user exists or a nil if not.
@@ -50,7 +61,7 @@ class AutomateIt::AccountManager < AutomateIt::Plugin::Manager
   def remove_groups_from_user(groups, user) dispatch(groups, user) end
 
   # Change the +password+ for the +user+.
-  def passwd(user, password) dispatch(user, password) end
+  def passwd(user, password, opts={}) dispatch(user, password, opts) end
 
   #.......................................................................
 
@@ -94,13 +105,12 @@ class AutomateIt::AccountManager < AutomateIt::Plugin::Manager
   def users_to_groups() dispatch() end
 end # class AccountManager
 
-# == AccountManager::BaseDriver
-#
-# Base class for all AccountManager drivers.
-class ::AutomateIt::AccountManager::BaseDriver < AutomateIt::Plugin::Driver
-end
-
 # Drivers
-require 'automateit/account_manager/portable'
-require 'automateit/account_manager/linux'
-require 'automateit/account_manager/passwd'
+require 'automateit/account_manager/base'
+#require 'automateit/account_manager/passwd_pty' # FIXME rename current 'passwd' to 'passwd_pty'
+require 'automateit/account_manager/passwd' # FIXME replace
+require 'automateit/account_manager/passwd_expect'
+require 'automateit/account_manager/nscd'
+require 'automateit/account_manager/portable' # FIXME rename to etc
+require 'automateit/account_manager/linux' # FIXME merge linux and sunos
+require 'automateit/account_manager/sunos' # FIXME merge linux and sunos
