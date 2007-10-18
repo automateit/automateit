@@ -19,6 +19,7 @@ require 'erb'
 
 # Load ActiveSupport pieces individually to save ~0.5s
 ### require 'active_support'
+require 'active_support/core_ext/array' # [].extract_options, new in AS 1.4.4
 require 'active_support/core_ext/blank' # foo.blank?
 require 'active_support/core_ext/class/attribute_accessors' # cattr_accessor
 require 'active_support/core_ext/class/inheritable_attributes' # inheritable_cattr_accessor
