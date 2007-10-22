@@ -47,8 +47,7 @@ else
     it "should find added interface" do
       @m.add(@properties).should be_true if @independent
 
-      query = @driver_token == :openbsd ? @properties[:device] : @device_and_label
-      @m.interfaces.should include(query)
+      @m.interfaces.should include(@has_named_aliases ? @device_and_label : @device)
     end
 
     it "should find added IP address" do
@@ -117,7 +116,7 @@ else
 
   #---[ Targets ]---------------------------------------------------------
 
-  %w(linux sunos openbsd).each do |driver_name|
+  %w(linux sunos openbsd freebsd).each do |driver_name|
     driver_token = driver_name.to_sym
     driver = INTERPRETER.address_manager[driver_token]
     if driver.available?
@@ -134,9 +133,13 @@ else
             :mask => "24",
           }
 
+          @has_named_aliases = true
+
           case driver_token
-          when :sunos, :openbsd
+          when :sunos
             # Accept defaults
+          when :openbsd, :freebsd
+            @has_named_aliases = false
           when :linux
             @properties[:label] = "atst"
             @properties[:announcements] = 1
@@ -144,6 +147,7 @@ else
             raise ArgumentError.new("Unknown defaults for AddressManager driver: #{driver_token}")
           end
 
+          @device = @properties[:device]
           @device_and_label = @properties[:device]+":"+@properties[:label]
 
           if @m.interfaces.include?(@device_and_label) \
