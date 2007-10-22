@@ -81,5 +81,6 @@ end
 # Drivers
 require 'automateit/address_manager/base'
 require 'automateit/address_manager/portable'
+require 'automateit/address_manager/bsd'
 require 'automateit/address_manager/linux'
 require 'automateit/address_manager/sunos'

@@ -7,7 +7,7 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
   # See AddressManager#hostnames
   def hostnames()
     # NOTE: depends on driver's implementation of addresses
-    names = addresses.inject(Set.new) do |sum, address|
+    names = manager.addresses.inject(Set.new) do |sum, address|
       # Some addresses can't be resolved, bummer.
       sum.merge(Resolv.getnames(address)) rescue Resolv::ResolvError; sum
     end
@@ -33,9 +33,9 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
   def has?(opts)
     raise ArgumentError.new(":device or :address must be specified") unless opts[:device] or opts[:address]
     result = true
-    result &= interfaces.include?(opts[:device]) if opts[:device] and not opts[:label]
-    result &= interfaces.include?(opts[:device]+":"+opts[:label]) if opts[:device] and opts[:label]
-    result &= addresses.include?(opts[:address]) if opts[:address]
+    result &= manager.interfaces.include?(opts[:device]) if opts[:device] and not opts[:label]
+    result &= manager.interfaces.include?(opts[:device]+":"+opts[:label]) if opts[:device] and opts[:label]
+    result &= manager.addresses.include?(opts[:address]) if opts[:address]
     return result
   end
 

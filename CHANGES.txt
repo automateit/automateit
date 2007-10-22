@@ -1,3 +1,9 @@
+0.71021:
+	Date: Sun, 21 Oct 2007 04:58:01 -0700
+	Desc:
+	- Added PlatformManager::OpenBSD.
+	- Added AccountManager::BSD which supports SunOS, FreeBSD and OpenBSD ifconfig variants.
+
 0.71017:
     Date: Wed, 17 Oct 2007 00:24:24 -0700
     Desc:
