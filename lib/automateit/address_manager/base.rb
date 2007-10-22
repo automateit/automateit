@@ -88,14 +88,14 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
     opts[:announcements] = opts[:announcements].to_i || AutomateIt::AddressManager::DEFAULT_ANNOUNCEMENTS
     raise SecurityError.new("you must be root") unless superuser?
     raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
-    return false if has?(opts)
+    return false if manager.has?(opts)
     block.call(opts)
     return true
   end
 
   # Helper for #remove method.
   def _remove_helper(opts, &block)
-    return false unless has?(opts)
+    return false unless manager.has?(opts)
     raise SecurityError.new("you must be root") unless superuser?
     raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
     return block.call(opts)

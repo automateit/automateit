@@ -2,7 +2,7 @@
 #
 # An AddressManager driver for operating systems using a BSD-like ifconfig.
 # Driver provides querying addresses and interfaces.
-class AutomateIt::AddressManager::OpenBSD < AutomateIt::AddressManager::BaseDriver
+class AutomateIt::AddressManager::BSD < AutomateIt::AddressManager::BaseDriver
   def self.token
     :bsd
   end
