@@ -1,7 +1,7 @@
 # See AutomateIt::Interpreter for usage information.
 module AutomateIt # :nodoc:
   # AutomateIt version
-  VERSION=Gem::Version.new("0.71017")
+  VERSION=Gem::Version.new("0.71021")
 
   # Instantiates a new Interpreter. See documentation for
   # Interpreter#setup.
