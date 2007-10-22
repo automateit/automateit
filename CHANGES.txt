@@ -3,7 +3,8 @@
 	Desc:
 	- Added PlatformManager::OpenBSD.
 	- Added AddressManager::OpenBSD.
-	- Added AddressManager::BSD which supports SunOS, FreeBSD and OpenBSD ifconfig variants.
+	- Added AddressManager::FreeBSD.
+	- Added AddressManager::BSD which assists SunOS, FreeBSD and OpenBSD.
 
 0.71017:
     Date: Wed, 17 Oct 2007 00:24:24 -0700
