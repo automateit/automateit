@@ -116,55 +116,49 @@ else
 
   #---[ Targets ]---------------------------------------------------------
 
-  @checked_address_manager = false
-  %w(linux sunos openbsd freebsd).each do |driver_name|
-    driver_token = driver_name.to_sym
-    driver = INTERPRETER.address_manager[driver_token]
-    if driver.available?
-      @checked_address_manager = true
-      
-      describe driver.class.to_s do
-        it_should_behave_like "AutomateIt::AddressManager"
+  begin
+    # Raises exception if no driver is available, which is caught later
+    driver = INTERPRETER.address_manager.driver_for(:add)
+    driver_token = driver.token
 
-        before(:all) do
-          @driver_token = driver_token
+    describe driver.class.to_s do
+      it_should_behave_like "AutomateIt::AddressManager"
 
-          @properties = {
-            :device => @m.interfaces.reject{|t| t =~ /^lo\d+$/}.first,
-            :label => "1",
-            :address => "10.0.0.249",
-            :mask => "24",
-          }
+      before(:all) do
+        @driver_token = driver_token
 
-          @has_named_aliases = true
+        # Defaults
+        @has_named_aliases = true
+        @properties = {
+          :device => @m.interfaces.reject{|t| t =~ /^lo\d+$/}.first,
+          :label => "1",
+          :address => "10.0.0.249",
+          :mask => "24",
+        }
 
-          case driver_token
-          when :sunos
-            # Accept defaults
-          when :openbsd, :freebsd
-            @has_named_aliases = false
-          when :linux
-            @properties[:label] = "atst"
-            @properties[:announcements] = 1
-          else
-            raise ArgumentError.new("Unknown defaults for AddressManager driver: #{driver_token}")
-          end
+        # Platform specifics
+        case driver_token
+        when :sunos
+          # Accept defaults
+        when :openbsd, :freebsd
+          @has_named_aliases = false
+        when :linux
+          @properties[:label] = "atst"
+          @properties[:announcements] = 1
+        else
+          raise ArgumentError.new("Unknown defaults for AddressManager driver: #{driver_token}")
+        end
 
-          @device = @properties[:device]
-          @device_and_label = @properties[:device]+":"+@properties[:label]
+        @device = @properties[:device]
+        @device_and_label = @properties[:device]+":"+@properties[:label]
 
-          if @m.interfaces.include?(@device_and_label) \
-              or @m.addresses.include?(@properties[:address])
-            raise "ERROR: This computer already has the device/address used for testing! Either disable #{@device_and_label} and #{@properties[:address]}, or change the spec to test using different properties."
-          end
-
-          @d = @m[driver_token]
+        if @m.interfaces.include?(@device_and_label) \
+            or @m.addresses.include?(@properties[:address])
+          raise "ERROR: This computer already has the device/address used for testing! Either disable #{@device_and_label} and #{@properties[:address]}, or change the spec to test using different properties."
         end
       end
     end
-  end
-  
-  unless @checked_address_manager
+  rescue NotImplementedError
     puts "Can't find AddressManager for this platform, #{__FILE__}"
   end
 end
