@@ -304,8 +304,11 @@ task :chown do
   end
 end
 
+desc "Link to local rdoc stash"
 task :rdoclink do
   automateit.ln_s("/home/lagi/stash/automateit_rdoc", "doc")
 end
+
+task :after => [:rdoclink, :rdoc, :regem]
 
 #===[ fin ]=============================================================
