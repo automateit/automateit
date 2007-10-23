@@ -128,21 +128,44 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
     )
   end
 
-  def _ifconfig_helper(action, opts)
+  # Returns a string used to construct an ifconfig command, e.g.
+  #   ifconfig hme0 192.9.2.106 netmask 255.255.255.0 up
+  #   ifconfig hme0:1 172.40.30.4 netmask 255.255.0.0 up
+  #
+  # Options:
+  # * :device -- Interface, e.g., "eth0". String.
+  # * :label -- Alias label, e.g., "1". String.
+  # * :address -- IP address, e.g., "127.0.0.1". String.
+  # * :mask -- Netmask, e.g., "255.255.255.0" or 24. String or Fixnum.
+  #
+  # Helper options:
+  # * :append -- Array of strings to append to end of command, e.g., ["-alias"].
+  # * :prepend -- Array of strings to prepend to string, adding them after after "ifconfig", e.g., ["inet"].
+  # * :state -- Whether to list "up" and "down" in command. Defaults to true.
+  def _ifconfig_helper(action, opts, helper_opts={})
     _raise_unless_available
+
+    # Translate common names
     action = :del if action.to_sym == :remove
 
+    # Defaults
     _normalize_opts(opts)
-
-    ### ifconfig hme0 192.9.2.106 netmask 255.255.255.0 up
-    ### ifconfig hme0:1 172.40.30.4 netmask 255.255.0.0 up
+    helper_opts[:state] = true unless helper_opts[:state] == false
 
     ipcmd = "ifconfig"
     ipcmd << " " << _interface_and_label(opts)
+    if helper_opts[:prepend]
+      ipcmd << " " << helper_opts[:prepend].join(" ")
+    end
     ipcmd << " %s" % opts[:address]
     ipcmd << " netmask %s" % opts[:mask] if opts[:mask]
-    ipcmd << " up" if action == :add
-    ipcmd << " down" if action == :del
+    if helper_opts[:state]
+      ipcmd << " up" if action == :add
+      ipcmd << " down" if action == :del
+    end
+    if helper_opts[:append]
+      ipcmd << " " << helper_opts[:append].join(" ")
+    end
     return ipcmd
   end
 end

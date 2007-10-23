@@ -46,27 +46,18 @@ class AutomateIt::AddressManager::OpenBSD < AutomateIt::AddressManager::BaseDriv
   
 protected
 
+  # ifconfig dc0 inet alias 192.168.0.3 netmask 255.255.255.255
   def _openbsd_ifconfig_helper(action, opts)
-    # ifconfig dc0 inet alias 192.168.0.3 netmask 255.255.255.255
+    helper_opts = {:state => false, :prepend => %w(inet)}
     opts2 = opts.clone
-    is_alias = opts2.delete(:label)
-    
-    cmd = _ifconfig_helper(action, opts2)
-    replacement = "inet"
-    if is_alias
-      cmd.gsub!(/ (up|down)$/, '')
-
-      case action
-      when :add
-        replacement << " alias" 
-      when :remove
-        replacement << " delete"
-      else
-        raise ArgumentError.new("Unknown action: #{action}")
-      end
+    if opts2.delete(:label)
+      helper_opts[:prepend] << \
+        case action
+        when :add: "alias"
+        when :remove, :del: "delete"
+        else ArgumentError.new("Unknown action: #{action}")
+        end
     end
-    cmd.gsub!(/(ifconfig\s+[^\s]+\s+)/, '\1'+replacement+' ')
-    
-    return cmd
+    return _ifconfig_helper(action, opts2, helper_opts)
   end
 end

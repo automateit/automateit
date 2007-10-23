@@ -116,10 +116,13 @@ else
 
   #---[ Targets ]---------------------------------------------------------
 
+  @checked_address_manager = false
   %w(linux sunos openbsd freebsd).each do |driver_name|
     driver_token = driver_name.to_sym
     driver = INTERPRETER.address_manager[driver_token]
     if driver.available?
+      @checked_address_manager = true
+      
       describe driver.class.to_s do
         it_should_behave_like "AutomateIt::AddressManager"
 
@@ -158,8 +161,10 @@ else
           @d = @m[driver_token]
         end
       end
-    else
-      puts %{NOTE: Can't check %s on this platform, #{__FILE__}} % driver.class
     end
+  end
+  
+  unless @checked_address_manager
+    puts "Can't find AddressManager for this platform, #{__FILE__}"
   end
 end

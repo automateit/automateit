@@ -39,27 +39,18 @@ class AutomateIt::AddressManager::FreeBSD < AutomateIt::AddressManager::BaseDriv
   
 protected
 
-  def _freebsd_ifconfig_helper(action, opts)
-    # ifconfig fxp0 inet 172.16.1.3 netmask 255.255.255.255 alias
+  # ifconfig fxp0 inet 172.16.1.3 netmask 255.255.255.255 alias
+  def _freebsd_ifconfig_helper(action, opts)    
+    helper_opts = {:state => false, :prepend => %w(inet)}
     opts2 = opts.clone
-    is_alias = opts2.delete(:label)
-    
-    cmd = _ifconfig_helper(action, opts2)
-    replacement = "inet"
-    if is_alias
-      cmd.gsub!(/ (up|down)$/, '')
-
-      case action
-      when :add
-        replacement << " alias" 
-      when :remove
-        replacement << " -alias"
-      else
-        raise ArgumentError.new("Unknown action: #{action}")
-      end
+    if opts2.delete(:label)
+      helper_opts[:append] = \
+        case action
+        when :add: %w(alias)
+        when :remove, :del: %w(-alias)
+        else ArgumentError.new("Unknown action: #{action}")
+        end
     end
-    cmd.gsub!(/(ifconfig\s+[^\s]+\s+)/, '\1'+replacement+' ')
-    
-    return cmd
+    return _ifconfig_helper(action, opts2, helper_opts)
   end
 end
