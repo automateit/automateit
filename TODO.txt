@@ -8,7 +8,6 @@ Solaris 10
 - Create PackageManager::Blastwave
 - Create PackageManager::SunPkg
 
-111 AddressManager -- Refactor _ifconfig_helper to assist FreeBSD and OpenBSD drivers
 111 Shell -- Write #su(user, *command)
 100 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 

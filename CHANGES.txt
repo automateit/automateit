@@ -1,10 +1,10 @@
 0.71021:
-	Date: Sun, 21 Oct 2007 04:58:01 -0700
-	Desc:
-	- Added PlatformManager::OpenBSD.
-	- Added AddressManager::OpenBSD.
-	- Added AddressManager::FreeBSD.
-	- Added AddressManager::BSD which assists SunOS, FreeBSD and OpenBSD.
+    Date: Sun, 21 Oct 2007 04:58:01 -0700
+    Desc:
+    - Added PlatformManager::OpenBSD.
+    - Added AddressManager::OpenBSD.
+    - Added AddressManager::FreeBSD.
+    - Added AddressManager::BSD which assists SunOS, FreeBSD and OpenBSD.
 
 0.71017:
     Date: Wed, 17 Oct 2007 00:24:24 -0700
