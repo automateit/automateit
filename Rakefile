@@ -226,7 +226,7 @@ namespace :rdoc do
   desc "Generate documentation"
   task :make do
     # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-    sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' lib docs/*.txt README.txt TUTORIAL.txt TESTING.txt"
+    sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt: Open source server automation' lib docs/*.txt README.txt TUTORIAL.txt TESTING.txt"
     # Create a tutorial index
     File.open("doc/tutorial.html", "w+") do |writer|
       writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
@@ -274,7 +274,7 @@ namespace :rdoc do
       puts "checking %s" % File.mtime(target)
       puts "different" if different
 
-      sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' %s" % sources_and_targets.values.join(" ") if different
+      sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt: Open source server automation' %s" % sources_and_targets.values.join(" ") if different
       sleep 1
     end
   end

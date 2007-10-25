@@ -18,17 +18,19 @@ task :manifest do
 end
 
 Hoe.new("AutomateIt", AutomateIt::VERSION.to_s) do |s|
+  slogan = "AutomateIt is an open source tool for automating the setup and maintenance of servers, applications and their dependencies."
+  title = "AutomateIt: Open source server automation"
   s.author = "Igal Koshevoy"
   s.changes = s.paragraphs_of('CHANGES.txt', 0).join("\n")
-  s.description = "AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems" 
+  s.description = slogan
   s.email = "igal@pragmaticraft.com"
   s.extra_deps = [["activesupport", ">= 1.4"], ["open4", ">= 0.9"]]
   s.name = "automateit"
-  s.summary = "AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems" 
+  s.summary = slogan
   s.url = "http://automateit.org/"
   s.spec_extras = {
     :platform => Gem::Platform::RUBY,
-    :rdoc_options => %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << 'AutomateIt is an open-source tool for automating the setup and maintenance of UNIX-like systems.' << %w(lib docs),
+    :rdoc_options => %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << title << %w(lib docs),
     :extra_rdoc_files => FileList[%w(README.txt TUTORIAL.txt TESTING.txt), "docs/*.txt"],
   }
   s.spec_extras.merge!(HoeInclude)
