@@ -116,6 +116,7 @@ else
 
   #---[ Targets ]---------------------------------------------------------
 
+  # FIXME remove needless warning about not being able to check on platform, duh
   %w(linux sunos).each do |driver_name|
     driver_token = driver_name.to_sym
     driver = INTERPRETER.address_manager[driver_token]
