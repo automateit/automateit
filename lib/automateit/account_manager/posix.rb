@@ -1,7 +1,7 @@
 # == AccountManager::POSIX
 #
 # A POSIX driver for the AccountManager.
-class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portable
+class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Etc
   depends_on :programs => %w(useradd usermod userdel groupadd groupmod groupdel)
 
   def suitability(method, *args) # :nodoc:

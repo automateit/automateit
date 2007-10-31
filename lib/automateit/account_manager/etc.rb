@@ -1,10 +1,10 @@
-# == AccountManager::Portable
+# == AccountManager::Etc
 #
-# A pure-Ruby, portable driver for the AccountManager. It is only suitable
-# for doing queries and lacks methods such as +add_user+. Platform-specific
-# drivers inherit from this class and provide these methods.
-class ::AutomateIt::AccountManager::Portable < ::AutomateIt::AccountManager::BaseDriver
-  depends_on :callbacks => [lambda{AutomateIt::AccountManager::Portable.has_etc?}]
+# A pure-Ruby, driver using the Etc module on Unix-like the AccountManager. It
+# is only suitable for doing queries and lacks methods such as +add_user+.
+# Platform-specific drivers inherit from this class and provide these methods.
+class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDriver
+  depends_on :callbacks => [lambda{AutomateIt::AccountManager::Etc.has_etc?}]
 
   def suitability(method, *args) # :nodoc:
     return 1
@@ -14,14 +14,14 @@ class ::AutomateIt::AccountManager::Portable < ::AutomateIt::AccountManager::Bas
   # the 'etc' module?
   def self.has_etc?
     begin
-      require 'etc'
+      require './spec/integration/account_manager_spec.rb:1etc'
       return defined?(Etc)
     rescue LoadError
       return false
     end
   end
   
-  # Alias for AccountManager::Portable.has_etc?
+  # Alias for AccountManager::Etc.has_etc?
   def has_etc?
     self.has_etc?
   end

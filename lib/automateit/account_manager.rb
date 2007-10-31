@@ -107,8 +107,8 @@ end # class AccountManager
 
 # Drivers
 require 'automateit/account_manager/base'
-require 'automateit/account_manager/passwd' # FIXME rename to pty
+require 'automateit/account_manager/passwd_pty'
 require 'automateit/account_manager/passwd_expect'
 require 'automateit/account_manager/nscd'
-require 'automateit/account_manager/portable' # FIXME rename to etc
+require 'automateit/account_manager/etc'
 require 'automateit/account_manager/posix'
