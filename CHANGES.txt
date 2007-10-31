@@ -1,3 +1,13 @@
+0.71030:
+    Date: Tue, 30 Oct 2007 01:43:02 -0700
+    Desc:
+    - (%) Fixed bug in AddressManager#add_user when called with multiple groups. Improved AddressManager spec. 
+    - (+) Added documentation to Project explaining how to partition recipes, and run recipes from other recipes.
+    - (+) Added AddressManager::POSIX which provides support for Linux and SunOS, and eliminated the OS-specific drivers for these. 
+    - Added AddressManager::NSCD by extracting methods from old OS-specific drivers. 
+    - Added AddressManager::PasswdExpect which uses Expect for much more reliable password changes. 
+    - Improved AddressManager::PasswdPty by adding retry capability.
+
 0.71021:
     Date: Sun, 21 Oct 2007 04:58:01 -0700
     Desc:
