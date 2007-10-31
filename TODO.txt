@@ -2,22 +2,28 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
-Solaris 10
-- Create AccountManager::SunOS
-- Create ServiceManager::SMF
-- Create PackageManager::Blastwave
-- Create PackageManager::SunPkg
+BUGS
+- does service_manager.start_and_enable work as expected?
 
-111 Shell -- Write #su(user, *command)
-100 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
+111 aissh or aion -- Write command for running stuff against servers with ssh, e.g., "aissh rails_servers ls", which is basically a wrapper over "for t in aitag -w rails_servers; do echo $t; ssh $t "ls"; done"
+111 Shell -- Write #su(user, *command) as a wrapper around #sh
+101 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 
 100 Edit -- Display summary of edits, return with :details as [rv, list]
 100 Shell -- Incorporate which.cmd so #which can work on Windows
 100 Interpreter#invoke and HelpfulERB -- Extract error context code into class
 
+001 CPAN -- Write driver for PackageManager::CPAN
+001 FreeBSD -- Write driver for PackageManager::FreeBSD_Ports (or generic ::Ports?) and FreeBSD_Pkg
+000 Darwin -- Write drivers, e.g. PackageManager for Fink and MacPorts (or generic ::Ports?)
 000 Shell#chperm -- With symbolic mode, wrap `chmod -v` as temporary workaround?
-000 FreeBSD -- Write driver for PackageManager::Ports
-000 Darwin -- Write drivers, e.g. PackageManager for Fink, MacPorts, Pkgsrc
+000 PackageManager -- Provide a way to specify desired versions and upgrade via recipes
+
+Solaris 10
+000 Create AccountManager::SunOS
+000 Create ServiceManager::SMF
+000 Create PackageManager::Blastwave
+000 Create PackageManager::SunOS_Pkg
 
 ??? Shell -- Return false or list, never single item?
 ??? Driver -- How to determine if a manager or driver method is available? Manager#available?, Manager#available and Driver#suitable? only say if it should be a default.
