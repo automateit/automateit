@@ -30,17 +30,4 @@ class AutomateIt::AddressManager::SunOS < AutomateIt::AddressManager::BaseDriver
       true
     end
   end
-
-  # See AddressManager#interfaces
-  def interfaces()
-    _raise_unless_available
-    return `ifconfig -a`.scan(/^([^ ]+):\s+/s).flatten
-  end
-
-  # See AddressManager#addresses
-  def addresses()
-    _raise_unless_available
-    return `ifconfig -a`.scan(/\s+inet\s+([^\s]+)\s+/).flatten
-  end
 end
-

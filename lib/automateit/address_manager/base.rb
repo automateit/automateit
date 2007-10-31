@@ -7,7 +7,7 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
   # See AddressManager#hostnames
   def hostnames()
     # NOTE: depends on driver's implementation of addresses
-    names = addresses.inject(Set.new) do |sum, address|
+    names = manager.addresses.inject(Set.new) do |sum, address|
       # Some addresses can't be resolved, bummer.
       sum.merge(Resolv.getnames(address)) rescue Resolv::ResolvError; sum
     end
@@ -33,9 +33,9 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
   def has?(opts)
     raise ArgumentError.new(":device or :address must be specified") unless opts[:device] or opts[:address]
     result = true
-    result &= interfaces.include?(opts[:device]) if opts[:device] and not opts[:label]
-    result &= interfaces.include?(opts[:device]+":"+opts[:label]) if opts[:device] and opts[:label]
-    result &= addresses.include?(opts[:address]) if opts[:address]
+    result &= manager.interfaces.include?(opts[:device]) if opts[:device] and not opts[:label]
+    result &= manager.interfaces.include?(opts[:device]+":"+opts[:label]) if opts[:device] and opts[:label]
+    result &= manager.addresses.include?(opts[:address]) if opts[:address]
     return result
   end
 
@@ -88,14 +88,14 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
     opts[:announcements] = opts[:announcements].to_i || AutomateIt::AddressManager::DEFAULT_ANNOUNCEMENTS
     raise SecurityError.new("you must be root") unless superuser?
     raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
-    return false if has?(opts)
+    return false if manager.has?(opts)
     block.call(opts)
     return true
   end
 
   # Helper for #remove method.
   def _remove_helper(opts, &block)
-    return false unless has?(opts)
+    return false unless manager.has?(opts)
     raise SecurityError.new("you must be root") unless superuser?
     raise ArgumentError.new(":device and :address must be specified") unless opts[:device] and opts[:address]
     return block.call(opts)
@@ -128,21 +128,44 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
     )
   end
 
-  def _ifconfig_helper(action, opts)
+  # Returns a string used to construct an ifconfig command, e.g.
+  #   ifconfig hme0 192.9.2.106 netmask 255.255.255.0 up
+  #   ifconfig hme0:1 172.40.30.4 netmask 255.255.0.0 up
+  #
+  # Options:
+  # * :device -- Interface, e.g., "eth0". String.
+  # * :label -- Alias label, e.g., "1". String.
+  # * :address -- IP address, e.g., "127.0.0.1". String.
+  # * :mask -- Netmask, e.g., "255.255.255.0" or 24. String or Fixnum.
+  #
+  # Helper options:
+  # * :append -- Array of strings to append to end of command, e.g., ["-alias"].
+  # * :prepend -- Array of strings to prepend to string, adding them after after "ifconfig", e.g., ["inet"].
+  # * :state -- Whether to list "up" and "down" in command. Defaults to true.
+  def _ifconfig_helper(action, opts, helper_opts={})
     _raise_unless_available
+
+    # Translate common names
     action = :del if action.to_sym == :remove
 
+    # Defaults
     _normalize_opts(opts)
-
-    ### ifconfig hme0 192.9.2.106 netmask 255.255.255.0 up
-    ### ifconfig hme0:1 172.40.30.4 netmask 255.255.0.0 up
+    helper_opts[:state] = true unless helper_opts[:state] == false
 
     ipcmd = "ifconfig"
     ipcmd << " " << _interface_and_label(opts)
+    if helper_opts[:prepend]
+      ipcmd << " " << helper_opts[:prepend].join(" ")
+    end
     ipcmd << " %s" % opts[:address]
     ipcmd << " netmask %s" % opts[:mask] if opts[:mask]
-    ipcmd << " up" if action == :add
-    ipcmd << " down" if action == :del
+    if helper_opts[:state]
+      ipcmd << " up" if action == :add
+      ipcmd << " down" if action == :del
+    end
+    if helper_opts[:append]
+      ipcmd << " " << helper_opts[:append].join(" ")
+    end
     return ipcmd
   end
 end

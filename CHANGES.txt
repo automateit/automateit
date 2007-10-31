@@ -1,5 +1,18 @@
-0.71010:
-    Date: Wed, 10 Oct 2007 21:51:35 -0700
+0.71021:
+    Date: Sun, 21 Oct 2007 04:58:01 -0700
+    Desc:
+    - Added PlatformManager::OpenBSD.
+    - Added AddressManager::OpenBSD.
+    - Added AddressManager::FreeBSD.
+    - Added AddressManager::BSD which assists SunOS, FreeBSD and OpenBSD.
+
+0.71017:
+    Date: Wed, 17 Oct 2007 00:24:24 -0700
+    Desc:
+    - (%) Fixed, created workaround so AutomateIt can run using the newly-released ActiveSupport 1.4.4 (part of Rails 2.0 PR1), because this new library breaks backwards compatibility by depending on new #extract_options method.
+
+0.71012:
+    Date: Fri, 12 Oct 2007 03:54:30 -0700
     Desc:
     - (%) Fixed #touch, it worked fine but was corrupting log output
     - (%) Fixed AccountManager::Linux, it now only runs when the OS detected is Linux.

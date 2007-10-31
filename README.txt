@@ -1,6 +1,6 @@
 == AutomateIt
 
-<em>AutomateIt is an open-source tool for automating the setup and maintenance of servers.</em>
+<em>AutomateIt is an open source tool for automating the setup and maintenance of servers, applications and their dependencies.</em>
 
 Information about AutomateIt is best read in the following order:
 1. http://AutomateIt.org -- website explaining what it is and why it's useful

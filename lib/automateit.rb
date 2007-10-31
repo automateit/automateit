@@ -12,11 +12,13 @@ require 'resolv'
 require 'set'
 require 'socket'
 require 'yaml'
+
+# Gems
+require 'rubygems'
 require 'erb'
 
 # Load ActiveSupport pieces individually to save ~0.5s
 ### require 'active_support'
-gem 'activesupport'
 require 'active_support/core_ext/array' # [].extract_options, new in AS 1.4.4
 require 'active_support/core_ext/blank' # foo.blank?
 require 'active_support/core_ext/class/attribute_accessors' # cattr_accessor
