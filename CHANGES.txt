@@ -1,5 +1,5 @@
 0.71031.1:
-    Wed, 31 Oct 2007 13:15:30 -0700
+    Date: Wed, 31 Oct 2007 13:15:30 -0700
     Desc:
     - (%) Fixed bug in EditSession methods, these weren't escaping regular expression characters in strings. Refactored some of these methods for clarity.
 
