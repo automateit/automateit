@@ -1,8 +1,9 @@
 # == AccountManager::Etc
 #
-# A pure-Ruby, driver using the Etc module on Unix-like the AccountManager. It
-# is only suitable for doing queries and lacks methods such as +add_user+.
-# Platform-specific drivers inherit from this class and provide these methods.
+# An AccountManager driver for Unix-like OSes that have the Ruby Etc module. It
+# is only suitable for doing queries and lacks methods that perform
+# modifications, such as +add_user+. Platform-specific drivers inherit from
+# this class and provide methods that perform modifications.
 class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDriver
   depends_on :callbacks => [lambda{AutomateIt::AccountManager::Etc.has_etc?}]
 
