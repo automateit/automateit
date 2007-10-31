@@ -183,6 +183,12 @@ module AutomateIt
           @project = File.expand_path(project_path)
           log.debug(PNOTE+"Loading project from path: #{@project}")
 
+          lib_files = Dir[File.join(@project, "lib", "*.rb")] + Dir[File.join(@project, "lib", "**", "init.rb")]
+          lib_files.each do |lib|
+            log.debug(PNOTE+"Loading project library: #{lib}")
+            invoke(lib)
+          end
+
           tag_file = File.join(@project, "config", "tags.yml")
           if File.exists?(tag_file)
             log.debug(PNOTE+"Loading project tags: #{tag_file}")
@@ -193,12 +199,6 @@ module AutomateIt
           if File.exists?(field_file)
             log.debug(PNOTE+"Loading project fields: #{field_file}")
             field_manager[:yaml].setup(:file => field_file)
-          end
-
-          lib_files = Dir[File.join(@project, "lib", "*.rb")] + Dir[File.join(@project, "lib", "**", "init.rb")]
-          lib_files.each do |lib|
-            log.debug(PNOTE+"Loading project library: #{lib}")
-            invoke(lib)
           end
 
           # Instantiate project's plugins so they're available to the environment

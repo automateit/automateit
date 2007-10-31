@@ -1,3 +1,8 @@
+0.71031:
+    Date: Wed, 31 Oct 2007 02:58:58 -0700
+    Desc:
+    - Improved Project libraries so they're loaded before Tags and Fields. This makes it possible to, for example, write a library helper that's called from within the fields.yml file via ERB.
+
 0.71030:
     Date: Tue, 30 Oct 2007 01:43:02 -0700
     Desc:
