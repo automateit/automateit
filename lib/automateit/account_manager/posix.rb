@@ -18,7 +18,7 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Portab
       cmd << " -c #{opts[:description] || username}"
       cmd << " -d #{opts[:home]}" if opts[:home]
       cmd << " -m" unless opts[:create_home] == false
-      cmd << " -G  #{opts[:groups].join(' ')}" if opts[:groups]
+      cmd << " -G #{opts[:groups].join(',')}" if opts[:groups]
       cmd << " -s #{opts[:shell] || "/bin/bash"}"
       cmd << " -u #{opts[:uid]}" if opts[:uid]
       cmd << " -g #{opts[:gid]}" if opts[:gid]
