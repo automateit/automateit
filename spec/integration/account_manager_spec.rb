@@ -9,9 +9,10 @@ elsif not INTERPRETER.account_manager.available?(:add_user)
 else
   describe AutomateIt::AccountManager do
     before(:all) do
-      @independent = true
+      ### @independent = true
+      @independent = false
 
-      #@a = AutomateIt.new(:verbosity => Logger::INFO)
+      ### @a = AutomateIt.new(:verbosity => Logger::INFO)
       @a = AutomateIt.new(:verbosity => Logger::WARN)
       @m = @a.account_manager
       @quiet = ! @a.log.info?
@@ -47,13 +48,15 @@ else
       end
     end
 
-    def add_user
+    def add_user(opts={})
       # SunOS /home entries don't exist until you add them to auto_home, so
       # work around this by using a directory we know can be used
       home = INTERPRETER.tagged?(:sunos) ? "/var/tmp/#{@username}" : nil
 
-      return @m.add_user(@username, :passwd => "asdf", :shell => "/bin/false",
-         :home => home, :quiet => @quiet)
+      defaults = { :passwd => "asdf", :shell => "/bin/false", :home => home,
+        :quiet => @quiet }
+
+      return @m.add_user(@username, defaults.merge(opts))
     end
 
     def add_group
@@ -174,36 +177,38 @@ else
       @m.users_for_group(@groupname).should == []
     end
 
-    it "should add a group with members" do
-      add_user_with_group.should_not be_nil
-    end
+   it "should add a group with members" do
+     add_user_with_group.should_not be_nil
+   end
 
-    it "should query users in a group" do
-      add_user_with_group if @independent
+   it "should query users in a group" do
+     add_user_with_group if @independent
 
-      @m.users_for_group(@groupname).should == [@username]
-    end
+     @m.users_for_group(@groupname).should == [@username]
+   end
 
-    it "should query groups for a user" do
-      add_user_with_group if @independent
+   it "should query groups for a user" do
+     add_user_with_group if @independent
 
-      @m.groups_for_user(@username).should include(@groupname)
-    end
+     @m.groups_for_user(@username).should include(@groupname)
+   end
 
-    it "should remove users from a group" do
-      add_user_with_group if @independent
+   it "should remove users from a group" do
+     add_user_with_group if @independent
 
-      @m.remove_users_from_group(@username, @groupname).should == [@username]
-    end
+     @m.remove_users_from_group(@username, @groupname).should == [@username]
+   end
 
     it "should add groups to a user" do
       add_user if @independent
       add_group if @independent
 
       @m.add_groups_to_user(@groupname, @username).should == [@groupname]
+
     end
 
     it "should add users to group" do
+      @m.remove_groups_from_user(@groupname, @username) unless @independent
       add_user if @independent
       add_group if @independent
 
@@ -273,6 +278,26 @@ else
 
     it "should not remove a non-existent user" do
       @m.remove_user(@username).should be_false
+    end
+
+    it "should add user with multiple groups" do
+      # Find the first few users
+      groups_expected = []
+      size = 3
+      Etc.group do |group|
+        groups_expected << group.name
+        break if groups_expected.size >= size
+      end
+
+      # Create a user
+      (user = add_user(:groups => groups_expected)).should_not be_true
+
+      # Make sure they have the right number of groups
+      groups_found = @m.groups_for_user(@username)
+      for group in groups_expected
+        ### puts "%s : %s" % [group, groups_found.include?(group)]
+        groups_found.should include(group)
+      end
     end
   end
 end
