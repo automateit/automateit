@@ -41,6 +41,14 @@ describe "AutomateIt::EditManager for strings" do
     output.should =~ /\APREPEND\nThis/s
   end
 
+  it "should prepend strings to the top even if they have regexp-like characters" do
+    output = @a.edit(:text => @input) do
+      prepend "@ini_set('memory_limit', '32M');"
+      prepend "@ini_set('memory_limit', '32M');" # Will be ignored
+    end
+    output.should == "@ini_set('memory_limit', '32M');"+"\n"+@input
+  end
+
   it "should prepend lines to the top unless they match an expression" do
     output = @a.edit(:text => @input) do
       prepend "PREPEND", :unless => /PR.+ND/

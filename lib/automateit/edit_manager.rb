@@ -183,10 +183,12 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   #   # Won't prepend line because Regexp matches exisint line in buffer.
   #   prepend("add this line", :unless => /add\s*this\*line/)
   def prepend(line, opts={})
-    query = Regexp.new(opts[:unless] || line)
-    query = Regexp.escape(query) if query.is_a?(String)
+    query = opts[:unless] || line
+    if query.is_a?(String)
+      query = Regexp.new(Regexp.escape(query))
+    end
     return if contains?(query)
-    @contents = "%s\n%s" % [line, @contents]
+    @contents = "%s\n%s" % [line.chomp, @contents]
   end
 
   # Append +line+ to the bottom of the buffer, but only if it's not in
@@ -207,16 +209,14 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   end
 
   # Does the buffer contain anything that matches the String or Regexp +query+?
-  def contains?(query)
-    if query.is_a?(String)
-      query = Regexp.new(Regexp.escape(query))
-    end
+  def contains?(line)
+    query = line.is_a?(String) ? Regexp.new(Regexp.escape(line)) : line
     ! @contents.match(query).nil?
   end
 
   # Delete lines matching the String or Regexp +query+
-  def delete(query, opts={})
-    query = Regexp.escape(query) if query.is_a?(String)
+  def delete(line, opts={})
+    query = line.is_a?(String) ? Regexp.escape(line) : line
     query = Regexp.new("^[^\n]*%s[^\n]*\n?" % query)
     @contents.gsub!(query, "")
   end
@@ -232,26 +232,24 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
   end
 
   # Comment out lines matching the String or Regexp +query+.
-  def comment(query, opts={})
-    query = Regexp.escape(query) if query.is_a?(String)
+  def comment(line, opts={})
+    query = line.is_a?(String) ? Regexp.escape(line) : line
     query = Regexp.new("^(?!#{comment_prefix})([^\n]*%s[^\n]*)(\n*)" % query)
     return false unless @contents.match(query)
     @contents.gsub!(query, "%s%s%s%s" % [@comment_prefix, $1, @comment_suffix, $2])
   end
 
   # Uncomment lines matching the String or Regexp +query+.
-  def uncomment(query, opts={})
-    query = Regexp.escape(query) if query.is_a?(String)
+  def uncomment(line, opts={})
+    query = line.is_a?(String) ? Regexp.escape(line) : line
     query = Regexp.new("^(%s)([^\n]*%s[^\n]*)(%s)(\n*)" % [@comment_prefix, query, @comment_suffix])
     return false unless @contents.match(query)
     @contents.gsub!(query, "%s%s" % [$2, $4])
   end
 
   # Replace contents matching the String or Regexp +query+ with the +string+.
-  def replace(query, string, opts={})
-    if query.is_a?(String)
-      query = Regexp.new(Regexp.escape(query))
-    end
+  def replace(line, string, opts={})
+    query = line.is_a?(String) ? Regexp.new(Regexp.escape(line)) : line
     @contents.gsub!(query, string)
   end
 
