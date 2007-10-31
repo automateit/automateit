@@ -159,6 +159,13 @@ task :now do
   puts time.to_s(:rfc822)
 end
 
+desc "RFC-822 time for yesterday"
+task :yesterday do
+  require 'active_support'
+  time = Time.now - 1.day
+  puts time.to_s(:rfc822)
+end
+
 namespace :gem do
   desc "View Gem metadata"
   task :metadata do
