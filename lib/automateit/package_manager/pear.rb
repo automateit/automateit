@@ -2,6 +2,19 @@
 #
 # A PackageManager driver for PEAR (PHP Extension and Application Repository),
 # manages software packages using the <tt>pear</tt> command.
+#
+# === Using specific channels
+#
+# To install a package from the default PEAR channel, just specify it's name,
+# e.g. <tt>HTML_QuickForm</tt>.
+#
+# To install a package from another channel, you must specify the name prefixed
+# with the channel's URL, e.g. <tt>pear.symfony-project.com/symfony</tt>, so
+# that the channel can be automatically added as needed.
+#
+# *IMPORTANT*: DO NOT specify a remote channel's alias, e.g.
+# <tt>symfony/symfony</tt>, because this provides no way to discover the
+# channel.
 class ::AutomateIt::PackageManager::PEAR < ::AutomateIt::PackageManager::BaseDriver
   depends_on :programs => %w(pear)
 
@@ -44,6 +57,9 @@ class ::AutomateIt::PackageManager::PEAR < ::AutomateIt::PackageManager::BaseDri
     return _not_installed_helper?(*packages)
   end
 
+  # *IMPORTANT*: See documentation at the top of this file for how to correctly
+  # install packages from a specific channel.
+  #
   # See AutomateIt::PackageManager#install
   def install(*packages)
     return _install_helper(*packages) do |list, opts|
