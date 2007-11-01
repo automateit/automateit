@@ -1,4 +1,8 @@
-class ::AutomateIt::PackageManager::Pecl < ::AutomateIt::PackageManager::BaseDriver
+# == PackageManager::PECL
+#
+# A PackageManager driver for PECL (PHP Extension Community Library), manages
+# software packages using the <tt>pecl</tt> command.
+class ::AutomateIt::PackageManager::PECL < ::AutomateIt::PackageManager::BaseDriver
   depends_on :programs => %w(pecl)
 
   def suitability(method, *args) # :nodoc:
@@ -10,7 +14,7 @@ class ::AutomateIt::PackageManager::Pecl < ::AutomateIt::PackageManager::BaseDri
   # name.  Each value is a hash containing values for :channel, :version,
   # and :state.
   def get_installed_packages()
-    cmd = "pecl list 2>&1"
+    cmd = "pecl list -a 2>&1"
     data = `#{cmd}`
     installed_packages = {}
     data.scan(/^([^(\s]+)\s+([^\s]+)\s+([^\s]+)$/) do |package, version, state|
@@ -19,6 +23,7 @@ class ::AutomateIt::PackageManager::Pecl < ::AutomateIt::PackageManager::BaseDri
     end
     return installed_packages
   end
+  protected :get_installed_packages
 
   # See AutomateIt::PackageManager#installed?
   def installed?(*packages)

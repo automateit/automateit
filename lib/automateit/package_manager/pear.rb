@@ -1,4 +1,8 @@
-class ::AutomateIt::PackageManager::Pear < ::AutomateIt::PackageManager::BaseDriver
+# == PackageManager::PEAR
+#
+# A PackageManager driver for PEAR (PHP Extension and Application Repository),
+# manages software packages using the <tt>pear</tt> command.
+class ::AutomateIt::PackageManager::PEAR < ::AutomateIt::PackageManager::BaseDriver
   depends_on :programs => %w(pear)
 
   def suitability(method, *args) # :nodoc:
@@ -18,6 +22,7 @@ class ::AutomateIt::PackageManager::Pear < ::AutomateIt::PackageManager::BaseDri
     end
     return installed_packages
   end
+  protected :get_installed_packages
 
   # See AutomateIt::PackageManager#installed?
   def installed?(*packages)
@@ -45,8 +50,8 @@ class ::AutomateIt::PackageManager::Pear < ::AutomateIt::PackageManager::BaseDri
       # pear options:
       # -a install all required dependencies
 
-      `pear config-set auto_discover 1`
-      cmd = "pear install -a "+list.join(" ")+" < /dev/null"
+      cmd = "(pear config-set auto_discover 1; "
+      cmd << "pear install -a "+list.join(" ")+" < /dev/null)"
       cmd << " > /dev/null" if opts[:quiet]
       cmd << " 2>&1"
 

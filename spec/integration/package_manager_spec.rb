@@ -77,6 +77,8 @@ else
     :portage => "arc", # Obscure package for extracting ARC files from the 80's
     :gem => "s33r", # Alpha-grade package its author deprecated in favor of another
     :egg => "_sre.py", # Slower reimplementation of ancient Python Regexps
+    :pear => "File_DICOM", # Obscure package for DICOM X-rays, abandoned in 2003
+    :pecl => "ecasound", # Obscure package for Ecasound libs, abandoned in 2003
     ### :cpan => "Acme::please", # Insane gimmick port of intercal's please statements
   }
 
