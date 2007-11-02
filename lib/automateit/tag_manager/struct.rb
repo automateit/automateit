@@ -50,15 +50,19 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
     return hosts.select{|hostname| tagged?(query, hostname)}
   end
 
+  TAG_NEGATION = %r{!?}
+  TAG_WORD = %r{[\w\.\-]+}
+  TAG_TOKENIZER = %r{\!|\(|\)|\&{1,2}|\|{1,2}|#{TAG_NEGATION}#{TAG_WORD}}
+
   # See TagManager#tagged?
   def tagged?(query, hostname=nil)
     query = query.to_s
     selected_tags = hostname ? tags_for(hostname) : tags
-    # XXX This tokenization process discards unknown characters, which may hide errors in the query
-    tokens = query.scan(%r{\!|\(|\)|\&+|\|+|!?[\.\w]+})
+    # XXX Tokenizer discards unknown characters, which may hide errors in the query
+    tokens = query.scan(TAG_TOKENIZER)
     if tokens.size > 1
       booleans = tokens.map do |token|
-        if matches = token.match(/^(!?)([\.\w]+)$/)
+        if matches = token.match(/^(#{TAG_NEGATION})(#{TAG_WORD})$/)
           selected_tags.include?(matches[2]) && matches[1].empty?
         else
           token

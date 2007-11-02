@@ -1,3 +1,8 @@
+0.71101:
+    Date: Thu, 01 Nov 2007 17:07:51 -0700
+    Desc:
+    - (%) Fixed bug in TagManager#tagged? when checking tag names containing dashes ("-"), refactored to improve tag tokenizing rules, added test. Thank you, David Brewer.
+
 0.71031.2:
     Date: Wed, 31 Oct 2007 23:48:41 -0700
     Desc:

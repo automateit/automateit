@@ -96,6 +96,16 @@ describe "AutomateIt::TagManager", :shared => true do
     @a.tagged?("magic").should be_true
   end
 
+  it "should find tags with dashes in the name" do
+    tag_with_dash = "pawafuru-mirakuru"
+    tag_without_dash = "wandafuru"
+
+    @a.tags << tag_with_dash << tag_without_dash
+
+    @a.tagged?(tag_with_dash).should be_true
+    @a.tagged?(tag_without_dash).should be_true
+  end
+
   it "should find tags for a host using an array" do
     @a.tags_for(["kurou"]).should include("apache_servers")
   end
