@@ -188,6 +188,10 @@ task :tag do
   sh "hg tag -f stable"
 end
 
+task :push do
+  sh "hg push -r stable ../app_stable"
+end
+
 #---[ Install and uninstall ]-------------------------------------------
 
 =begin
