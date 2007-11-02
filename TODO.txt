@@ -5,6 +5,7 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 BUGS
 - does service_manager.start_and_enable work as expected?
 
+111 PackageManager -- Improve PEAR spec by having it check files with and without channel URL
 111 aissh or aion -- Write command for running stuff against servers with ssh, e.g., "aissh rails_servers ls", which is basically a wrapper over "for t in aitag -w rails_servers; do echo $t; ssh $t "ls"; done"
 111 Shell -- Write #su(user, *command) as a wrapper around #sh
 101 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
