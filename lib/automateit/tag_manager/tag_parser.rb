@@ -3,7 +3,7 @@
 # Helper class for parsing tags. Not useful for users -- for internal use only.
 class AutomateIt::TagManager::TagParser
   attr_accessor :struct
-  attr_accessor :is_trace
+  attr_accessor :is_trace # FIXME replace is_trace with nitpick
 
   # Create a parser for the +struct+, a hash of tag keys to values with arrays of items.
   def initialize(struct, is_trace=false)
@@ -38,6 +38,11 @@ class AutomateIt::TagManager::TagParser
     puts msg if is_trace
   end
 
+  HOSTS_FOR_VALUE = /(.+?)/
+  HOSTS_FOR_INCLUDE_TAG_RE = /^INCLUDE_TAG #{HOSTS_FOR_VALUE}$/
+  HOSTS_FOR_EXCLUDE_TAG_RE = /^EXCLUDE_TAG #{HOSTS_FOR_VALUE}$/
+  HOSTS_FOR_EXCLUDE_HOST_RE = /^EXCLUDE_HOST #{HOSTS_FOR_VALUE}$/
+
   # Return array of hosts for the +tag+.
   def hosts_for(tag)
     raise IndexError.new("Unknown tag - #{tag}") unless struct[tag]
@@ -45,13 +50,13 @@ class AutomateIt::TagManager::TagParser
     hosts = Set.new
     for item in struct[tag]
       case item
-      when /^INCLUDE_TAG (\w+)$/
+      when HOSTS_FOR_INCLUDE_TAG_RE
         trace "+g %s" % $1
         hosts.merge(hosts_for($1))
-      when /^EXCLUDE_TAG (\w+)$/
+      when HOSTS_FOR_EXCLUDE_TAG_RE
         trace "-g %s" % $1
         hosts.subtract(hosts_for($1))
-      when /^EXCLUDE_HOST (\w+)$/
+      when HOSTS_FOR_EXCLUDE_HOST_RE
         trace "-h %s" % $1
         hosts.delete($1)
       else

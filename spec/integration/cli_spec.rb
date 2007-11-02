@@ -143,6 +143,18 @@ describe AutomateIt::CLI, " with a project" do# {{{
   it "should add run-time tags to a project" do
     with_project do
       recipe = "recipes/recipe.rb"
+
+      write_to(recipe, <<-HERE)
+        tagged?("added")
+      HERE
+
+      AutomateIt::CLI.run(:recipe => recipe, :tags => %w(added)).should be_true
+    end
+  end
+
+  it "should add run-time tags to a project without masking existing tags" do
+    with_project do
+      recipe = "recipes/recipe.rb"
       tags_yml = "config/tags.yml"
 
       write_to(tags_yml, <<-HERE)
@@ -151,10 +163,10 @@ describe AutomateIt::CLI, " with a project" do# {{{
       HERE
 
       write_to(recipe, <<-HERE)
-        tagged?("tsukai")
+        tagged?("added && all_servers")
       HERE
 
-      AutomateIt::CLI.run(:recipe => recipe, :tags => %w(tsukai)).should be_true
+      AutomateIt::CLI.run(:recipe => recipe, :tags => %w(added)).should be_true
     end
   end
 

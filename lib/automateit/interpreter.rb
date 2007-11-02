@@ -176,6 +176,7 @@ module AutomateIt
       # Instantiate core plugins so they're available to the project
       _instantiate_plugins
 
+      # Add optional run-time tags
       tags.merge(opts[:tags]) if opts[:tags]
 
       if project_path = opts[:project] || ENV["AUTOMATEIT_PROJECT"] || ENV["AIP"]
@@ -190,7 +191,7 @@ module AutomateIt
             log.debug(PNOTE+"Loading project library: #{lib}")
             invoke(lib)
           end
-
+          
           tag_file = File.join(@project, "config", "tags.yml")
           if File.exists?(tag_file)
             log.debug(PNOTE+"Loading project tags: #{tag_file}")

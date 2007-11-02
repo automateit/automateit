@@ -2,12 +2,6 @@ rails_servers:
   - localhost
   - kagami
   - tsukasa
-  - michiru
-  - rheya
-  - satori
 myapp_servers:
   - localhost
   - kagami
-  - michiru
-  - rheya
-  - satori

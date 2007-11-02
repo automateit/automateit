@@ -13,33 +13,49 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
   # * :struct -- Hash to use for queries.
   def setup(opts={})
     super(opts)
-
     @struct ||= {}
     @tags   ||= Set.new
+    @struct_updated = false
+    @our_hostname_tags ||= Set.new
+    @our_platform_tags ||= Set.new
 
     if opts[:struct]
+      @struct_updated = true
       @struct.merge!(AutomateIt::TagManager::TagParser.expand(opts[:struct]))
     end
   end
 
   # Return tags, populate them if necessary.
   def tags
-    if @tags.empty?
+    if @our_hostname_tags.empty?
+      @struct_updated = true
+
       begin
-        hostnames = interpreter.address_manager.hostnames # SLOW 0.4s
-        @tags.merge(hostnames)
-        @tags.merge(tags_for(hostnames))
-        @tags.merge(interpreter.address_manager.addresses)
+        @our_hostname_tags.merge(interpreter.address_manager.hostnames) # SLOW 0.4s
+        @our_hostname_tags.merge(interpreter.address_manager.addresses)
       rescue NotImplementedError => e
         log.debug("Can't find AddressManager for this platform: #{e}")
       end
 
+      @tags.merge(@our_hostname_tags)
+    end
+
+    if @our_platform_tags.empty?
+      @struct_updated = true
+
       begin
-        @tags.merge(interpreter.platform_manager.tags)
+        @our_platform_tags = interpreter.platform_manager.tags
+        @tags.merge(@our_platform_tags)
       rescue NotImplementedError => e
         log.debug("Can't find PlatformManager for this platform: #{e}")
       end
     end
+
+    if @struct_updated
+      @tags.merge(tags_for(@our_hostname_tags))
+      @struct_updated = false
+    end
+
     @tags
   end
 

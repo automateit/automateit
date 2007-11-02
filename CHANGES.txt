@@ -1,3 +1,12 @@
+0.71101.2:
+    Date: Thu, 01 Nov 2007 22:37:44 -0700
+    Desc:
+    - (%) Fixed bug in TagParser, it couldn't parse hostnames with non-letter characters. Added tests. Thanks for the report, David Brewer.
+    - (%) Fixed bug in TagManager, adding a run-time tag caused it to not parse tags.yml. Added tests.
+    - (+) Improved TagManager, it now makes run-time tags available to the interpreter when parsing tags.yml, which provides greater flexibility in defining tags. Added tests. Thanks for the suggestion, David Brewer.
+
+Thanks for the report, David Brewer.
+
 0.71101.1:
     Date: Thu, 01 Nov 2007 18:52:01 -0700
     Desc:

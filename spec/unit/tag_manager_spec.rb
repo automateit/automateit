@@ -138,6 +138,14 @@ describe "AutomateIt::TagManager", :shared => true do
   it "should exclude groups from groups" do
     @a.hosts_tagged_with("all_servers_except_proxy_servers").sort.should == ["kurou", "shirou"].sort
   end
+
+  it "should match tags with dashes" do
+    @a.tagged?("apache-servers-using-dashes").should be_true
+  end
+
+  it "should include groups with dashes" do
+    @a.tagged?("apache-servers-using-dashes-include").should be_true
+  end
 end
 
 describe "AutomateIt::TagManager::Struct" do
@@ -166,6 +174,12 @@ describe "AutomateIt::TagManager::Struct" do
           "@all_servers",
           "!@proxy_servers",
         ],
+        "apache-servers-using-dashes" => [
+          "@apache_servers",
+        ],
+        "apache-servers-using-dashes-include" => [
+          "@apache-servers-using-dashes",
+        ]
       }
     )
   end
@@ -190,6 +204,10 @@ describe "AutomateIt::TagManager::YAML" do
       all_servers_except_proxy_servers:
         - @all_servers
         - !@proxy_servers
+      apache-servers-using-dashes:
+        - @apache_servers
+      apache-servers-using-dashes-include:
+        - @apache-servers-using-dashes
     EOB
     @m.setup(
       :default => :yaml,
