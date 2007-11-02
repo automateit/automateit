@@ -15,7 +15,6 @@ def automateit
 end
 
 # Run a hoe +task+.
-#
 def hoe(task)
   # XXX Hoe provides many tasks I don't need, don't like the implementation of,
   # or don't like their names. I'd use Rake's 'import' and 'invoke' but the Hoe
@@ -180,6 +179,7 @@ end
 task :publish do
   automateit
   hoe("release VERSION=#{AutomateIt::VERSION}")
+  Rake::Task[:after].invoke
 end
 
 #---[ Install and uninstall ]-------------------------------------------
