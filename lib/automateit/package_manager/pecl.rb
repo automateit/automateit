@@ -46,13 +46,19 @@ class ::AutomateIt::PackageManager::PECL < ::AutomateIt::PackageManager::BaseDri
     return _not_installed_helper?(*packages)
   end
 
+  # Options:
+  # * :force -- Force installation, needed when installing unstable packages
+  #
   # See AutomateIt::PackageManager#install
   def install(*packages)
     return _install_helper(*packages) do |list, opts|
       # pecl options:
       # -a install all required dependencies
+      # -f force installation
 
-      cmd = "pecl install -a "+list.join(" ")+" < /dev/null"
+      cmd = "pecl install -a"
+      cmd << " -f" if opts[:force]
+      cmd << " "+list.join(" ")+" < /dev/null"
       cmd << " > /dev/null" if opts[:quiet]
       cmd << " 2>&1"
 

@@ -20,6 +20,17 @@ else
       @d.uninstall(@package, :quiet => true)
     end
 
+    def uninstall_package(packages, opts={})
+      opts[:quiet] = true
+      return @d.uninstall(packages, opts)
+    end
+
+    def install_package(packages, opts={})
+      opts[:quiet] = true
+      opts[:force] = [:pecl, :pear].include?(@d.token)
+      return @d.install(packages, opts)
+    end
+
     # Some specs below leave side-effects which others depend on, although
     # these are clearly documented within the specs. This is necessary
     # because doing proper setup/teardown for each test would make it run 5x
@@ -28,18 +39,18 @@ else
 
     it "should not install an invalid package" do
       @d.log.silence(Logger::FATAL) do
-        lambda{ @d.install(@fake_package, :quiet => true) }.should raise_error(ArgumentError)
+        lambda{ install_package(@fake_package) }.should raise_error(ArgumentError)
       end
     end
 
     it "should install a package" do
-      @d.install(@package, :quiet => true).should be_true
+      install_package(@package).should be_true
       # Leaves behind an installed package
     end
 
     it "should not re-install an installed package" do
       # Expects package to be installed
-      @d.install(@package, :quiet => true).should be_false
+      install_package(@package).should be_false
     end
 
     it "should find an installed package" do
@@ -61,11 +72,11 @@ else
 
     it "should uninstall a package" do
       # Expects package to be installed
-      @d.uninstall(@package, :quiet => true).should be_true
+      uninstall_package(@package).should be_true
     end
 
     it "should not uninstall a package that's not installed" do
-      @d.uninstall(@package, :quiet => true).should be_false
+      uninstall_package(@package).should be_false
     end
   end
 
@@ -90,6 +101,8 @@ else
   targets.each_pair do |driver_token, package|
     # Run the following from the shell to skip package tests:
     #   export AUTOMATEIT_SPEC_SKIP_PACKAGES=1
+    # Or clear it out:
+    #   unset AUTOMATEIT_SPEC_SKIP_PACKAGES
     next unless ENV["AUTOMATEIT_SPEC_SKIP_PACKAGES"].nil?
 
     driver = INTERPRETER.package_manager[driver_token]

@@ -60,14 +60,20 @@ class ::AutomateIt::PackageManager::PEAR < ::AutomateIt::PackageManager::BaseDri
   # *IMPORTANT*: See documentation at the top of this file for how to correctly
   # install packages from a specific channel.
   #
+  # Options:
+  # * :force -- Force installation, needed when installing unstable packages
+  #
   # See AutomateIt::PackageManager#install
   def install(*packages)
     return _install_helper(*packages) do |list, opts|
       # pear options:
       # -a install all required dependencies
+      # -f force installation
 
       cmd = "(pear config-set auto_discover 1; "
-      cmd << "pear install -a "+list.join(" ")+" < /dev/null)"
+      cmd << "pear install -a"
+      cmd << " -f" if opts[:force]
+      cmd << " "+list.join(" ")+" < /dev/null)"
       cmd << " > /dev/null" if opts[:quiet]
       cmd << " 2>&1"
 

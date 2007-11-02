@@ -1,3 +1,9 @@
+0.71102:
+    Date: Fri, 02 Nov 2007 02:59:41 -0700
+    Desc:
+    - Improved PackageManager::PEAR and PackageManager::PECL, can now :force installation of unstable packages.
+    - Refactored PackageManager spec and added :force to get PEAR and PECL to cooperate with systems default.
+
 0.71101.2:
     Date: Thu, 01 Nov 2007 22:37:44 -0700
     Desc:
