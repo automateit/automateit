@@ -140,6 +140,24 @@ describe AutomateIt::CLI, " with a project" do# {{{
     end
   end
 
+  it "should add run-time tags to a project" do
+    with_project do
+      recipe = "recipes/recipe.rb"
+      tags_yml = "config/tags.yml"
+
+      write_to(tags_yml, <<-HERE)
+        all_servers:
+          - localhost
+      HERE
+
+      write_to(recipe, <<-HERE)
+        tagged?("tsukai")
+      HERE
+
+      AutomateIt::CLI.run(:recipe => recipe, :tags => %w(tsukai)).should be_true
+    end
+  end
+
   it "should load fields in a project" do
     with_project do
       recipe = "recipes/recipe.rb"

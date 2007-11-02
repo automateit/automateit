@@ -14,12 +14,11 @@ class AutomateIt::TagManager::Struct < AutomateIt::TagManager::BaseDriver
   def setup(opts={})
     super(opts)
 
+    @struct ||= {}
+    @tags   ||= Set.new
+
     if opts[:struct]
-      @struct = AutomateIt::TagManager::TagParser.expand(opts[:struct])
-      @tags   = Set.new
-    else
-      @struct ||= {}
-      @tags   ||= Set.new
+      @struct.merge!(AutomateIt::TagManager::TagParser.expand(opts[:struct]))
     end
   end
 

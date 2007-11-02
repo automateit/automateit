@@ -174,8 +174,8 @@ end
 describe "AutomateIt::TagManager::YAML" do
   it_should_behave_like "AutomateIt::TagManager"
 
-  before(:all) do
-    @m[:yaml].should_receive(:_read).with("demo.yml").and_return(<<-EOB)
+  def setup_yaml_tags
+    @m[:yaml].should_receive(:_read).any_number_of_times.with("demo.yml").and_return(<<-EOB)
       <%="apache_servers"%>:
         - kurou
         - shirou
@@ -195,5 +195,20 @@ describe "AutomateIt::TagManager::YAML" do
       :default => :yaml,
       :file => "demo.yml"
     )
+  end
+
+  before(:all) do
+    setup_yaml_tags
+  end
+
+  it "should not clear tags if re-loaded" do
+    setup_yaml_tags
+    tag = "al-azif"
+
+    @a.tags << tag
+    @a.should be_tagged(tag)
+
+    setup_yaml_tags
+    @a.should be_tagged(tag)
   end
 end

@@ -176,6 +176,8 @@ module AutomateIt
       # Instantiate core plugins so they're available to the project
       _instantiate_plugins
 
+      tags.merge(opts[:tags]) if opts[:tags]
+
       if project_path = opts[:project] || ENV["AUTOMATEIT_PROJECT"] || ENV["AIP"]
         # Only load a project if we find its env file
         env_file = File.join(project_path, "config", "automateit_env.rb")
@@ -212,8 +214,6 @@ module AutomateIt
           raise ArgumentError.new("Couldn't find project at: #{project_path}")
         end
       end
-
-      tags.merge(opts[:tags]) if opts[:tags]
     end
 
     # Hash of plugin tokens to plugin instances for this Interpreter.
