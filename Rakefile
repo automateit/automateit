@@ -182,6 +182,12 @@ task :publish do
   Rake::Task[:after].invoke
 end
 
+task :tag do
+  automateit
+  sh "hg tag #{AutomateIt::VERSION}"
+  sh "hg tag -f stable"
+end
+
 #---[ Install and uninstall ]-------------------------------------------
 
 =begin
