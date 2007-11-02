@@ -1,3 +1,8 @@
+0.71101.1:
+    Date: Thu, 01 Nov 2007 18:52:01 -0700
+    Desc:
+    - (%) Fixed bug in Interpreter, which only set optional run-time tags specified on the command-line AFTER it loaded the fields/tags files. Thanks for the report, David Brewer.
+
 0.71101:
     Date: Thu, 01 Nov 2007 17:07:51 -0700
     Desc:
