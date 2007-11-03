@@ -6,6 +6,7 @@
     - Improved AccountManager spec with additional examples for checking password changes.
     - Improved AccountManager::NSCD with refactoring and additional tests.
     - Improved AddressManager spec with additional tests for address conversion routines and code generation helpers.
+    - Improved Plugin spec with more checks against invalid managers and drivers.
 
 0.71102:
     Date: Fri, 02 Nov 2007 02:59:41 -0700

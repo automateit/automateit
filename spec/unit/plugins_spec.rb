@@ -2,11 +2,42 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 
 #===[ stub classes ]====================================================# {{{
 
+#---[ MyBrokenManager ]-------------------------------------------------
+
+class MyBrokenManager < AutomateIt::Plugin::Manager
+  def mymethod(opts)
+    dispatch(opts)
+  end
+end
+
+class MyBrokenManager::BaseDriver < AutomateIt::Plugin::Driver
+  # Is abstract by default
+end
+
+class MyBrokenManager::MyBrokenDriver < MyBrokenManager::BaseDriver
+  def suitability(method, *args)
+    return {:omfg => :lol}
+  end
+end
+
+#---[ MyDriverlessManager ]---------------------------------------------
+
+class MyDriverlessManager < AutomateIt::Plugin::Manager
+  def mymethod(opts)
+    dispatch(opts)
+  end
+end
+#---[ MyManager ]-------------------------------------------------------
+
 class MyManager < AutomateIt::Plugin::Manager
   alias_methods :mymethod
 
   def mymethod(opts)
     dispatch(opts)
+  end
+
+  def mynonexistentmethod(opts)
+    dispatch_safely(opts)
   end
 end
 
@@ -234,6 +265,10 @@ describe "MyManager's drivers" do
     @m.mymethod(:one => 1, :with => :my_first_driver).should == 1
   end
 
+  it "should dispatch safely" do
+    @m.mynonexistentmethod(:hello => :world).should be_nil
+  end
+
   it "should dispatch safely to non-suitable drivers" do
     @m.dispatch_safely_to(:asdf).should be_nil
   end
@@ -250,6 +285,26 @@ describe "MyManager's drivers" do
     @m[:my_first_driver].manager.should == @m
   end
 
+end
+
+describe "MyBrokenManager" do
+  before(:all) do
+    @m = MyBrokenManager.new
+  end
+
+  it "should fail to find an invalid driver" do
+    lambda { @m.driver_for(:mymethod) }.should raise_error(NotImplementedError)
+  end
+end
+
+describe "MyDriverlessManager" do
+  before(:all) do
+    @m = MyDriverlessManager.new
+  end
+
+  it "should fail to find a driver for manager without drivers" do
+    lambda { @m.driver_for(:mymethod) }.should raise_error(NotImplementedError)
+  end
 end
 
 describe AutomateIt::Interpreter do

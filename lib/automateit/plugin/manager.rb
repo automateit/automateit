@@ -199,12 +199,7 @@ module AutomateIt
       # instance found, else raises a NotImplementedError if no suitable driver
       # is found.
       def driver_for(method, *args, &block)
-        begin
-          driver, level = driver_suitability_levels_for(method, *args, &block).sort_by{|k,v| v}.last
-        rescue IndexError
-          driver = nil
-          level = -1
-        end
+        driver, level = driver_suitability_levels_for(method, *args, &block).sort_by{|k,v| v}.last
         if driver and level > 0
           return @drivers[driver]
         else
