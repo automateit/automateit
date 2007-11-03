@@ -9,6 +9,7 @@
     - Improved Plugin spec with more checks against invalid managers and drivers, and unavailable dependencies.
     - Improved ShellManager spec with more checks against hard links and symbolic links; for #cp when contents, modes or ownership changes; for #rm with :force option: for #umask with and without block, and with caught exceptions.
     - Added spec for String#shell_escape.
+    - Added spec for Object's extensions for #unique_methods and #args_and_opts.
 
 0.71102:
     Date: Fri, 02 Nov 2007 02:59:41 -0700
