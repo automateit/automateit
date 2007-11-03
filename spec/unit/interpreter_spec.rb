@@ -48,6 +48,12 @@ describe AutomateIt::Interpreter do
     @a.preview?.should be_true
   end
 
+  it "should get and set values in the interpreter" do
+    @a.set("meow", :MEOW).should == :MEOW
+    @a.get("meow").should == :MEOW
+    @a.meow.should == :MEOW
+  end
+
   it "should eval commands within Interpreter's context" do
     @a.preview = true
     @a.instance_eval{preview?}.should be_true
