@@ -82,50 +82,35 @@ class Numeric
   def commify() (s=self.to_s;x=s.length;s).rjust(x+(3-(x%3))).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/,'\1,').strip end
 end
 
-desc "Display the lines of source code and how many lines were changed in the repository"
-task :loc => [:loclines, :locdiff, :locchurn, :sloc]
+namespace :loc do
+  desc "Display lines of code using loccount"
+  task :count do
+    sh "loccount bin/* lib/ spec/ examples/ *.rake"
+  end
 
-desc "Display the lines of source code"
-task :loclines do
-  require 'find'
-  lines = 0
-  bytes = 0
-  Find.find(*%w(bin lib spec Rakefile ../web/Rakefile ../web/src )) do |path|
-    Find.prune if path.match(/.*(\b(.hg|.svn|CVS)\b|(.sw.?|.pyc)$)/)
-    next if File.directory?(path)
-    if path.match(/(\bbin\b|.*\.(env|pl|py|rb|rake|java|sql|ftl|jsp|xml|properties|css|rcss|html|rhtml|erb|po|haml|sass)$)/)
-      data = File.read(path)
-      bytes += data.size
-      ### lines += data.scan(/^.*\w.*$/).size # Skip spaces
-      lines += data.scan(/^\s*(?!#)\w.*$/).size # Skip blanks and comments
+  desc "Display the lines of code changed in the repository"
+  task :diff do
+    if File.directory?(".hg")
+      puts "%s lines added and removed through SCM operations" % `hg log --patch`.scan(/^[+-][^+-].+/).size.commify
+    else
+      raise NotImplementedError.new("Sorry, this only works for a Mercurial checkout")
     end
   end
-  puts "Lines: "+lines.commify
-  puts "Bytes: "+bytes.commify
-end
 
-task :loccount do
-  sh ""
-end
+  desc "Display lines of churn"
+  task :churn do
+    require 'active_support'
+    puts "%s lines of Hg churn" % (`hg churn`.scan(/^[^\s]+\s+(\d+)\s/).flatten.map(&:to_i).sum).commify
+  end
 
-desc "Display the lines of code changed in the repository"
-task :locdiff do
-  if File.directory?(".hg")
-    puts "%s lines added and removed through SCM operations" % `hg log --patch`.scan(/^[+-][^+-].+/).size.commify
-  else
-    raise NotImplementedError.new("Sorry, this only works for a Mercurial checkout")
+  desc "Display lines of code based on sloccount"
+  task :sloc do
+    sh "sloccount lib spec misc examples bin"
   end
 end
 
-desc "Display lines of churn"
-task :locchurn do
-  require 'active_support'
-  puts "%s lines of Hg churn" % (`hg churn`.scan(/^[^\s]+\s+(\d+)\s/).flatten.map(&:to_i).sum).commify
-end
-
-task :sloc do
-  sh "sloccount lib spec misc examples bin"
-end
+desc "Display the lines of source code and how many lines were changed in the repository"
+task :loc => ["loc:count", "loc:diff", "loc:churn", "loc:sloc"]
 
 #---[ RubyGems ]--------------------------------------------------------
 
@@ -172,22 +157,26 @@ namespace :gem do
   end
 end
 
+desc "Create a gem"
 task :gem do
   hoe(:gem)
 end
 
+desc "Publish to RubyForge"
 task :publish do
   automateit
   hoe("release VERSION=#{AutomateIt::VERSION}")
   Rake::Task[:after].invoke
 end
 
+desc "Tag a stable release"
 task :tag do
   automateit
   sh "hg tag #{AutomateIt::VERSION}"
   sh "hg tag -f stable"
 end
 
+desc "Push a stable release"
 task :push do
   sh "hg push -r stable ../app_stable"
 end
@@ -233,6 +222,7 @@ namespace :install do
   end
 end
 
+desc "Uninstall automateit gem"
 task :uninstall do
   automateit.package_manager.uninstall "automateit", :with => :gem
 end
