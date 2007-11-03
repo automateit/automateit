@@ -155,7 +155,7 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
     ipcmd = "ifconfig"
     ipcmd << " " << _interface_and_label(opts)
     if helper_opts[:prepend]
-      ipcmd << " " << helper_opts[:prepend].join(" ")
+      ipcmd << " " << [helper_opts[:prepend]].flatten.join(" ")
     end
     ipcmd << " %s" % opts[:address]
     ipcmd << " netmask %s" % opts[:mask] if opts[:mask]
@@ -164,7 +164,7 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
       ipcmd << " down" if action == :del
     end
     if helper_opts[:append]
-      ipcmd << " " << helper_opts[:append].join(" ")
+      ipcmd << " " << [helper_opts[:append]].flatten.join(" ")
     end
     return ipcmd
   end
