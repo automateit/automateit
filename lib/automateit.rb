@@ -35,6 +35,7 @@ Hash.module_eval{include ActiveSupport::CoreExtensions::Hash::Keys}
 # Extensions
 require 'ext/object.rb'
 require 'ext/metaclass.rb'
+require 'ext/shell_escape.rb'
 
 # Helpers
 require 'hashcache'
