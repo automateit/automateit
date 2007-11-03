@@ -304,11 +304,27 @@ describe AutomateIt::ShellManager, " in general" do
       @a.render(:text => "Hello", :to => source_file2)
       @a.mkdir(target_dir)
 
-      @a.cp(source_dir, target_dir).should == source_dir
+      @a.cp_R(source_dir, target_dir).should == source_dir
       File.exists?("meh/feh/file1").should be_true
       File.exists?("meh/feh/file2").should be_true
 
       @a.cp(source_dir, target_dir).should be_false
+    end
+  end
+
+  it "should copy files whose contents changed (cp)" do
+    @m.mktempdircd do
+      source = "file1"
+      target = "file2"
+
+      @a.render(:text => "Hello", :to => source)
+      @a.render(:text => "olleH", :to => target)
+
+      source_atime = File.atime(source)
+      source_mtime = File.mtime(source)
+      File.utime(source_atime, source_mtime, target)
+
+      @a.cp(source, target).should == source
     end
   end
 
@@ -354,6 +370,19 @@ describe AutomateIt::ShellManager, " in general" do
       @m.rm_r(dir) == [dir, file]
       File.exists?(file).should be_false
       File.exists?(dir).should be_false
+    end
+  end
+
+  it "should delete forcefully (rm_f)" do
+    @m.mktempdircd do
+      target = "file1"
+
+      @m.touch(target)
+      @m.chmod(0000, target)
+
+      @m.rm(target, :force => true).should == [target]
+
+      File.exists?(target).should be_false
     end
   end
 
@@ -505,6 +534,23 @@ describe AutomateIt::ShellManager, " when managing modes" do
       end
     end
 
+    it "should copy files whose mode changed (cp)" do
+      @m.mktempdircd do
+        source = "file1"
+        target = "file2"
+
+        @a.render(:text => "Hello", :to => source)
+        @a.cp(source, target)
+
+        File.chmod(0754, target)
+        source_atime = File.atime(source)
+        source_mtime = File.mtime(source)
+        File.utime(source_atime, source_mtime, target)
+
+        @a.cp(source, target, :preserve => true).should == source
+      end
+    end
+
     #it "should set the default mask (umask)" # TODO
   end
 
@@ -602,6 +648,25 @@ describe AutomateIt::ShellManager, " when managing permissions" do
         (stat.gid == @gid).should be_true
       end
     end
+
+    it "should copy files whose owner changed (cp)" do
+      @m.mktempdircd do
+        source = "file1"
+        target = "file2"
+
+        @a.render(:text => "Hello", :to => source)
+        @a.cp(source, target)
+
+        # TODO not portable
+        File.chown(2, 2, target)
+        source_atime = File.atime(source)
+        source_mtime = File.mtime(source)
+        File.utime(source_atime, source_mtime, target)
+
+        @a.cp(source, target, :preserve => true).should == source
+      end
+    end
+
   else
     puts "NOTE: Must be root to check 'chown' in #{__FILE__}"
   end
