@@ -3,6 +3,8 @@
     Desc:
     - (+) Added "aissh" command, provides an easy way to run commands on a group of hosts. For example, see if there's a Rails process running on all hosts matching the "rails_servers" tag: "aissh rails_servers 'ps -ef | grep rails'"
     - Improved PackageManager, it can now accept package names as Symbols.
+    - Improved AccountManager spec with additional examples for checking password changes.
+    - Improved AccountManager::NSCD with refactoring and additional tests.
 
 0.71102:
     Date: Fri, 02 Nov 2007 02:59:41 -0700
