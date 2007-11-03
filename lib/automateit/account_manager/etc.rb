@@ -15,8 +15,8 @@ class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDrive
   # the 'etc' module?
   def self.has_etc?
     begin
-      require './spec/integration/account_manager_spec.rb:1etc'
-      return defined?(Etc)
+      require 'etc'
+      return defined?(::Etc)
     rescue LoadError
       return false
     end
@@ -24,7 +24,7 @@ class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDrive
   
   # Alias for AccountManager::Etc.has_etc?
   def has_etc?
-    self.has_etc?
+    self.class.has_etc?
   end
 
   #.......................................................................
