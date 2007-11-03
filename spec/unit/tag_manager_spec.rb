@@ -1,21 +1,21 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-describe "AutomateIt::TagManager", :shared => true do
-  before(:all) do
-    @a = AutomateIt.new
-    @a.address_manager.should_receive(:hostnames).any_number_of_times.and_return(["kurou", "kurou.foo"])
-    @a.platform_manager.setup(
-      :default => :struct,
-      :struct => {
-        :os => "mizrahi",
-        :arch => "realian",
-        :distro => "momo",
-        :version => "s100",
-      }
-    )
-    @m = @a.tag_manager
-  end
+def prepare_for_tagmanager
+  @a = AutomateIt.new
+  @a.address_manager.should_receive(:hostnames).any_number_of_times.and_return(["kurou", "kurou.foo"])
+  @a.platform_manager.setup(
+    :default => :struct,
+    :struct => {
+      :os => "mizrahi",
+      :arch => "realian",
+      :distro => "momo",
+      :version => "s100",
+    }
+  )
+  @m = @a.tag_manager
+end
 
+describe "AutomateIt::TagManager", :shared => true do
   it "should have tags" do
     @a.tags.should be_a_kind_of(Enumerable)
   end
@@ -152,6 +152,8 @@ describe "AutomateIt::TagManager::Struct" do
   it_should_behave_like "AutomateIt::TagManager"
 
   before(:all) do
+    prepare_for_tagmanager
+
     @m.setup(
       :default => :struct,
       :struct => {
@@ -216,6 +218,7 @@ describe "AutomateIt::TagManager::YAML" do
   end
 
   before(:all) do
+    prepare_for_tagmanager
     setup_yaml_tags
   end
 
@@ -230,3 +233,45 @@ describe "AutomateIt::TagManager::YAML" do
     @a.should be_tagged(tag)
   end
 end
+
+describe "AutomateIt::TagManager::YAML", "with empty struct" do
+  def setup_yaml_tags
+    @m[:yaml].should_receive(:_read).any_number_of_times.with("demo.yml").and_return(<<-EOB)
+      # Empty!
+    EOB
+    @m.setup(
+      :default => :yaml,
+      :file => "demo.yml"
+    )
+  end
+  before(:all) do
+    prepare_for_tagmanager
+    setup_yaml_tags
+  end
+
+  it "should tolerate empty struct" do
+    @a.tagged?("foo").should be_false
+  end
+end
+
+
+describe "AutomateIt::TagManager::YAML", "with no leaves" do
+  def setup_yaml_tags
+    @m[:yaml].should_receive(:_read).any_number_of_times.with("demo.yml").and_return(<<-EOB)
+      <%="apache_servers"%>:
+    EOB
+    @m.setup(
+      :default => :yaml,
+      :file => "demo.yml"
+    )
+  end
+  before(:all) do
+    prepare_for_tagmanager
+    setup_yaml_tags
+  end
+
+  it "should tolerate empty leaves" do
+    @a.tagged?("apache_servers").should be_false
+  end
+end
+
