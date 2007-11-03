@@ -22,4 +22,28 @@ describe AutomateIt::AddressManager do
   it "should be able to convert binaries to decimals" do
     @d.send(:bin2dec, "11111111").should == 255
   end
+
+  it "should be able to derive interface and label from a device" do
+    @d.send(:_interface_and_label, :device => "eth0").should == "eth0"
+  end
+
+  it "should be able to derive interface and label from a device and alias" do
+    @d.send(:_interface_and_label, :device => "eth0", :label => "1").should == "eth0:1"
+  end
+
+  it "should fail to derive interface and lable from inadequate options" do
+    lambda { @d.send(:_interface_and_label, :label => "1") }.should raise_error(ArgumentError)
+  end
+
+  it "should be able to prepend arguments to ifconfig commands" do
+    @d.send(:_ifconfig_helper, :del, 
+      {:address => "127.0.0.1", :device => "eth0", :label => "1"}, 
+      {:prepend => "inet"}).should == "ifconfig eth0:1 inet 127.0.0.1 down"
+  end
+
+  it "should be able to append arguments to ifconfig commands" do
+    @d.send(:_ifconfig_helper, :del, 
+      {:address => "127.0.0.1", :device => "eth0", :label => "1"}, 
+      {:append => "unplumb"}).should == "ifconfig eth0:1 127.0.0.1 down unplumb"
+  end
 end
