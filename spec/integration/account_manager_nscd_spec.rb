@@ -26,6 +26,10 @@ else
       end
     end
 
+    it "should fail with invalid queries" do
+      lambda { @d.database_for(:stuff) }.should raise_error(ArgumentError)
+    end
+
     it "should invalidate NSCD databases" do
       @m.invalidate(:passwd).should be_true
     end
