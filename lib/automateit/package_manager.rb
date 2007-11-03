@@ -222,6 +222,8 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       result = packages.map(&:to_s).grep(LIST_NORMALIZER_RE)
     when Hash
       result = packages.stringify_keys
+    when Symbol, String
+      result = packages.to_s
     else
       raise TypeError.new("Unknown input type: #{packages.class}")
     end
