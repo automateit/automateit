@@ -8,6 +8,7 @@
     - Improved AddressManager spec with additional tests for address conversion routines and code generation helpers.
     - Improved Plugin spec with more checks against invalid managers and drivers, and unavailable dependencies.
     - Improved ShellManager spec with more checks against hard links and symbolic links; for #cp when contents, modes or ownership changes; for #rm with :force option: for #umask with and without block, and with caught exceptions.
+    - Added spec for String#shell_escape.
 
 0.71102:
     Date: Fri, 02 Nov 2007 02:59:41 -0700
