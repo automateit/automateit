@@ -27,6 +27,7 @@ class MyDriverlessManager < AutomateIt::Plugin::Manager
     dispatch(opts)
   end
 end
+
 #---[ MyManager ]-------------------------------------------------------
 
 class MyManager < AutomateIt::Plugin::Manager
@@ -304,6 +305,18 @@ describe "MyDriverlessManager" do
 
   it "should fail to find a driver for manager without drivers" do
     lambda { @m.driver_for(:mymethod) }.should raise_error(NotImplementedError)
+  end
+end
+
+describe "MyManagerlessDriver" do
+  it "should fail to create a driver without a manager" do
+    lambda {
+      self.class.module_eval do
+        class MyManagerlessDriver < AutomateIt::Plugin::Driver
+          # Will fail
+        end
+      end
+    }.should raise_error(TypeError)
   end
 end
 
