@@ -1,0 +1,93 @@
+#!/usr/bin/env ruby
+
+# XXX What can go wrong with this loading approach?
+libdir = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+if File.directory?(libdir) and File.exists?(File.join(libdir, "automateit.rb"))
+  $LOAD_PATH.unshift(libdir)
+end
+
+require 'rubygems'
+require 'optparse'
+require 'automateit'
+include AutomateIt::Constants
+
+OptionParser.new do |parser|
+  PROG = File.basename($0)
+  opts = {}
+  parser.banner = <<EOB
+#{PROG} - tool for running command via SSH on hosts matching AutomateIt tags
+
+Usage: #{PROG} [options] [arguments...]
+
+IMPORTANT:
+  #{PROG} can only match against tags specified in tags.yml. It cannot
+  match against automatically generated tags like the OS, architecture and such
+  which are created at runtime by PlatformManager or AddressManager. So if you
+  want to run a command against all Ubuntu servers, you must define them
+  explicitly in tags.yml.
+
+Examples:
+  # Read tags from project in current directory and run "ls" on all hosts
+  # tagged with "apache_servers" or "rails_servers":
+  #{PROG} --project . 'apache_servers | rails_servers' ls
+
+  # Preview SSH commands needed to run "ls" on "apache_servers":
+  #{PROG} -p . -n apache_servers ls
+
+  # Pass arguments to "ls", rather than #{PROG}:
+  #{PROG} -p . -n apache_servers -- ls -la
+
+  # Same as previous but using a quoted string:
+  #{PROG} -p . -n apache_servers 'ls -la'
+
+  # Execute a command which requires the target server to redirect output:
+  #{PROG} -p . -n apache_servers 'ps -ef | grep apache'
+
+Options:
+EOB
+  parser.on("-n", "--preview", "Preview without executing commands") do |v|
+    opts[:preview] = v
+  end
+
+  parser.on("-p", "--project PATH", "Set project path") do |v|
+    opts[:project] = v
+  end
+
+  parser.on("-q", "--quiet", "Don't display commands executed") do |v|
+    opts[:verbosity] = Logger::ERROR
+  end
+
+  parser.on("-v", "--version", "Display version") do |v|
+    puts AutomateIt::VERSION
+    exit 0
+  end
+
+  parser.on("-h", "--help", "Display this help message") do |v|
+    puts parser
+    exit
+  end
+
+  args = parser.parse!.dup
+  query = args.shift
+  commands = args
+
+  if commands.blank?
+    puts parser
+    puts "\nERROR: No commands specified"
+    exit 1
+  end
+
+  interpreter = AutomateIt.new(
+    :project => opts[:project],
+    :verbosity => opts[:verbosity]
+  )
+
+  interpreter.preview true if opts[:preview]
+
+  for host in interpreter.hosts_tagged_with(query).sort
+    cmd = "ssh %s %s" % [host, commands.join(" ").shell_escape]
+    interpreter.sh(cmd)
+  end
+
+  exit 0
+end
