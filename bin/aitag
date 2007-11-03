@@ -18,6 +18,13 @@ OptionParser.new do |parser|
 
 Usage: #{PROG} [options] [arguments...]
 
+IMPORTANT:
+  #{PROG} can only match against tags specified in tags.yml. It cannot 
+  match against automatically generated tags like the OS, architecture and such
+  which are created at runtime by PlatformManager or AddressManager. So if you
+  want to run a command against all Ubuntu servers, you must define them
+  explicitly in tags.yml. 
+
 Examples:
   # Load 'myproject' and see if it's tagged with 'apache' or 'svn':
   #{PROG} -p myproject 'apache || svn'
