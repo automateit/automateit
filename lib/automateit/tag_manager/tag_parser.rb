@@ -2,13 +2,13 @@
 #
 # Helper class for parsing tags. Not useful for users -- for internal use only.
 class AutomateIt::TagManager::TagParser
+  include Nitpick
+
   attr_accessor :struct
-  attr_accessor :is_trace # FIXME replace is_trace with nitpick
 
   # Create a parser for the +struct+, a hash of tag keys to values with arrays of items.
-  def initialize(struct, is_trace=false)
+  def initialize(struct)
     self.struct = struct
-    self.is_trace = is_trace
     normalize!
   end
 
@@ -33,11 +33,6 @@ class AutomateIt::TagManager::TagParser
     end
   end
 
-  # Display debugging information if +is_trace+ is enabled.
-  def trace(msg)
-    puts msg if is_trace
-  end
-
   HOSTS_FOR_VALUE = /(.+?)/
   HOSTS_FOR_INCLUDE_TAG_RE = /^INCLUDE_TAG #{HOSTS_FOR_VALUE}$/
   HOSTS_FOR_EXCLUDE_TAG_RE = /^EXCLUDE_TAG #{HOSTS_FOR_VALUE}$/
@@ -48,26 +43,26 @@ class AutomateIt::TagManager::TagParser
     raise IndexError.new("Unknown tag - #{tag}") unless struct.has_key?(tag)
     return [] if struct[tag].nil? # Tag has no leaves
 
-    trace "\nAA %s" % tag
+    nitpick "\nAA %s" % tag
     hosts = Set.new
     for item in struct[tag]
       case item
       when HOSTS_FOR_INCLUDE_TAG_RE
-        trace "+g %s" % $1
+        nitpick "+g %s" % $1
         hosts.merge(hosts_for($1))
       when HOSTS_FOR_EXCLUDE_TAG_RE
-        trace "-g %s" % $1
+        nitpick "-g %s" % $1
         hosts.subtract(hosts_for($1))
       when HOSTS_FOR_EXCLUDE_HOST_RE
-        trace "-h %s" % $1
+        nitpick "-h %s" % $1
         hosts.delete($1)
       else
-        trace "+h %s" % item
+        nitpick "+h %s" % item
         hosts << item
       end
     end
     result = hosts.to_a
-    trace "ZZ %s for %s" % [result.inspect, tag]
+    nitpick "ZZ %s for %s" % [result.inspect, tag]
     return result
   end
 
@@ -92,7 +87,7 @@ class AutomateIt::TagManager::TagParser
   end
 
   # Expand the +struct+.
-  def self.expand(struct, is_trace=false)
-    self.new(struct, is_trace).expand
+  def self.expand(struct)
+    self.new(struct).expand
   end
 end

@@ -42,6 +42,7 @@ require 'queued_logger'
 require 'tempster'
 require 'helpful_erb'
 require 'nested_error'
+require 'nitpick'
 
 # Core
 require 'automateit/root'
