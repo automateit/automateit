@@ -551,9 +551,68 @@ describe AutomateIt::ShellManager, " when managing modes" do
       end
     end
 
-    #it "should set the default mask (umask)" # TODO
-  end
+    it "should return umask value (umask)" do
+      @m.umask.should == File::umask
+    end
 
+    it "should set the default mask (umask)" do
+      @m.mktempdircd do
+        source = "file1"
+        previous_umask = File::umask
+
+        begin
+          @m.umask(0000)
+          File::umask.should_not == previous_umask
+
+          @a.touch(source)
+          File.stat(source).mode.should == 0100666
+        ensure
+          File::umask(previous_umask)
+        end
+      end
+    end
+
+    it "should set the default mask within block (umask)" do
+      @m.mktempdircd do
+        source = "file1"
+        previous_umask = File::umask
+
+        begin
+          @m.umask(0000) do
+            File::umask.should_not == previous_umask
+
+            @a.touch(source)
+            File.stat(source).mode.should == 0100666
+          end
+
+          File::umask.should == previous_umask
+        ensure
+          File::umask(previous_umask)
+        end
+      end
+    end
+
+    it "should reset umask correctly after an exception within a block (umask)" do
+      @m.mktempdircd do
+        previous_umask = File::umask
+
+        begin
+          begin
+            @m.umask(0000) do
+              File::umask.should_not == previous_umask
+              raise ArgumentError.new("OMFG")
+            end
+          rescue ArgumentError
+            # Error was expected
+          end
+
+          File::umask.should == previous_umask
+        ensure
+          File::umask(previous_umask)
+        end
+      end
+    end
+  end
 end
 
 describe AutomateIt::ShellManager, " when managing permissions" do
