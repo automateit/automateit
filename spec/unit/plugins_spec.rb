@@ -75,6 +75,25 @@ class MyManager::MyUnimplementedDriver < MyManager::BaseDriver
   # +mymethod+ method deliberately not implemented to test errors
 end
 
+class MyManager::MyInvalidDependsOnDriver < MyManager::BaseDriver
+  depends_on nil
+end
+
+class MyManager::MyInvalidDependencyTypeDriver < MyManager::BaseDriver
+  depends_on :omfg => :lol
+end
+
+class MyManager::MyNonexistentLibrariesDependencyDriver < MyManager::BaseDriver
+  depends_on :libraries => %w(qjkwerlkjqweluxovxuqwe)
+end
+
+class MyManager::MyNonexistentProgramsDependencyDriver < MyManager::BaseDriver
+  depends_on :programs => %(qlkjwesziuxkjlrjklqwel)
+end
+
+class MyManager::MyValidLibraryDependencyDriver < MyManager::BaseDriver
+  depends_on :requires => %w(set)
+end
 
 class MyManager::MyFirstDriver < MyManager::BaseDriver
   depends_on :directories => ["/"]
@@ -199,6 +218,32 @@ describe "MyManager's drivers" do
   it "should fail on unavailable methods" do
     lambda{ MyManager::MyUnsuitableDriver.new.unavailable_method }.should
       raise_error(NotImplementedError, /non_existent/)
+  end
+
+  it "should not consider drivers that declare absurd dependencies to be available" do
+    @m[:my_invalid_depends_on_driver].should_not be_available
+  end
+
+  it "should not consider drivers that depend on non-existent library dependencies to be available" do
+    @m[:my_nonexistent_libraries_dependency_driver].should_not be_available
+  end
+
+  it "should not consider drivers that depend on non-existent program dependencies to be available" do
+    @m[:my_nonexistent_programs_dependency_driver].should_not be_available
+  end
+
+  it "should figure out why drivers aren't available" do
+    lambda {
+      @m[:my_nonexistent_programs_dependency_driver].send(:_raise_unless_available)
+    }.should raise_error(NotImplementedError, /Missing.+programs.+qlkjwesziuxkjlrjklqwel/)
+  end
+
+  it "should fail when drivers define unknown dependency types" do
+    lambda { @m[:my_invalid_dependency_type_driver].available? }.should raise_error(TypeError)
+  end
+
+  it "should consider driver with valid library to be available" do
+    @m[:my_valid_library_dependency_driver].available?.should be_true
   end
 
   it "should have a token" do

@@ -185,7 +185,7 @@ module AutomateIt
                 when :callbacks
                   item.call() ? true : false
                 else
-                  raise "unknown kind: #{kind}"
+                  raise TypeError.new("Unknown kind: #{kind}")
                 end
               unless present
                 all_present = false
