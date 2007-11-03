@@ -2,11 +2,21 @@ require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb"
 
 describe AutomateIt::Interpreter do
   before(:all) do
-    @a = AutomateIt::Interpreter.new(:verbosity => Logger::WARN)
+    @verbosity = Logger::WARN
+    @a = AutomateIt::Interpreter.new(:verbosity => @verbosity)
   end
 
   it "should have a logger" do
     @a.log.should be_a_kind_of(Logger)
+  end
+
+  it "should be able to set a logger" do
+    @old_logger = @a.log
+
+    @a.log(QueuedLogger.new($stdout))
+    @a.log.level = @verbosity
+
+    @a.log.should_not == @old_logger
   end
 
   it "should provide a preview mode" do
@@ -21,6 +31,21 @@ describe AutomateIt::Interpreter do
     @a.preview_for("answer"){42}.should == 42
     @a.noop?.should be_false
     @a.writing?.should be_true
+
+    @a.preview true
+    @a.preview?.should be_true
+
+    @a.noop false
+    @a.preview?.should be_false
+
+    @a.noop = true
+    @a.preview?.should be_true
+
+    @a.writing true
+    @a.preview?.should be_false
+
+    @a.writing = false
+    @a.preview?.should be_true
   end
 
   it "should eval commands within Interpreter's context" do
