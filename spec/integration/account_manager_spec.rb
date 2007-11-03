@@ -20,6 +20,7 @@ else
       # Some OSes are limited to 8 character names :(
       @username =  "aitestus"
       @groupname = "aitestgr"
+      @password = "automateit"
 
       begin
         raise "User named '#{@username}' found. If this isn't a real user, delete it so that the test can contineu. If this is a real user, change the spec to test with a user that shouldn't exist." if @m.users[@username]
@@ -68,6 +69,12 @@ else
       return @m.add_group(@groupname, :members => @username)
     end
 
+    unless INTERPRETER.tagged?("windows | darwin")
+      it "should have Etc support on Unix-like platforms" do
+        @m.driver_for(:users).should have_etc
+      end
+    end
+
     it "should find root user" do
       entry = @m.users["root"]
       entry.should_not be_nil
@@ -76,6 +83,10 @@ else
 
     it "should not have a user before one is created" do
       @m.has_user?(@username).should be_false
+    end
+
+    it "should fail to change the password for a non-existent user" do
+      lambda{ @m.passwd(@username, "foo") }.should raise_error(ArgumentError)
     end
 
     it "should create a user" do
@@ -253,9 +264,8 @@ else
       end
     end
 
-    it "should change password" do
+    def change_password_with(object)
       add_user if @independent
-      pass = "automateit"
 
       # TODO This isn't portable
       def extract_pwent(username)
@@ -266,9 +276,34 @@ else
       end
 
       before = extract_pwent(@username)
-      @m.passwd(@username, pass, :quiet => @quiet).should be_true
+      object.passwd(@username, @password, :quiet => @quiet).should be_true
       after = extract_pwent(@username)
-      before.should_not eql(after)
+
+      before.should_not == after
+    end
+
+    it "should change password with default driver" do
+      change_password_with(@m)
+    end
+
+    if INTERPRETER.account_manager[:passwd_pty].available?
+      it "should change password with PTY driver" do
+        change_password_with(@m[:passwd_pty])
+      end
+    else
+      puts "NOTE: Can't check AccountManager::PasswdPTY on this platform, #{__FILE__}"
+    end
+
+    if INTERPRETER.account_manager[:passwd_expect].available?
+      it "should change password with Expect driver" do
+        change_password_with(@m[:passwd_expect])
+      end
+    else
+      puts "NOTE: Can't check AccountManager::PasswdExpect on this platform, #{__FILE__}"
+    end
+
+    it "should fail to change the password when given invalid arguents" do
+      lambda{ @m.passwd(Hash.new, "foo") }.should raise_error(TypeError)
     end
 
     it "should remove a user" do
