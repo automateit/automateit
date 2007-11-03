@@ -613,6 +613,10 @@ describe AutomateIt::ShellManager, " when managing hard links" do
   else
     it_should_behave_like "AutomateIt::ShellManager"
 
+    it "should provide links" do
+      @m.provides_link?.should be_true
+    end
+
     it "should create hard links when needed (ln)" do
       @m.mktempdircd do
         source = "foo"
@@ -635,6 +639,10 @@ describe AutomateIt::ShellManager, " when managing symbolic links" do
     puts "NOTE: Can't check symbolic links on this platform, #{__FILE__}"
   else
     it_should_behave_like "AutomateIt::ShellManager"
+
+    it "should provide symlinks" do
+      @m.provides_symlink?.should be_true
+    end
 
     it "should create symlinks when needed (ln_s)" do
       @m.mktempdircd do
