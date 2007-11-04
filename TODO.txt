@@ -2,17 +2,15 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
-BUGS
-- does service_manager.start_and_enable work as expected?
-
+111 ServiceManager -- Write tests for start_and_enable and such
 111 PackageManager -- Improve PEAR spec by having it check files with and without channel URL
-111 aissh or aion -- Write command for running stuff against servers with ssh, e.g., "aissh rails_servers ls", which is basically a wrapper over "for t in aitag -w rails_servers; do echo $t; ssh $t "ls"; done"
 111 Shell -- Write #su(user, *command) as a wrapper around #sh
 101 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 
 100 Edit -- Display summary of edits, return with :details as [rv, list]
 100 Shell -- Incorporate which.cmd so #which can work on Windows
 100 Interpreter#invoke and HelpfulERB -- Extract error context code into class
+100 Interpeter -- Implement #clear, #dirty? #track_changes 
 
 001 CPAN -- Write driver for PackageManager::CPAN
 001 FreeBSD -- Write driver for PackageManager::FreeBSD_Ports (or generic ::Ports?) and FreeBSD_Pkg
