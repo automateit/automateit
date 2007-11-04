@@ -6,7 +6,7 @@ require 'automateit'
 
 HoeInclude = {
   :executables => Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)},
-  :files => (%w(env.sh gpl.txt CHANGES.txt Hoe.rake Manifest.txt Rakefile README.txt TESTING.txt TODO.txt TUTORIAL.txt) + FileList["{bin,examples,docs,lib,misc,spec}/**/*"]).to_a.reject{|t| File.directory?(t)},
+  :files => (%w(add2path.sh gpl.txt CHANGES.txt Hoe.rake Manifest.txt Rakefile README.txt TESTING.txt TODO.txt TUTORIAL.txt) + FileList["{bin,examples,docs,lib,misc,spec}/**/*"]).to_a.reject{|t| File.directory?(t)},
   :test_files => FileList["{spec}/**/*"].to_a,
 }
 
