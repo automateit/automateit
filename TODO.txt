@@ -2,29 +2,33 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
+#---[ Quality issues ]--------------------------------------------------
+111 ServiceManager -- Create new #stop_and_start, and #restart as #tell wrapper
 111 ServiceManager -- Write tests for start_and_enable and such
 111 PackageManager -- Improve PEAR spec by having it check files with and without channel URL
+
+#---[ Development ]-----------------------------------------------------
 111 Shell -- Write #su(user, *command) as a wrapper around #sh
 101 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
-
 100 Edit -- Display summary of edits, return with :details as [rv, list]
-100 Shell -- Incorporate which.cmd so #which can work on Windows
-100 Interpreter#invoke and HelpfulERB -- Extract error context code into class
-100 Interpeter -- Implement #clear, #dirty? #track_changes 
+100 Shell -- Consistently return single items or arrays, alter specs to match
+101 PackageManager::CPAN - Implement
 
-001 CPAN -- Write driver for PackageManager::CPAN
-001 FreeBSD -- Write driver for PackageManager::FreeBSD_Ports (or generic ::Ports?) and FreeBSD_Pkg
-000 Darwin -- Write drivers, e.g. PackageManager for Fink and MacPorts (or generic ::Ports?)
 000 Shell#chperm -- With symbolic mode, wrap `chmod -v` as temporary workaround?
-000 PackageManager -- Provide a way to specify desired versions and upgrade via recipes
+001 PackageManager::FreeBSD_Ports - Implmen(or generic ::Ports?) and FreeBSD_Pkg
+000 Darwin -- Write drivers, e.g. PackageManager for Fink and MacPorts (or generic ::Ports?)
+000 PackageManager -- Upgrade or install specific versions
+000 PackageManager::Blastwave -- Implement
+000 PackageManager::SunOS_Pkg -- Implement
+000 ServiceManager::SMF -- Implement
+000 Shell -- Incorporate which.cmd so #which can work on Windows
 
-Solaris 10
-000 Create ServiceManager::SMF
-000 Create PackageManager::Blastwave
-000 Create PackageManager::SunOS_Pkg
-
-??? Shell -- Return false or list, never single item?
-??? Driver -- How to determine if a manager or driver method is available? Manager#available?, Manager#available and Driver#suitable? only say if it should be a default.
+000 Interpreter#invoke and HelpfulERB -- Extract error context code into class
+000 Interpeter -- Implement #clear, #dirty? #track_changes 
+000 DatabaseManager -- Design
+000 SourceManager -- Design
+000 ScheduleManager -- Design
+000 Driver -- How to determine if a manager or driver method is available? Manager#available?, Manager#available and Driver#suitable? only say if it should be a default.
 
 #===[ Web ]=============================================================
 100 Index: Call for pilot users, driver authors
