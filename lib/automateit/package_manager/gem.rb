@@ -5,16 +5,7 @@
 class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   depends_on \
     :programs => %w(gem), 
-    :callbacks => [lambda{
-      # TODO PackageManager::Gem -- Misleading #depends_on makes entire driver unavailable, although only #install requires PTY.
-      begin
-        require 'expect'
-        require 'pty'
-        return true
-      rescue LoadError
-        return false
-      end
-    }]
+    :libraries => %w(expect pty)
 
   def suitability(method, *args) # :nodoc:
     # Never select GEM as the default driver
