@@ -1,6 +1,3 @@
-require 'spec/rake/spectask'
-require 'rake/gempackagetask'
-
 task :default => :spec
 
 #---[ Wrappers ]--------------------------------------------------------
@@ -27,6 +24,7 @@ end
 
 # Run rspec on the +files+
 def specify(*files)
+  require 'spec/rake/spectask'
   Spec::Rake::SpecTask.new(:spec_internal) do |t|
     t.rcov = @rcov
     t.rcov_opts = ['--text-summary', '--include', 'lib', '--exclude', 'spec,.irbrc']
