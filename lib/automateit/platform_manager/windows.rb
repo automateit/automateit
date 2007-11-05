@@ -16,8 +16,15 @@ class AutomateIt::PlatformManager::Windows < AutomateIt::PlatformManager::Struct
     @struct[:os] = "windows"
     @struct[:arch] = ENV["PROCESSOR_ARCHITECTURE"]
     @struct[:distro] = "microsoft"
+
     # VER values: http://www.ss64.com/nt/ver.html
-    @struct[:release] = `ver`.strip.match(/Windows (\w+)/)[1].downcase
+    ver = `ver`.strip
+    if match = ver.match(/Windows (\w+)/)
+      @struct[:release] = match[1].downcase
+    elsif match = ver.match(/Windows \[Version 6\.0\./)
+      @struct[:release] = "vista"
+    end
+
     @struct
   end
   private :_prepare
