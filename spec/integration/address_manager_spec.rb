@@ -159,6 +159,6 @@ else
       end
     end
   rescue NotImplementedError
-    puts "Can't find AddressManager for this platform, #{__FILE__}"
+    puts "NOTE: Can't find AddressManager for this platform, #{__FILE__}"
   end
 end
