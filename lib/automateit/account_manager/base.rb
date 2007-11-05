@@ -50,6 +50,7 @@ class ::AutomateIt::AccountManager::BaseDriver < ::AutomateIt::Plugin::Driver
     end
 
     block.call(username, opts)
+    manager.invalidate(:passwd)
 
     passwd_opts = {:quiet => opts[:quiet]}
     manager.passwd(username, opts[:passwd], passwd_opts) if opts[:passwd]
