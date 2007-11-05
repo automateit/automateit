@@ -1,3 +1,9 @@
+0.71104:
+    Date: Sun, 04 Nov 2007 21:01:10 -0800
+    Desc:
+    - (%) Fixed bugs in startup sequence when run on Microsoft Windows. Added support for Vista.
+    - (%) Fixed bugs encountered on Windows in Plugin::Driver. Dependency checks are now done in specific order and stop as soon as a missing dependency is detected.
+
 0.71103:
     Date: Sat, 03 Nov 2007 01:26:13 -0700
     Desc:
