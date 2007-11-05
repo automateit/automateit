@@ -14,7 +14,7 @@ class ::AutomateIt::AccountManager::PasswdPTY < ::AutomateIt::AccountManager::Ba
     :programs => %w(passwd uname),
     :libraries => %w(open3 expect pty),
     # Something is horribly wrong with Ruby PTY on Sun
-    :callbacks => lambda { `uname -s`.strip !~ /sunos|solaris/i }
+    :callbacks => lambda { `uname -s`.strip !~ /sunos|solaris|openbsd|freebsd/i }
 
   def suitability(method, *args) # :nodoc:
     # Level must be higher than Linux
