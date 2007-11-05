@@ -8,7 +8,7 @@ class AutomateIt::AddressManager::BSD < AutomateIt::AddressManager::BaseDriver
   end
 
   depends_on :programs => %w(ifconfig uname),
-    :callbacks => lambda{`uname -s`.match(/openbsd|freebsd|sunos/i)}
+    :callbacks => lambda{`uname -s 2>&1`.match(/openbsd|freebsd|sunos/i)}
 
   def suitability(method, *args) # :nodoc:
     available? ? 2 : 0

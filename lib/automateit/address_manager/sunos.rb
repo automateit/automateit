@@ -8,10 +8,11 @@ class AutomateIt::AddressManager::SunOS < AutomateIt::AddressManager::BaseDriver
   end
 
   depends_on :programs => %w(ifconfig uname),
-    :callbacks => lambda{`uname -s`.match(/sunos/i)}
+    :callbacks => lambda{`uname -s 2>&1`.match(/sunos/i)}
 
   def suitability(method, *args) # :nodoc:
-    available? ? 2 : 0
+    # Must be higher than AddressManager::BSD 
+    available? ? 3 : 0
   end
 
   # See AddressManager#add

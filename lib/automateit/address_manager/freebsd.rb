@@ -8,10 +8,10 @@ class AutomateIt::AddressManager::FreeBSD < AutomateIt::AddressManager::BaseDriv
   end
 
   depends_on :programs => %w(ifconfig uname),
-    :callbacks => lambda{`uname -s`.match(/freebsd/i)}
+    :callbacks => lambda{`uname -s 2>&1`.match(/freebsd/i)}
 
   def suitability(method, *args) # :nodoc:
-    # Must be higher than ::BSD
+    # Must be higher than AddressManager::BSD
     available? ? 3 : 0
   end
 
