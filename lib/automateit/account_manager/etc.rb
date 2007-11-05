@@ -5,26 +5,17 @@
 # modifications, such as +add_user+. Platform-specific drivers inherit from
 # this class and provide methods that perform modifications.
 class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDriver
-  depends_on :callbacks => [lambda{AutomateIt::AccountManager::Etc.has_etc?}]
+  depends_on :libraries => %w(etc),
+    :callbacks => lambda{
+      begin
+        ! ::Etc.getpwnam(::Etc.getlogin).nil?
+      rescue
+        false
+      end
+    }
 
   def suitability(method, *args) # :nodoc:
-    return 1
-  end
-  
-  # Does this platform provide a way of querying users and groups through 
-  # the 'etc' module?
-  def self.has_etc?
-    begin
-      require 'etc'
-      return defined?(::Etc)
-    rescue LoadError
-      return false
-    end
-  end
-  
-  # Alias for AccountManager::Etc.has_etc?
-  def has_etc?
-    self.class.has_etc?
+    return available? ? 1 : 0
   end
 
   #.......................................................................
@@ -35,13 +26,13 @@ class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDrive
   class UserQuery
     # See AccountManager#users
     def [](query)
-      Etc.endpwent
+      ::Etc.endpwent
       begin
         case query
         when String
-          return Etc.getpwnam(query)
+          return ::Etc.getpwnam(query)
         when Fixnum
-          return Etc.getpwuid(query)
+          return ::Etc.getpwuid(query)
         else
           raise TypeError.new("unknonwn type for query: #{query.class}")
         end
@@ -69,13 +60,13 @@ class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDrive
   class GroupQuery
     # See AccountManager#groups
     def [](query)
-      Etc.endgrent
+      ::Etc.endgrent
       begin
         case query
         when String
-          return Etc.getgrnam(query)
+          return ::Etc.getgrnam(query)
         when Fixnum
-          return Etc.getgrgid(query)
+          return ::Etc.getgrgid(query)
         else
           raise TypeError.new("unknonwn type for query: #{query.class}")
         end
@@ -102,7 +93,7 @@ class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDrive
     username = pwent.name
     result = Set.new
     result << groups[pwent.gid].name if groups[pwent.gid]
-    Etc.group do |grent|
+    ::Etc.group do |grent|
       result << grent.name if grent.mem.include?(username)
     end
     return result.to_a
@@ -117,13 +108,13 @@ class ::AutomateIt::AccountManager::Etc< ::AutomateIt::AccountManager::BaseDrive
   # See AccountManager#users_to_groups
   def users_to_groups
     result = {}
-    Etc.group do |grent|
+    ::Etc.group do |grent|
       grent.mem.each do |username|
         result[username] ||= Set.new
         result[username] << grent.name
       end
     end
-    Etc.passwd do |pwent|
+    ::Etc.passwd do |pwent|
       grent = groups[pwent.gid]
       unless grent
         log.fatal(PNOTE+"WARNING: User's default group doesn't exist: user %s, gid %s" % [pwent.name, pwent.gid])
