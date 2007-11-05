@@ -4,7 +4,8 @@
 # Service Cache Daemon, found on Unix-like systems.
 class ::AutomateIt::AccountManager::NSCD < ::AutomateIt::AccountManager::BaseDriver
   depends_on :programs => %w(nscd ps),
-    :callbacks => [lambda{`ps -ef`.match(%r{/usr/sbin/nscd$})}]
+    # FIXME AccountManager.nscd - "ps -ef" isn't portable, may need to be "ps aux" or such
+    :callbacks => lambda{`ps -ef`.match(%r{/usr/sbin/nscd$})}
 
   def suitability(method, *args) # :nodoc:
     # Level must be higher than Portable
