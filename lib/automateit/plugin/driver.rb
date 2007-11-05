@@ -157,42 +157,55 @@ module AutomateIt
         elsif is_available.nil?
           all_present = true
           missing = {}
-          for kind in opts.keys
-          #IK# for kind in [:files, :directories, :programs, :callbacks, :requires, :libraries]
-            next unless opts[kind]
-            for item in [opts[kind]].flatten
-              present = \
-                case kind
-                when :files
-                  File.exists?(item)
-                when :directories
-                  File.directory?(item)
-                when :programs
-                  # XXX Find less awkward way to check if a program exists. Can't use +shell_manager.which+ because that will use +dispatch+ and go into an infinite loop checking +available?+. The +which+ command isn't available on all platforms, so that failure must be handled as well.
-                  begin
-                    interpreter.shell_manager[:which].which!(item)
-                    true
-                  rescue ArgumentError, NotImplementedError, NoMethodError
-                    false
+
+          # Check callbacks last
+          kinds = opts.keys
+          callbacks = kinds.delete(:callbacks)
+          kinds << callbacks if callbacks
+
+          begin
+            for kind in kinds
+              next unless opts[kind]
+              for item in [opts[kind]].flatten
+                present = \
+                  case kind
+                  when :files
+                    File.exists?(item)
+                  when :directories
+                    File.directory?(item)
+                  when :programs
+                    # XXX Find less awkward way to check if a program exists. Can't use +shell_manager.which+ because that will use +dispatch+ and go into an infinite loop checking +available?+. The +which+ command isn't available on all platforms, so that failure must be handled as well.
+                    begin
+                      interpreter.shell_manager[:which].which!(item)
+                      true
+                    rescue ArgumentError, NotImplementedError, NoMethodError
+                      false
+                    end
+                  when :requires, :libraries
+                    begin
+                      require item
+                      true
+                    rescue LoadError
+                      false
+                    end
+                  when :callbacks
+                    item.call() ? true : false
+                  else
+                    raise TypeError.new("Unknown kind: #{kind}")
                   end
-                when :requires, :libraries
-                  begin
-                    require item
-                    true
-                  rescue LoadError
-                    false
-                  end
-                when :callbacks
-                  item.call() ? true : false
-                else
-                  raise TypeError.new("Unknown kind: #{kind}")
+                unless present
+                  all_present = false
+                  missing[kind] ||= []
+                  missing[kind] << item
+
+                  # Do not continue scanning if dependency is missed
+                  raise EOFError.new("break")
                 end
-              unless present
-                all_present = false
-                missing[kind] ||= []
-                missing[kind] << item
               end
             end
+          rescue EOFError => e
+            # Ignore expected "break" warning
+            raise e unless e.message == "break"
           end
           self.class._missing_dependencies = missing
           self.class._is_available = all_present
