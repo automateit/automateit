@@ -1,7 +1,7 @@
 # == AccountManager::POSIX
 #
 # A POSIX driver for the AccountManager.
-class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Etc
+class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::BaseDriver
   depends_on :programs => %w(useradd usermod userdel groupadd groupmod groupdel)
 
   def suitability(method, *args) # :nodoc:
@@ -121,6 +121,18 @@ class ::AutomateIt::AccountManager::POSIX < ::AutomateIt::AccountManager::Etc
         cmd = "usermod -G #{(user_groups.to_a-[groupname]).join(',')} #{username}"
         interpreter.sh(cmd)
       end
+    end
+  end
+
+  # Dispatch common names to Etc, but don't define these methods here because
+  # that would make available? and suitability think these exist, when in fact,
+  # they're just wrappers.
+  def method_missing(symbol, *args, &block)
+    case symbol
+    when :users, :has_user?, :groups, :has_group?, :groups_for_user, :users_for_group, :users_to_groups
+      manager.send(symbol, *args, &block)
+    else
+      super(symbol, *args, &block)
     end
   end
 end
