@@ -11,8 +11,10 @@
 # changed using the AccountManager::PasswdExpect driver, which works properly.
 class ::AutomateIt::AccountManager::PasswdPTY < ::AutomateIt::AccountManager::BaseDriver
   depends_on \
-    :programs => %w(passwd),
-    :libraries => %w(open3 expect pty)
+    :programs => %w(passwd uname),
+    :libraries => %w(open3 expect pty),
+    # Something is horribly wrong with Ruby PTY on Sun
+    :callbacks => lambda { `uname -s`.strip !~ /sunos|solaris/i }
 
   def suitability(method, *args) # :nodoc:
     # Level must be higher than Linux
