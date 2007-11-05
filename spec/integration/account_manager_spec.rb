@@ -4,7 +4,7 @@ if not INTERPRETER.euid?
   puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
 elsif not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
-elsif not INTERPRETER.account_manager.available?(:users)
+elsif (INTERPRETER.account_manager.available?(:users) && INTERPRETER.account_manager.available?(:add_user)) != true
   puts "NOTE: Can't find AccountManager for this platform, #{__FILE__}"
 else
   describe AutomateIt::AccountManager do
@@ -20,7 +20,7 @@ else
       # Some OSes are limited to 8 character names :(
       @username =  "aitestus"
       @groupname = "aitestgr"
-      @password = "automateit"
+      @password = "WejVotyejik2"
 
       begin
         raise "User named '#{@username}' found. If this isn't a real user, delete it so that the test can contineu. If this is a real user, change the spec to test with a user that shouldn't exist." if @m.users[@username]
@@ -54,7 +54,7 @@ else
       # work around this by using a directory we know can be used
       home = INTERPRETER.tagged?(:sunos) ? "/var/tmp/#{@username}" : nil
 
-      defaults = { :passwd => "asdf", :shell => "/bin/false", :home => home,
+      defaults = { :passwd => "skosk8osWu", :shell => "/bin/false", :home => home,
         :quiet => @quiet }
 
       return @m.add_user(@username, defaults.merge(opts))
@@ -261,12 +261,15 @@ else
     def change_password_with(object)
       add_user if @independent
 
-      # TODO This isn't portable
       def extract_pwent(username)
-        for filename in %w(/etc/shadow /etc/passwd)
+        # TODO Not portable.
+        for filename in %w(/etc/master.passwd /etc/shadow /etc/passwd)
           next unless File.exist?(filename)
           return File.read(filename).split(/\n/).grep(/^#{username}\b/)
         end
+
+        # Fails on SunOS which returns "x"
+        #::Etc.getpwnam(username).passwd
       end
 
       before = extract_pwent(@username)
