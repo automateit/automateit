@@ -4,7 +4,7 @@ if not INTERPRETER.euid?
   puts "NOTE: Can't check 'euid' on this platform, #{__FILE__}"
 elsif not INTERPRETER.superuser?
   puts "NOTE: Must be root to check #{__FILE__}"
-elsif not INTERPRETER.account_manager.available?(:add_user)
+elsif not INTERPRETER.account_manager.available?(:users)
   puts "NOTE: Can't find AccountManager for this platform, #{__FILE__}"
 else
   describe AutomateIt::AccountManager do
@@ -67,12 +67,6 @@ else
     def add_user_with_group
       add_user
       return @m.add_group(@groupname, :members => @username)
-    end
-
-    unless INTERPRETER.tagged?("windows | darwin")
-      it "should have Etc support on Unix-like platforms" do
-        @m.driver_for(:users).should have_etc
-      end
     end
 
     it "should find root user" do
