@@ -29,7 +29,7 @@ send "$password\\r"
 expect eof
           HERE
 
-          cmd = "expect #{filename} #{user} #{password}"
+          cmd = "expect #{filename}"
           cmd << " > /dev/null" if opts[:quiet]
           return(interpreter.sh cmd)
         end
