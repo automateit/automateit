@@ -1,3 +1,12 @@
+0.71105:
+    Date: Mon, 10 Nov 2007 02:50:15 -0800
+    Desc:
+    - (%) Fixed some bugs in AccountManager on Solaris and OpenBSD. 
+    - (%) Improved AccountManager::Etc, it now checks commands directly, rather than using blacklisting, which works better to exclude the changing methods available in Windows and JRuby.
+    - (+) Implemented ShellManager::WhichWindows, simulates the #which command on Windows.
+    - WARNING: AccountManager only works reliably on Linux currently. Solaris fails about 5% of the time because its faulty NSCD daemon doesn't provide a reliable way of synchronously purging stale data. OpenBSD works, but violates POSIX guidelines for adding users to a group or groups to a user, and fails for on these methods. FreeBSD ignores POSIX and will need its own driver.
+    - WARNING: PasswdPTY driver, used for setting and changing passwords, now blacklists Solaris, OpenBSD and FreeBSD because their Ruby PTY drivers are defective. Workaround is to install TCL's "expect" program so AutomateIt can use the reliable PasswdExpect driver instead.
+
 0.71104:
     Date: Sun, 04 Nov 2007 21:01:10 -0800
     Desc:
@@ -62,11 +71,11 @@ Thanks for the report, David Brewer.
 0.71030:
     Date: Tue, 30 Oct 2007 01:43:02 -0700
     Desc:
-    - (%) Fixed bug in AddressManager#add_user when called with multiple groups. Improved AddressManager spec. 
+    - (%) Fixed bug in AddressManager#add_user when called with multiple groups. Improved AddressManager spec.
     - (+) Added documentation to Project explaining how to partition recipes, and run recipes from other recipes.
-    - (+) Added AddressManager::POSIX which provides support for Linux and SunOS, and eliminated the OS-specific drivers for these. 
-    - Added AddressManager::NSCD by extracting methods from old OS-specific drivers. 
-    - Added AddressManager::PasswdExpect which uses Expect for much more reliable password changes. 
+    - (+) Added AddressManager::POSIX which provides support for Linux and SunOS, and eliminated the OS-specific drivers for these.
+    - Added AddressManager::NSCD by extracting methods from old OS-specific drivers.
+    - Added AddressManager::PasswdExpect which uses Expect for much more reliable password changes.
     - Improved AddressManager::PasswdPty by adding retry capability.
 
 0.71021:

@@ -15,12 +15,18 @@ describe AutomateIt::ShellManager, " with sh and which" do
   it_should_behave_like "AutomateIt::ShellManager"
 
   begin
-    INTERPRETER.which("true")
-    INTERPRETER.which("false")
+    if INTERPRETER.tagged?(:windows)
+      it "should run shell commands and detect their exit status (sh)" do
+        @m.sh("dir > nul").should be_true
+      end
+    else
+      INTERPRETER.which!("true")
+      INTERPRETER.which!("false")
 
-    it "should run shell commands and detect their exit status (sh)" do
-      @m.sh("true").should be_true
-      @m.sh("false").should be_false
+      it "should run shell commands and detect their exit status (sh)" do
+        @m.sh("true").should be_true
+        @m.sh("false").should be_false
+      end
     end
   rescue NotImplementedError
     puts "NOTE: Can't check 'sh' on this platform, #{__FILE__}"
@@ -30,7 +36,8 @@ describe AutomateIt::ShellManager, " with sh and which" do
     puts "NOTE: Can't use 'which' on this platform in #{__FILE__}"
   else
     it "should find which program is in the path (which)" do
-      @m.which("sh").match(/.\/sh$/).nil?.should be_false
+      cmd = "ruby"
+      @m.which(cmd).match(/#{cmd}/).nil?.should be_false
     end
 
     it "should not find programs that aren't in the path (which)" do
