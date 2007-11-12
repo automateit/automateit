@@ -83,7 +83,7 @@ end
 namespace :loc do
   desc "Display lines of code using loccount"
   task :count do
-    sh "loccount bin/* lib/ spec/ examples/ *.rake"
+    sh "loccount helpers/* bin/* lib/ spec/ examples/ *.rake"
   end
 
   desc "Display the lines of code changed in the repository"
@@ -103,7 +103,7 @@ namespace :loc do
 
   desc "Display lines of code based on sloccount"
   task :sloc do
-    sh "sloccount lib spec misc examples bin"
+    sh "sloccount lib spec misc examples bin helpers"
   end
 end
 
