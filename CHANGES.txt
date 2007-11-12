@@ -1,11 +1,9 @@
-0.71105:
-    Date: Mon, 10 Nov 2007 02:50:15 -0800
+0.71111:
+    Date: Sun, 11 Nov 2007 06:06:27 -0800
     Desc:
-    - (%) Fixed some bugs in AccountManager on Solaris and OpenBSD. 
-    - (%) Improved AccountManager::Etc, it now checks commands directly, rather than using blacklisting, which works better to exclude the changing methods available in Windows and JRuby.
-    - (+) Implemented ShellManager::WhichWindows, simulates the #which command on Windows.
-    - WARNING: AccountManager only works reliably on Linux currently. Solaris fails about 5% of the time because its faulty NSCD daemon doesn't provide a reliable way of synchronously purging stale data. OpenBSD works, but violates POSIX guidelines for adding users to a group or groups to a user, and fails for on these methods. FreeBSD ignores POSIX and will need its own driver.
-    - WARNING: PasswdPTY driver, used for setting and changing passwords, now blacklists Solaris, OpenBSD and FreeBSD because their Ruby PTY drivers are defective. Workaround is to install TCL's "expect" program so AutomateIt can use the reliable PasswdExpect driver instead.
+    - (+) Improved AccountManager::Etc detection logic, it now tries to run commands rather than relying on blacklists. This better supports Windows and JRuby.
+    - (+) Added ShellManager::WhichWindows, it simulates the #which command on Windows.
+    - WARNING: AccountManager::POSIX#add_groups_to_user and add_users_to_group
 
 0.71104:
     Date: Sun, 04 Nov 2007 21:01:10 -0800

@@ -3,11 +3,12 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 #===[ App ]=============================================================
 
 #---[ Quality issues ]--------------------------------------------------
-!!! AccountManager -- Solaris still fails randomly.
+!!! ServiceManager -- Create new #stop_and_start, and add new #restart as #tell wrapper
+111 ServiceManager -- Write tests for start_and_enable and such
+
+!!! AccountManager -- Solaris fails 5% of the time on the last spec.
 !!! AccountManager -- OpenBSD stalls if it thinks a password's quality sucks.
 !!! AccountManager -- OpenBSD fails "should add groups to a user" and "should add users to group"
-!!! ServiceManager -- Create new #stop_and_start, and #restart as #tell wrapper
-111 ServiceManager -- Write tests for start_and_enable and such
 111 PackageManager -- Improve PEAR spec by having it check files with and without channel URL
 111 AccountManager::NSCD -- Uses "ps -ef", needs abstraction
 
