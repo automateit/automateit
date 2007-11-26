@@ -24,6 +24,7 @@ end
 
 # Run rspec on the +files+
 def specify(*files)
+  require 'rubygems'
   require 'spec/rake/spectask'
   Spec::Rake::SpecTask.new(:spec_internal) do |t|
     t.rcov = @rcov
