@@ -25,75 +25,75 @@ describe "AutomateIt::TagManager", :shared => true do
   end
 
   it "should have tag for short hostname" do
-    @a.tagged?("kurou").should be_true
+    @a.should be_tagged("kurou")
   end
 
   it "should have tag for long hostname" do
-    @a.tagged?("kurou.foo").should be_true
+    @a.should be_tagged("kurou.foo")
   end
 
   it "should have tag for OS" do
-    @a.tagged?("mizrahi").should be_true
+    @a.should be_tagged("mizrahi")
   end
 
   it "should have tag for OS/arch" do
-    @a.tagged?("mizrahi_realian").should be_true
+    @a.should be_tagged("mizrahi_realian")
   end
 
   it "should have tag for distro/release" do
-    @a.tagged?("momo_s100").should be_true
+    @a.should be_tagged("momo_s100")
   end
 
   it "should have tag for a role" do
-    @a.tagged?("apache_servers").should be_true
+    @a.should be_tagged("apache_servers")
   end
 
   it "should match a symbol query" do
-    @a.tagged?(:apache_servers).should be_true
+    @a.should be_tagged(:apache_servers)
   end
 
   it "should match a string query" do
-    @a.tagged?("apache_servers").should be_true
+    @a.should be_tagged("apache_servers")
   end
 
   it "should not match unknown symbol keys" do
-    @a.tagged?(:foo).should be_false
+    @a.should_not be_tagged(:foo)
   end
 
   it "should not match unknown string keys" do
-    @a.tagged?("foo").should be_false
+    @a.should_not be_tagged("foo")
   end
 
   it "should match an AND query" do
-    @a.tagged?("kurou && apache_servers").should be_true
+    @a.should be_tagged("kurou && apache_servers")
   end
 
   it "should match an OR query" do
-    @a.tagged?("kurou || apache_servers").should be_true
+    @a.should be_tagged("kurou || apache_servers")
   end
 
   it "should match a grouped AND and OR query" do
-    @a.tagged?("(kurou || apache_servers) && momo_s100").should be_true
+    @a.should be_tagged("(kurou || apache_servers) && momo_s100")
   end
 
   it "should not match AND with unknown keys" do
-    @a.tagged?("kurou && foo").should be_false
+    @a.should_not be_tagged("kurou && foo")
   end
 
   it "should not match OR with unknown keys" do
-    @a.tagged?("foo && bar").should be_false
+    @a.should_not be_tagged("foo && bar")
   end
 
   it "should query tags for a specific host" do
-    @a.tagged?("proxy_servers", "kurou").should be_false
-    @a.tagged?("proxy_servers", "akane.foo").should be_true
-    @a.tagged?("proxy_servers", "akane").should be_true
+    @a.should_not be_tagged("proxy_servers", "kurou")
+    @a.should be_tagged("proxy_servers", "akane.foo")
+    @a.should be_tagged("proxy_servers", "akane")
   end
 
   it "should append tags" do
-    @a.tagged?("magic").should be_false
+    @a.should_not be_tagged("magic")
     @a.tags << "magic"
-    @a.tagged?("magic").should be_true
+    @a.should be_tagged("magic")
   end
 
   it "should find tags with dashes in the name" do
@@ -102,8 +102,8 @@ describe "AutomateIt::TagManager", :shared => true do
 
     @a.tags << tag_with_dash << tag_without_dash
 
-    @a.tagged?(tag_with_dash).should be_true
-    @a.tagged?(tag_without_dash).should be_true
+    @a.should be_tagged(tag_with_dash)
+    @a.should be_tagged(tag_without_dash)
   end
 
   it "should find tags for a host using an array" do
@@ -122,9 +122,9 @@ describe "AutomateIt::TagManager", :shared => true do
   end
 
   it "should find using negative queries" do
-    @a.tagged?("akane").should be_false
-    @a.tagged?("!akane").should be_true
-    @a.tagged?("!akane && !proxy_servers").should be_true
+    @a.should_not be_tagged("akane")
+    @a.should be_tagged("!akane")
+    @a.should be_tagged("!akane && !proxy_servers")
   end
 
   it "should include group aliases" do
@@ -140,11 +140,11 @@ describe "AutomateIt::TagManager", :shared => true do
   end
 
   it "should match tags with dashes" do
-    @a.tagged?("apache-servers-using-dashes").should be_true
+    @a.should be_tagged("apache-servers-using-dashes")
   end
 
   it "should include groups with dashes" do
-    @a.tagged?("apache-servers-using-dashes-include").should be_true
+    @a.should be_tagged("apache-servers-using-dashes-include")
   end
 end
 
@@ -271,7 +271,6 @@ describe "AutomateIt::TagManager::YAML", "with no leaves" do
   end
 
   it "should tolerate empty leaves" do
-    @a.tagged?("apache_servers").should be_false
+    @a.should_not be_tagged("apache_servers")
   end
 end
-
