@@ -15,6 +15,7 @@ $:.unshift '~/rubygems' if File.exist? "~/rubygems"
 
 require 'optparse'
 require 'rubygems'
+require 'rubygems/format' #IK# Fix for RubyGems 0.9.5
 require 'zlib'
 require 'digest/sha2'
 begin
