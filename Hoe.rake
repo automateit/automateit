@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'hoe'
 
 $LOAD_PATH.unshift('lib')
