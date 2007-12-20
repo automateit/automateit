@@ -1,7 +1,10 @@
 0.71219:
     Date: Wed, 19 Dec 2007 22:00:59 -0800
     Desc:
-    - (%) Fixed gem installation problem. The latest ActiveSupport gem doesn't install the Builder gem, so AutomateIt now installs this gem itself.
+    - Created a bunch of workarounds needed because of bugs and backwards incompatible changes in new versions of third-party libraries...
+    - (%) Fixed "gem install automateit". Created workaround for new ActiveSupport bug which doesn't install the Builder gem. 
+    - (%) Fixed "rake regem" which generates the AutomateIt gem. Created workaround for new RubyGems bug which no longer installs the necessary Gem::Format dependency. Created workaround for new Rake bug which causes FileList to act like a string instead of an array. Created workaround for new Rake/RubyGems bugs that don't load 'rubygems' by default.
+    - Improved PasswdExpect, no longer passing username/password on command-line to improve security.
 
 0.71112:
     Date: Mon, 12 Nov 2007 09:51:31 -0800
