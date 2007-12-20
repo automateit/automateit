@@ -3,6 +3,10 @@ module AutomateIt # :nodoc:
   #
   # Various constants.
   module AutomateIt::Constants
+    INSTALL_DIR = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
+    
+    HELPERS_DIR = File.join(INSTALL_DIR, "helpers")
+
     # Output prefix for command execution, e.g., "** ls -la"
     PEXEC = "** "
 

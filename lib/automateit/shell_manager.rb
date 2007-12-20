@@ -267,30 +267,6 @@ end
 #
 # Base class for all ShellManager drivers.
 class AutomateIt::ShellManager::BaseDriver < AutomateIt::Plugin::Driver
-  def _replace_owner_with_user(opts)
-    value = opts.delete(:owner)
-    opts[:user] = value  if value and not opts[:user]
-    return opts
-  end
-  protected :_replace_owner_with_user
-
-  # Returns hash of verbosity and preview settings for FileUtils commands.
-  def _fileutils_opts
-    opts = {}
-    opts[:verbose] = false # Generate our own log messages
-    opts[:noop] = true if preview?
-    return opts
-  end
-  protected :_fileutils_opts
-
-  # Return array of all the directory's top-level contents, including hidden
-  # files with "." prefix on UNIX. Directories are returned just as a name,
-  # you'll need to expand those separately if needed.
-  def _directory_contents(directory)
-    return Dir[directory+"/{,.}*"].reject{|t| t =~ /(^|#{File::SEPARATOR})\.{1,2}$/}
-  end
-  protected :_directory_contents
-
   # Returns derived filename to use as a peer given the +source+ and +target+.
   # This is necessary for differentiating between directory and file targets.
   #
@@ -304,11 +280,37 @@ class AutomateIt::ShellManager::BaseDriver < AutomateIt::Plugin::Driver
   def peer_for(source, target)
     return FileUtils.send(:fu_each_src_dest0, source, target){|a, b| b}
   end
+
+protected
+  def _replace_owner_with_user(opts)
+    value = opts.delete(:owner)
+    opts[:user] = value  if value and not opts[:user]
+    return opts
+  end
+
+  # Returns hash of verbosity and preview settings for FileUtils commands.
+  def _fileutils_opts
+    opts = {}
+    opts[:verbose] = false # Generate our own log messages
+    opts[:noop] = true if preview?
+    return opts
+  end
+
+  # Return array of all the directory's top-level contents, including hidden
+  # files with "." prefix on UNIX. Directories are returned just as a name,
+  # you'll need to expand those separately if needed.
+  def _directory_contents(directory)
+    return Dir[directory+"/{,.}*"].reject{|t| t =~ /(^|#{File::SEPARATOR})\.{1,2}$/}
+  end
 end
 
 # Drivers
 require 'automateit/shell_manager/portable'
-require 'automateit/shell_manager/which'
+
+require 'automateit/shell_manager/which_base'
+require 'automateit/shell_manager/which_unix'
+require 'automateit/shell_manager/which_windows'
+
 require 'automateit/shell_manager/base_link'
 require 'automateit/shell_manager/symlink'
 require 'automateit/shell_manager/link'

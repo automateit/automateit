@@ -1,3 +1,20 @@
+0.71219:
+    Date: Wed, 19 Dec 2007 22:00:59 -0800
+    Desc:
+    - (%) Fixed gem installation problem. The latest ActiveSupport gem doesn't install the Builder gem, so AutomateIt now installs this gem itself.
+
+0.71112:
+    Date: Mon, 12 Nov 2007 09:51:31 -0800
+    Desc:
+    - (%) Fixed ShellManager::WhichWindows#which, forgot to include helper file in gem.
+
+0.71111:
+    Date: Sun, 11 Nov 2007 06:06:27 -0800
+    Desc:
+    - (+) Improved AccountManager::Etc detection logic, it now tries to run commands rather than relying on blacklists. This better supports Windows and JRuby.
+    - (+) Added ShellManager::WhichWindows, it simulates the #which command on Windows.
+    - WARNING: AccountManager::POSIX#add_groups_to_user and add_users_to_group
+
 0.71104:
     Date: Sun, 04 Nov 2007 21:01:10 -0800
     Desc:
@@ -62,11 +79,11 @@ Thanks for the report, David Brewer.
 0.71030:
     Date: Tue, 30 Oct 2007 01:43:02 -0700
     Desc:
-    - (%) Fixed bug in AddressManager#add_user when called with multiple groups. Improved AddressManager spec. 
+    - (%) Fixed bug in AddressManager#add_user when called with multiple groups. Improved AddressManager spec.
     - (+) Added documentation to Project explaining how to partition recipes, and run recipes from other recipes.
-    - (+) Added AddressManager::POSIX which provides support for Linux and SunOS, and eliminated the OS-specific drivers for these. 
-    - Added AddressManager::NSCD by extracting methods from old OS-specific drivers. 
-    - Added AddressManager::PasswdExpect which uses Expect for much more reliable password changes. 
+    - (+) Added AddressManager::POSIX which provides support for Linux and SunOS, and eliminated the OS-specific drivers for these.
+    - Added AddressManager::NSCD by extracting methods from old OS-specific drivers.
+    - Added AddressManager::PasswdExpect which uses Expect for much more reliable password changes.
     - Improved AddressManager::PasswdPty by adding retry capability.
 
 0.71021:

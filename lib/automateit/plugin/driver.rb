@@ -174,13 +174,21 @@ module AutomateIt
                   when :directories
                     File.directory?(item)
                   when :programs
-                    # XXX Find less awkward way to check if a program exists. Can't use +shell_manager.which+ because that will use +dispatch+ and go into an infinite loop checking +available?+. The +which+ command isn't available on all platforms, so that failure must be handled as well.
-                    begin
-                      interpreter.shell_manager[:which].which!(item)
-                      true
-                    rescue ArgumentError, NotImplementedError, NoMethodError
-                      false
+                    # TODO Driver#available? - Find better way to locate the platform's #which driver and use it to check if a program exists. This is tricky because this #available? method is the one that handles detection, yet we have to bypass it.
+                    result = nil
+                    for variant in %w(unix windows)
+                      variant_token = "which_#{variant}".to_sym
+                      begin
+                        driver = interpreter.shell_manager[variant_token]
+                        result = driver.which!(item)
+                        ### puts "%s : %s for %s" % [variant, result, item]
+                        break
+                      rescue ArgumentError, NotImplementedError, NoMethodError => e
+                        # Exceptions are expected, only print for debugging
+                        ### puts e.inspect
+                      end
                     end
+                    result
                   when :requires, :libraries
                     begin
                       require item
