@@ -24,7 +24,8 @@ Hoe.new("AutomateIt", AutomateIt::VERSION.to_s) do |s|
   s.changes = s.paragraphs_of('CHANGES.txt', 0).join("\n")
   s.description = slogan
   s.email = "igal@pragmaticraft.com"
-  s.extra_deps = [["activesupport", ">= 1.4"], ["open4", ">= 0.9"]]
+  # TODO Remove dependency on activesupport and builder
+  s.extra_deps = [["activesupport", ">= 1.4"], ["builder", ">= 2.0"], ["open4", ">= 0.9"]]
   s.name = "automateit"
   s.summary = slogan
   s.url = "http://automateit.org/"
