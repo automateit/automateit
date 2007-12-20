@@ -112,18 +112,24 @@ task :loc => ["loc:count", "loc:diff", "loc:churn", "loc:sloc"]
 
 #---[ RubyGems ]--------------------------------------------------------
 
+ARCHIVE_PATH = "../gem_archive"
 desc "Regenerate Gem"
 task :regem do
-  archive_path = "../gem_archive"
-  has_archive = File.directory?(archive_path)
-  puts "WARNING: Archive of previously released gems at '#{archive_path}' is not available, do not upload without these." unless has_archive
+  has_archive = File.directory?(ARCHIVE_PATH)
+  puts "WARNING: Archive of previously released gems at '#{ARCHIVE_PATH}' is not available, do not upload without these." unless has_archive
   rm_r Dir["pkg/*"]
   mkdir_p "pkg/pub/gems"
-  cp FileList["#{archive_path}/*.gem"], "pkg/pub/gems", :preserve => true if has_archive and not Dir["#{archive_path}/*.gem"].empty?
+  cp FileList["#{ARCHIVE_PATH}/*.gem"], "pkg/pub/gems", :preserve => true if has_archive and not Dir["#{ARCHIVE_PATH}/*.gem"].empty?
   Rake::Task[:gem].invoke
   cp Dir["pkg/*.gem"], "pkg/pub/gems", :preserve => true
-  cp Dir["pkg/*.gem"], "#{archive_path}", :preserve => true if has_archive
+  cp Dir["pkg/*.gem"], "#{ARCHIVE_PATH}", :preserve => true if has_archive
   sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb" if has_archive
+end
+
+desc "Populate gem_archive"
+task :download_gem_archive do
+  mkdir_p ARCHIVE_PATH unless File.exist?(ARCHIVE_PATH)
+  sh "rsync -cvaxz igal@pythia.kattare.com:automateit_org/pub/gems/ #{ARCHIVE_PATH}"
 end
 
 desc "Generate manifest"
