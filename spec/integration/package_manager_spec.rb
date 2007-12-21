@@ -90,7 +90,7 @@ else
     :egg => "_sre.py", # Slower reimplementation of ancient Python Regexps
     :pear => "File_DICOM", # Obscure package for DICOM X-rays, abandoned in 2003
     :pecl => "ecasound", # Obscure package for Ecasound libs, abandoned in 2003
-    ### :cpan => "Acme::please", # Insane gimmick port of intercal's please statements
+    :cpan => "Acme::please", # Insane gimmick port of intercal's please statements
   }
 
   if INTERPRETER.tagged?(:centos)

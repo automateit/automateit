@@ -1,8 +1,16 @@
+0.71220:
+    Date: Thu, 20 Dec 2007 23:36:05 -0800
+    Desc:
+    - (+) Added PackageManager::CPAN for managing Perl packages. Thanks go out to Jesse Hallett for assisting me with research on how to use the CPAN APIs.
+    - Fixed PackageManager#install when called with a single Symbol argument.
+    - Added PackageManager::DPKG for local installation of .deb packages. Added logic to help it install a hash of package names to file names. Added spec to validate this.
+    - Refactored PackageManager::APT to defer to PackageManager::DPKG's logic when possible.
+
 0.71219:
     Date: Wed, 19 Dec 2007 22:00:59 -0800
     Desc:
     - Created a bunch of workarounds needed because of bugs and backwards incompatible changes in new versions of third-party libraries...
-    - (%) Fixed "gem install automateit". Created workaround for new ActiveSupport bug which doesn't install the Builder gem. 
+    - (%) Fixed "gem install automateit". Created workaround for new ActiveSupport bug which doesn't install the Builder gem.
     - (%) Fixed "rake regem" which generates the AutomateIt gem. Created workaround for new RubyGems bug which no longer installs the necessary Gem::Format dependency. Created workaround for new Rake bug which causes FileList to act like a string instead of an array. Created workaround for new Rake/RubyGems bugs that don't load 'rubygems' by default.
     - Improved PasswdExpect, no longer passing username/password on command-line to improve security.
 

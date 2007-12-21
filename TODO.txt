@@ -5,12 +5,14 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 #---[ Quality issues ]--------------------------------------------------
 !!! ServiceManager -- Create new #stop_and_start, and add new #restart as #tell wrapper
 111 ServiceManager -- Write tests for start_and_enable and such
-
 !!! AccountManager -- Solaris fails 5% of the time on the last spec.
 !!! AccountManager -- OpenBSD stalls if it thinks a password's quality sucks.
 !!! AccountManager -- OpenBSD fails "should add groups to a user" and "should add users to group"
 111 PackageManager -- Improve PEAR spec by having it check files with and without channel URL
 111 AccountManager::NSCD -- Uses "ps -ef", needs abstraction
+
+#---[ Design issues ]---------------------------------------------------
+111 PackageManager -- What's a reasonable way to leave out the ':with' option when using a hash argument to install? E.g.,  sudo ai -e "package_manager.install({'swiftfox-prescott' => '/tmp/swiftfox_3.0b3pre-1_prescott.deb'}, :with => :dpkg)"
 
 #---[ Development ]-----------------------------------------------------
 111 Shell -- Write #su(user, *command) as a wrapper around #sh
