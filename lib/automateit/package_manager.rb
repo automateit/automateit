@@ -203,7 +203,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
       case packages
       when Symbol
         nitpick "LN Sy"
-        packages = packages.to_s
+        packages = [packages.to_s]
       when String
         nitpick "LN Ss"
         packages = packages.grep(LIST_NORMALIZER_RE).join(" ").split
@@ -237,6 +237,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 end
 
 # Drivers
+require 'automateit/package_manager/dpkg'
 require 'automateit/package_manager/apt'
 require 'automateit/package_manager/yum'
 require 'automateit/package_manager/gem'
@@ -244,3 +245,4 @@ require 'automateit/package_manager/egg'
 require 'automateit/package_manager/portage'
 require 'automateit/package_manager/pear'
 require 'automateit/package_manager/pecl'
+require 'automateit/package_manager/cpan'
