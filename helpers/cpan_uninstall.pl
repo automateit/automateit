@@ -58,5 +58,6 @@ foreach my $module (@modules) {
 
   my $packlist = $packlists->packlist($module)->packlist_file();
   print "- List: $packlist\n" unless $quiet;
-  nuke $packlist;
+  # NOTE: Leave packlist alone so it can be uninstalled if something goes catastrophically wrong with this uninstaller.
+  #IK# nuke $packlist;
 }
