@@ -5,10 +5,6 @@
 class AutomateIt::PackageManager::DPKG < AutomateIt::PackageManager::BaseDriver
   depends_on :programs => %w(dpkg)
 
-  def suitability(method, *args) # :nodoc:
-    return available? ? 1 : 0
-  end
-
   # See AutomateIt::PackageManager#installed?
   def installed?(*packages)
     return _installed_helper?(*packages) do |list, opts|

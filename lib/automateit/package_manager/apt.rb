@@ -5,6 +5,10 @@
 class AutomateIt::PackageManager::APT < AutomateIt::PackageManager::DPKG
   depends_on :programs => %w(apt-get dpkg)
 
+  def suitability(method, *args) # :nodoc:
+    return available? ? 1 : 0
+  end
+
   # See AutomateIt::PackageManager#install
   def install(*packages)
     return _install_helper(*packages) do |list, opts|
