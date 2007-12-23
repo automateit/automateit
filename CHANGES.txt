@@ -1,3 +1,9 @@
+0.71221:
+    Date: Sun, 23 Dec 2007 00:48:30 -0800
+    Desc:
+    - (%) Fixed PackageManager::APT driver. In 0.71220, the DPKG driver was selected as the default driver over APT. The fix chooses APT as the default over DPKG, like before.
+    - Fixed Rakefile to work with latest version of RubyGems.
+
 0.71220:
     Date: Thu, 20 Dec 2007 23:36:05 -0800
     Desc:
