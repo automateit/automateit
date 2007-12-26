@@ -14,14 +14,8 @@ unless ($#modules >= 0) {
 my @available;
 my @unavailable;
 foreach my $module (@modules) {
-  if (my $module_ref = CPAN::Shell->expand('Module', $module)) {
-    my $path = $module_ref->inst_file;
-    if ($path && -e $path) {
-      #IK# print $module_ref->inst_file, "\n";
-      push(@available, $module);
-    } else {
-      push(@unavailable, $module);
-    }
+  if ($CPAN::META->has_inst($module)) {
+    push(@available, $module);
   } else {
     #IK# die "Can't find module: $module";
     push(@unavailable, $module);
