@@ -3,7 +3,9 @@
 # Example: ./is_available.pl Acme::please CPAN
 
 use warnings "all";
-use CPAN;
+use File::Basename;
+my $wrapper = dirname($0)."/cpan_wrapper.pl";
+require $wrapper;
 
 @modules = @ARGV;
 unless ($#modules >= 0) {
@@ -14,10 +16,9 @@ unless ($#modules >= 0) {
 my @available;
 my @unavailable;
 foreach my $module (@modules) {
-  if ($CPAN::META->has_inst($module)) {
+  if (CpanWrapper->is_installed($module)) {
     push(@available, $module);
   } else {
-    #IK# die "Can't find module: $module";
     push(@unavailable, $module);
   }
 }
