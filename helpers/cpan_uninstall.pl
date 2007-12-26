@@ -2,6 +2,11 @@
 
 # Example: ./uninstall.pl Acme::please
 
+use warnings "all";
+use File::Basename;
+my $wrapper = dirname($0)."/cpan_wrapper.pl";
+require $wrapper;
+
 sub usage {
   my($message) = @_;
   print <<EOB;
@@ -15,11 +20,7 @@ EOB
   }
 }
 
-use warnings "all";
-use ExtUtils::Packlist;
-use ExtUtils::Installed;
 use Getopt::Long;
-
 our $quiet = 0;
 our $dryrun = 0;
 our $help = 0;
@@ -39,25 +40,19 @@ unless ($#modules >= 0) {
   usage "No modules specified";
 }
 
-sub nuke {
-  my($target) = @_;
-  if ($dryrun == 0) {
-    unlink($target) || die "$! -- $target"
-  }
-}
-
-my $packlists = ExtUtils::Installed->new();
+$CpanWrapper::DRYRUN = $dryrun;
+if (0 && $CpanWrapper::DRYRUN) { die } # Squelch warnings
 
 foreach my $module (@modules) {
-  print "* Uninstalling module: $module\n" unless $quiet;
-
-  foreach my $item ($packlists->files($module)) {
-    print "- File: $item\n" unless $quiet;
-    nuke $item;
+  unless (CpanWrapper->is_installed($module)) {
+    print "! Module isn't installed: $module\n";
+    next;
   }
 
-  my $packlist = $packlists->packlist($module)->packlist_file();
-  print "- List: $packlist\n" unless $quiet;
-  # NOTE: Leave packlist alone so it can be uninstalled if something goes catastrophically wrong with this uninstaller.
-  #IK# nuke $packlist;
+  print "* Uninstalling module: $module\n" unless $quiet;
+
+  my(@files) = CpanWrapper->uninstall($module);
+  foreach my $file (@files) {
+    print "- File: $file\n" unless $quiet;
+  }
 }

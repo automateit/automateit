@@ -1,3 +1,8 @@
+0.71226:
+    Date: Wed, 26 Dec 2007 11:41:03 -0800
+    Desc:
+    - (%) Fixed PackageManager::CPAN driver. It now provides a workaround to activate CPAN if it wasn't already configured, previously it'd hang as CPAN tried to get input. It now provides a workaround for rejecting all CPAN inputs because the CPAN default options are surprisingly dangerous. It now tries harder to execute the Perl helper files, previously these wouldn't be executed on some OSes. The helpers' core logic has been abstracted into a wrapper library.
+
 0.71221:
     Date: Sun, 23 Dec 2007 00:48:30 -0800
     Desc:

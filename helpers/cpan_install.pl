@@ -2,6 +2,11 @@
 
 # Example: ./install.pl Acme::please
 
+use warnings "all";
+use File::Basename;
+my $wrapper = dirname($0)."/cpan_wrapper.pl";
+require $wrapper;
+
 sub usage {
   my($message) = @_;
   print <<EOB;
@@ -15,10 +20,7 @@ EOB
   }
 }
 
-use warnings "all";
-use CPAN;
 use Getopt::Long;
-
 our $quiet = 0;
 our $dryrun = 0;
 our $help = 0;
@@ -38,10 +40,18 @@ unless ($#modules >= 0) {
   usage "No modules specified";
 }
 
+$CpanWrapper::DRYRUN = $dryrun;
+if (0 && $CpanWrapper::DRYRUN) { die } # Squelch warnings
+
+# Uninstall modules
 foreach my $module (@modules) {
-  if (my $module_ref = CPAN::Shell->expand('Module', $module)) {
-    print "* Installing: $module\n" unless $quiet;
-    $module_ref->install unless $dryrun;
+  if (CpanWrapper->is_installed($module)) {
+    print "! Module already installed: $module\n";
+    next;
+  }
+
+  if (CpanWrapper->install($module)) {
+    print "* Installed: $module\n" unless $quiet;
   } else {
     print "! Can't find CPAN module: $module\n";
     exit 1
