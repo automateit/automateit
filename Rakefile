@@ -243,7 +243,7 @@ namespace :rdoc do
   desc "Generate documentation"
   task :make do
     # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-    sh "rdoc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt: Open source server automation' lib docs/*.txt README.txt TUTORIAL.txt TESTING.txt"
+    sh "rdoc --template=jamis --main ./README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt: Open source server automation' lib docs/*.txt README.txt TUTORIAL.txt TESTING.txt"
     # Create a tutorial index
     File.open("doc/tutorial.html", "w+") do |writer|
       writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
