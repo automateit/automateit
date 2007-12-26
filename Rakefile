@@ -243,7 +243,7 @@ namespace :rdoc do
   desc "Generate documentation"
   task :make do
     # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-    sh "rdoc --template=jamis --main ./README.txt --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt: Open source server automation' lib docs/*.txt README.txt TUTORIAL.txt TESTING.txt"
+    sh "rdoc --op doc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --inline-source --line-numbers --title 'AutomateIt: Open source server automation' README.txt TUTORIAL.txt TESTING.txt lib docs/*.txt"
     # Create a tutorial index
     File.open("doc/tutorial.html", "w+") do |writer|
       writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
@@ -297,7 +297,14 @@ namespace :rdoc do
   end
 end
 
-task :rdoc => ["rdoc:make", "rdoc:rewrite"]
+desc "Generate Rdoc"
+task :rdoc do
+  # TODO Something is broke in rdoc recently. It decides to only generate rdocs for newer files, which is very bad because if you re-run "rdoc" without deleting the "doc" directory, it'll can end up creating a set of documentation that only contains the single file you changed. This sucks. 
+  sh "rm -rf doc" if File.exist?("doc")
+
+  Rake::Task["rdoc:make"].invoke
+  Rake::Task["rdoc:rewrite"].invoke
+end
 
 desc "List aliased_methods for inclusion into rdoc"
 task :aliased_methods do
