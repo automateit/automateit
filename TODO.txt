@@ -12,9 +12,12 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 111 AccountManager::NSCD -- Uses "ps -ef", needs abstraction
 
 #---[ Design issues ]---------------------------------------------------
-111 PackageManager -- What's a reasonable way to leave out the ':with' option when using a hash argument to install? E.g.,  sudo ai -e "package_manager.install({'swiftfox-prescott' => '/tmp/swiftfox_3.0b3pre-1_prescott.deb'}, :with => :dpkg)"
+??? PackageManager -- How to specify interpreter? E.g. reuse CPAN driver's approach?
+??? PackageManager -- How to have driver check against instance variables, such as the particular interpreter requested? Needed to work around things like 'gem1.8', 'python2.5.1' and '/usr/local/bin/perl'.
+??? PackageManager -- What's a reasonable way to leave out the ':with' option when using a hash argument to install? E.g.,  sudo ai -e "package_manager.install({'swiftfox-prescott' => '/tmp/swiftfox_3.0b3pre-1_prescott.deb'}, :with => :dpkg)"
 
 #---[ Development ]-----------------------------------------------------
+111 Shell or ServiceManager -- Add pgrep/pmatch methods and import them
 111 Shell -- Write #su(user, *command) as a wrapper around #sh
 101 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
 100 Edit -- Display summary of edits, return with :details as [rv, list]
