@@ -6,6 +6,7 @@
     - (%) Fixed PlatformManager::LSB, it no longer convers OS release versions like "7.10" into "7.1".
     - (%) Fixed "aitags" with "--tags" options, it now returns a sorted array.
     - (%) Fixed case/when statements to work with Ruby 1.9.
+    - (%) Fixed TemplateManager#render, it now only runs file-related checks when rendering to a file.
     - Improved PackageManager::CPAN's "cpan_wrapper.pl". It's now just a single file that can be used as both a command and library.
     - Improved EditManager. In preview mode, it now checks to make sure the file is readable rather than failing due to permission denied errors.
 

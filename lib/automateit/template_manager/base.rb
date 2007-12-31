@@ -99,22 +99,24 @@ protected
       target_exists = target_filename && _exists?(target_filename)
       updates = []
 
-      unless opts[:force]
-        case opts[:check]
-        when :exists
-          if target_exists
-            log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because it already exists")
-            return false
-          else
-            log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
-          end
-        when :timestamp
-          if target_exists
-            updates = _newer(target_filename, \
-                *[source_filename, opts[:dependencies]].reject{|t| t.nil?}.flatten)
-            if updates.empty?
-              log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because dependencies haven't been updated")
+      if target_filename
+        unless opts[:force]
+          case opts[:check]
+          when :exists
+            if target_exists
+              log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because it already exists")
               return false
+            else
+              log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
+            end
+          when :timestamp
+            if target_exists
+              updates = _newer(target_filename, \
+                  *[source_filename, opts[:dependencies]].reject{|t| t.nil?}.flatten)
+              if updates.empty?
+                log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because dependencies haven't been updated")
+                return false
+              end
             end
           end
         end
@@ -151,18 +153,20 @@ protected
       }
       output = block.call(block_opts)
 
-      case opts[:check]
-      when :compare
-        if not target_exists
-          log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
-        elsif output == target_contents
-          log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because contents are the same")
-          return false
-        else
-          log.info(PNOTE+"Rendering '#{target_filename}' because its contents changed")
+      if target_filename
+        case opts[:check]
+        when :compare
+          if not target_exists
+            log.info(PNOTE+"Rendering '#{target_filename}' because of it doesn't exist")
+          elsif output == target_contents
+            log.debug(PNOTE+"Rendering for '#{target_filename}' skipped because contents are the same")
+            return false
+          else
+            log.info(PNOTE+"Rendering '#{target_filename}' because its contents changed")
+          end
+        when :timestamp
+          log.info(PNOTE+"Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
         end
-      when :timestamp
-        log.info(PNOTE+"Rendering '#{target_filename}' because of updated: #{updates.join(' ')}")
       end
 
       _backup(target_filename) if target_exists and opts[:backup]
