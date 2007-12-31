@@ -16,9 +16,7 @@
 #   package_manager[:cpan].setup(:perl => "/usr/local/bin/perl")
 #   package_manager.install %w(File::Next App::Ack), :with => :cpan
 class ::AutomateIt::PackageManager::CPAN < ::AutomateIt::PackageManager::BaseDriver
-  CPAN_INSTALL = File.join(::AutomateIt::Constants::HELPERS_DIR, "cpan_install.pl")
-  CPAN_UNINSTALL = File.join(::AutomateIt::Constants::HELPERS_DIR, "cpan_uninstall.pl")
-  CPAN_IS_INSTALLED = File.join(::AutomateIt::Constants::HELPERS_DIR, "cpan_is_installed.pl")
+  CPAN_WRAPPER = File.join(::AutomateIt::Constants::HELPERS_DIR, "cpan_wrapper.pl")
 
   # Path to Perl interpreter
   attr_accessor :perl
@@ -53,7 +51,7 @@ class ::AutomateIt::PackageManager::CPAN < ::AutomateIt::PackageManager::BaseDri
   def installed?(*packages)
     return _installed_helper?(*packages) do |list, opts|
       perl = opts[:perl] || self.perl
-      cmd = "#{perl} #{CPAN_IS_INSTALLED} #{list.join(' ')}"
+      cmd = "#{perl} #{CPAN_WRAPPER} --query #{list.join(' ')}"
 
       # FIXME if CPAN isn't configured, this will hang because Perl will demand input
       log.debug(PEXEC+cmd)
@@ -78,7 +76,7 @@ class ::AutomateIt::PackageManager::CPAN < ::AutomateIt::PackageManager::BaseDri
   def install(*packages)
     return _install_helper(*packages) do |list, opts|
       perl = opts[:perl] || self.perl
-      cmd = "#{perl} #{CPAN_INSTALL} #{list.join(' ')}"
+      cmd = "#{perl} #{CPAN_WRAPPER} --install #{list.join(' ')}"
       cmd << " > /dev/null" if opts[:quiet]
       cmd << " 2>&1"
 
@@ -93,7 +91,7 @@ class ::AutomateIt::PackageManager::CPAN < ::AutomateIt::PackageManager::BaseDri
   def uninstall(*packages)
     return _uninstall_helper(*packages) do |list, opts|
       perl = opts[:perl] || self.perl
-      cmd = "#{perl} #{CPAN_UNINSTALL} #{list.join(' ')} < /dev/null"
+      cmd = "#{perl} #{CPAN_WRAPPER} --uninstall #{list.join(' ')} < /dev/null"
       cmd << " > /dev/null" if opts[:quiet]
       cmd << " 2>&1"
 

@@ -1,21 +1,32 @@
-package CpanWrapper;
-use CPAN;
-use ExtUtils::Packlist;
-use ExtUtils::Installed;
+# This file can be used as both a Perl library (read the POD below) and a
+# stand-alone program (run it with "--help" for instructions).
 
 =head1 NAME
 
-CpanWrapper - Provides a simpler wrapper for CPAN package methods.
+CpanWrapper - Provides a simpler wrapper for the CPAN package manager.
 
 =head1 DESCRIPTION
 
-This module provides easy-to-use methods for performing typical tasks that the
-CPAN module makes difficult for some incomprehensible reason.
+This module provides easy-to-use methods for installing, uninstalling and
+querying the status of CPAN modules.
+
+=over
+
+=cut
+
+use warnings "all";
+
+package CpanWrapper;
+
+require CPAN;
+require ExtUtils::Packlist;
+require ExtUtils::Installed;
+require Tie::Handle;
 
 =head1 CLASS VARIABLES
 
 =item $CpanWrapper::DRYRUN
-  
+
 Should actions really happen? E.g., in dry-run mode, the uninstall will only
 pretend to delete files.
 
@@ -23,24 +34,28 @@ pretend to delete files.
 
 our $DRYRUN = 0;
 
-=item CpanWrapper->is_installed($module_name)
+=head1 CLASS METHODS
 
-Returns 1 if the module is installed, else 0.
+=item CpanWrapper->query($module_name)
 
-Example:
+Query the module and return 1 if it's installed, 0 if not.
 
-  CpanWrapper->is_installed('App::Ack')
 =cut
-sub is_installed {
+sub query {
   my($class, $module) = @_;
-  return $CPAN::META->has_inst($module);
+  no warnings;
+  my $result = $CPAN::META->has_inst($module);
+  use warnings "all";
+  return $result;
 }
 
 =item CpanWrapper->uninstall($module_name)
 
 Uninstall the module. Returns an array of files removed.
+
 =cut
 sub uninstall {
+  # /usr/local/lib/perl/5.8.8/auto/ack/.packlist
   my($class, $module) = @_;
   my $packlists = ExtUtils::Installed->new;
   my @result;
@@ -48,14 +63,19 @@ sub uninstall {
     push(@result, $file);
     unlink $file unless $DRYRUN;
   }
+  my $packlist = $packlists->packlist($module)->packlist_file();
+  push(@result, $packlist);
+  unlink $packlist unless $DRYRUN;
   return @result;
 }
 
 =item CpanWrapper->install($module_name)
 
 Install the module. Returns 0 if can't find module.
+
 =cut
 sub install {
+  no warnings;
   my($class, $module) = @_;
   tie *NO, 'NoHandle';
   open(SAVEIN, ">&STDIN");
@@ -70,15 +90,16 @@ sub install {
   }
   open(STDIN, ">&SAVEIN");
   close NO;
+  use warnings "all";
   return $result;
 }
 
 =item NoHandle
 
 File handle that responds with "no" to all readline queries. This is used
-during the install process to reject CPAN's bad defaults.
+during the install process to reject CPAN's unreasonable defaults.
+
 =cut
-require Tie::Handle;
 package NoHandle;
 sub TIEHANDLE { my $self; bless \$self, shift }
 sub WRITE { die }
@@ -93,6 +114,107 @@ sub BINMODE { }
 sub EOF { 0 }
 sub TELL { }
 sub DESTROY { }
+
+#===[ command-line usage ]==============================================
+
 package main;
+if ($0 eq __FILE__) {
+  sub usage {
+    my($message) = @_;
+    print <<HERE;
+USAGE: cpan_wrapper.pl [OPTIONS] ACTION module [modules...]
+
+OPTIONS:
+--help
+    Show this help
+--quiet
+    Don't print anything other than what CPAN generates
+--dryrun
+    Don't actually perform actions, just pretend to
+
+ACTIONS:
+
+--install
+    Install modules
+--uninstall
+    Uninstall modules
+--query
+    Display which packages are installed and which aren't
+HERE
+
+    if ($message) {
+      print "ERROR: $message\n";
+      exit 1;
+    } else {
+      exit 0;
+    }
+  }
+
+  use Getopt::Long;
+  our $quiet = 0;
+  our $dryrun = 0;
+  our $help = 0;
+  our $install = 0;
+  our $uninstall = 0;
+  our $query = 0;
+  GetOptions(
+    'quiet' => \$quiet,
+    'dryrun' => \$dryrun,
+    'n' => \$dryrun,
+    'help' => \$help,
+    'install' => \$install,
+    'uninstall' => \$uninstall,
+    'query' => \$query,
+    'q' => \$query
+  );
+  my @modules = @ARGV;
+
+  usage(0) if 1 == $help;
+  usage("No action specified") unless $install or $uninstall or $query;
+  usage("No modules specified") unless $#modules >= 0;
+
+  if ($install) {
+    foreach my $module (@modules) {
+      if (CpanWrapper->install($module)) {
+        print "* Installed: $module\n" unless $quiet;
+      } else {
+        print "! Can't find CPAN module: $module\n";
+        exit 1
+      }
+    }
+  } elsif ($uninstall) {
+    foreach my $module (@modules) {
+      print "* Uninstalling module: $module\n" unless $quiet;
+
+      my(@files) = CpanWrapper->uninstall($module);
+      foreach my $file (@files) {
+        print "- $file\n" unless $quiet;
+      }
+    }
+  } elsif ($query) {
+    my @available;
+    my @unavailable;
+    foreach my $module (@modules) {
+      if (CpanWrapper->query($module)) {
+        push(@available, $module);
+      } else {
+        push(@unavailable, $module);
+      }
+    }
+
+    sub print_contents {
+      my($name, @modules) = @_;
+      return if $#modules < 0;
+      print "$name:\n";
+      foreach my $module (@modules) {
+        print "  - $module\n";
+      }
+    }
+
+    print "--- %YAML:1.0\n";
+    print_contents 'available', @available;
+    print_contents 'unavailable', @unavailable;
+  }
+}
 
 1;
