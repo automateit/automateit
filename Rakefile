@@ -98,8 +98,7 @@ namespace :loc do
 
   desc "Display lines of churn"
   task :churn do
-    require 'rubygems'
-    require 'active_support'
+    automateit # Load libraries
     puts "%s lines of Hg churn" % (`hg churn`.scan(/^[^\s]+\s+(\d+)\s/).flatten.map(&:to_i).sum).commify
   end
 
@@ -143,8 +142,7 @@ end
 
 desc "RFC-822 time for right now, optional D=x where x is delta like '1.day' ago"
 task :now do
-  require 'rubygems'
-  require 'activesupport'
+  automateit # Loads libraries
   time = Time.now
   if delta = ENV["D"]
     time = eval "time - #{delta}"
@@ -154,8 +152,7 @@ end
 
 desc "RFC-822 time for yesterday"
 task :yesterday do
-  require 'rubygems'
-  require 'active_support'
+  automateit # Loads libraries
   time = Time.now - 1.day
   puts time.to_s(:rfc822)
 end
@@ -174,7 +171,7 @@ end
 
 desc "Publish to RubyForge"
 task :publish do
-  automateit
+  automateit # Loads libraries
   hoe("release VERSION=#{AutomateIt::VERSION}")
   Rake::Task[:after].invoke
 end

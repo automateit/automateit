@@ -14,18 +14,37 @@
 #   ActiveSupport takes.
 
 require 'inactive_support/core_ext/array/extract_options' # [].extract_options
-Array.module_eval { include InactiveSupport::CoreExtensions::Array::ExtractOptions }
+class Array
+  include InactiveSupport::CoreExtensions::Array::ExtractOptions
+end
 
 require 'inactive_support/core_ext/blank' # foo.blank?
 require 'inactive_support/core_ext/symbol' # [:foo, :bar].map(&:to_s)
 require 'inactive_support/core_ext/module/aliasing' # alias_method_chain
 require 'inactive_support/core_ext/class/attribute_accessors' # cattr_accessor
 require 'inactive_support/core_ext/class/inheritable_attributes' # inheritable_cattr_accessor
+require 'inactive_support/core_ext/enumerable' # sum
+
+require 'inactive_support/core_ext/numeric/time' # 1.day
+class Numeric
+  include InactiveSupport::CoreExtensions::Numeric::Time
+end
 
 require 'inactive_support/core_ext/string/inflections' # "asdf".demodulize.underscore
-String.module_eval { include InactiveSupport::CoreExtensions::String::Inflections }
+class String
+  include InactiveSupport::CoreExtensions::String::Inflections
+end
 
 require 'inactive_support/core_ext/hash/keys' # {:foo => :bar}.stringify_keys
-Hash.module_eval{include InactiveSupport::CoreExtensions::Hash::Keys}
+class Hash
+  include InactiveSupport::CoreExtensions::Hash::Keys
+end
+
+require 'inactive_support/basic_object' # Ruby 1.9 compatibility
+require 'inactive_support/duration' # adds dates
+require 'inactive_support/core_ext/time/conversions' # to_formatted_s
+class Time
+  include InactiveSupport::CoreExtensions::Time::Conversions
+end
 
 require 'inactive_support/clean_logger' # cleans up Logger output

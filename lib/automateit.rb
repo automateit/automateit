@@ -17,10 +17,8 @@ require 'yaml'
 require 'rubygems'
 require 'erb'
 
-# ActiveSupport-like features
-require 'inactive_support'
-
 # Extensions
+require 'inactive_support'
 require 'ext/object.rb'
 require 'ext/metaclass.rb'
 require 'ext/shell_escape.rb'
