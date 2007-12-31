@@ -29,9 +29,6 @@ Examples:
   # Dump the 'myapp' hash contents as YAML
   #{PROG} -y myapp#user
 
-  # Dump the 'myapp' hash contents as XML
-  #{PROG} -x myapp#user
-
 Options:
 EOB
   parser.on("-p", "--project PATH", "Set project path") do |v|
@@ -40,10 +37,6 @@ EOB
 
   parser.on("-Y", "--yaml", "Dump as YAML") do |v|
     opts[:yaml] = v
-  end
-
-  parser.on("-X", "--xml", "Dump as XML") do |v|
-    opts[:xml] = v
   end
 
   parser.on("-a", "--add TAGS", "Add list of space separated tags") do |v|
@@ -75,10 +68,6 @@ EOB
     exit 1
   elsif opts[:yaml]
     puts result.to_yaml
-  elsif opts[:xml]
-    require 'active_support/core_ext/hash'
-    require 'active_support/core_ext/array'
-    puts result.to_xml
   else
     puts result.is_a?(String) ? result : result.inspect
   end
