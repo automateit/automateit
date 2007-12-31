@@ -19,22 +19,26 @@ class AutomateIt::PlatformManager::LSB < AutomateIt::PlatformManager::Uname
     @struct[:release] ||= @@struct_cache[:release]
     if available?
       unless @struct[:distro] and @struct[:release]
-        data = _read_lsb_release_output # SLOW 0.2s
-        begin
-          yaml = YAML::load(data)
-          @struct[:distro]  ||= @@struct_cache[:distro]  ||= yaml["Distributor ID"].to_s.downcase
-          @struct[:release] ||= @@struct_cache[:release] ||= yaml["Release"].to_s.downcase
-        rescue NoMethodError, IndexError, ArgumentError => e
-          raise ArgumentError.new("invalid YAML output from '#{LSB_RELEASE}': #{data.inspect}")
-        end
+        hash = _parse_lsb_release_data(_read_lsb_release_data)
+        @struct[:distro]  ||= @@struct_cache[:distro]  ||= hash["Distributor ID"].to_s.downcase
+        @struct[:release] ||= @@struct_cache[:release] ||= hash["Release"].to_s.downcase
       end
     end
   end
 
-  def _read_lsb_release_output
+protected
+
+  # Returns the LSB data for this platform's Distributor and ID
+  def _read_lsb_release_data
+    # TODO Consider parsing files directly to avoid the overhead of this command.
+    #
     # Do NOT use 'lsb_release -a' because this takes a few seconds. Telling
     # 'lsb_release' which fields we want makes it much faster.
-    return `"#{LSB_RELEASE}" --release --id`.gsub(/\t/, " ")
+    `"#{LSB_RELEASE}" --release --id`
   end
-  private :_read_lsb_release_output
+
+  # Parses LSB data into a hash.
+  def _parse_lsb_release_data(data)
+    data.scan(/^([^:]+):\s+([^\n]+)/).inject({}){|s,v| s[v.first] = v.last; s}
+  end
 end
