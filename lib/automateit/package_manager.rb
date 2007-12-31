@@ -129,8 +129,10 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     check_packages = \
       case packages
-      when Hash: packages.keys
-      else packages
+      when Hash
+        packages.keys
+      else 
+        packages
       end
 
     missing = not_installed?(check_packages, :details => true)[1]
@@ -138,8 +140,10 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     install_packages = \
       case packages
-      when Hash: missing.map{|t| packages[t]}
-      else missing
+      when Hash
+        missing.map{|t| packages[t]}
+      else 
+        missing
       end
     block.call(install_packages, opts)
 
@@ -170,8 +174,10 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     check_packages = \
       case packages
-      when Hash: packages.keys
-      else packages
+      when Hash
+        packages.keys
+      else 
+        packages
       end
 
     present = installed?(check_packages, :details => true)[1]
@@ -179,8 +185,10 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     uninstall_packages = \
       case packages
-      when Hash: present.map{|t| packages[t]}
-      else present
+      when Hash
+        present.map{|t| packages[t]}
+      else 
+        present
       end
     block.call(uninstall_packages, opts)
 

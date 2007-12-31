@@ -17,10 +17,14 @@ class ::AutomateIt::AccountManager::BaseDriver < ::AutomateIt::Plugin::Driver
     end
 
     case user
-    when Symbol: user = user.to_s
-    when Integer: user = users[user]
-    when String: # leave it alone
-    else raise TypeError.new("Unknown user type: #{user.class}")
+    when Symbol
+      user = user.to_s
+    when Integer
+      user = users[user]
+    when String
+      # leave it alone
+    else 
+      raise TypeError.new("Unknown user type: #{user.class}")
     end
 
     return block.call(user, password, opts)

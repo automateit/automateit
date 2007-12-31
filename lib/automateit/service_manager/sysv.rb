@@ -54,9 +54,12 @@ class AutomateIt::ServiceManager::SYSV < AutomateIt::ServiceManager::BaseDriver
   def _started_and_stopped_helper(kind, service, opts={})
     expected = \
       case kind
-      when :started?: true
-      when :stopped?: false
-      else raise ArgumentError.new("unknown kind argument: #{kind}")
+      when :started?
+        true
+      when :stopped?
+        false
+      else 
+        raise ArgumentError.new("unknown kind argument: #{kind}")
       end
 
     result = tell(service, :status, :check => true)

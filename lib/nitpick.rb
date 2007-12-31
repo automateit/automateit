@@ -12,10 +12,14 @@ module Nitpick
     #   nitpick "I'm nitpicking"
     def nitpick(value=nil)
       case value
-      when NilClass: @nitpick
-      when TrueClass, FalseClass: @nitpick = value
-      when String, Symbol: puts "%% #{value}" if @nitpick
-      else raise TypeError.new("Unknown nitpick type: #{value.class}")
+      when NilClass
+        @nitpick
+      when TrueClass, FalseClass
+        @nitpick = value
+      when String, Symbol
+        puts "%% #{value}" if @nitpick
+      else 
+        raise TypeError.new("Unknown nitpick type: #{value.class}")
       end
     end
   end

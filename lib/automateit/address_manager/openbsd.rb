@@ -53,9 +53,12 @@ protected
     if opts2.delete(:label)
       helper_opts[:prepend] << \
         case action
-        when :add: "alias"
-        when :remove, :del: "delete"
-        else ArgumentError.new("Unknown action: #{action}")
+        when :add
+          "alias"
+        when :remove, :del
+          "delete"
+        else 
+          ArgumentError.new("Unknown action: #{action}")
         end
     end
     return _ifconfig_helper(action, opts2, helper_opts)
