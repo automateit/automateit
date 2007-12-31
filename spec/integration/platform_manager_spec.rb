@@ -34,22 +34,6 @@ begin
         @m.query(:release).should be_a_kind_of(String)
       end
 
-      it "should fail on invalid LSB output" do
-        if AutomateIt::PlatformManager::LSB === @m.driver_for(:query, :release)
-          # XXX mocking a shared variable breaks it because the mock doesn't go away
-          m = AutomateIt.new.platform_manager
-          m[:lsb].send(:instance_eval, "@struct.delete(:release)")
-          m[:lsb].class.send(:class_eval, "@@struct_cache.delete(:release)")
-          m[:lsb].should_receive(:_read_lsb_release_output).and_return("not : valid : yaml")
-          callback = lambda{ m[:lsb].setup; m[:lsb].query(:release) }
-          if RUBY_PLATFORM == "java"
-            callback.should raise_error # YAML throws a native, internal error
-          else
-            callback.should raise_error(ArgumentError, /invalid YAML/)
-          end
-        end
-      end
-
       it "should query combination of os, arch, distro and release" do
         result = @m.query("os#arch#distro#release")
         result.should be_a_kind_of(String)
