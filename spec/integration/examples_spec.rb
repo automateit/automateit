@@ -17,9 +17,23 @@ else
 
     # Get the fully qualified filename for the interpreter.
     # XXX What bad things will this do if, say, running with JRuby?
-    ruby = begin
+    INTERPRETER.params[:ruby] = begin
       c = ::Config::CONFIG
       File::join(c['bindir'], c['ruby_install_name']) << c['EXEEXT']
+    end
+
+    def wrap_command(cmd, &block)
+      INTERPRETER.instance_eval do
+        log.silence(Logger::WARN) do
+          output = `#{params[:ruby]} #{cmd} 2>&1`
+          begin
+            block.call
+          rescue Exception => e
+            puts "ERROR, failed while running command:\n#{cmd}\n#{output}"
+            raise e
+          end
+        end
+      end
     end
 
     begin
@@ -27,24 +41,18 @@ else
       AutomateIt::invoke(params[:installer], :verbosity => Logger::WARN, :preview => true, :friendly_exceptions => false)
 
       it "should install the example" do
-        INTERPRETER.instance_eval do
-          log.silence(Logger::WARN) do
-            sh("#{ruby} bin/automateit #{params[:installer]} > /dev/null 2>&1")
-            File.exists?("/etc/init.d/myapp_server").should be_true
-            File.directory?("/tmp/myapp_server").should be_true
-            service_manager.started?("myapp_server", :wait => 5).should be_true
-          end
+        wrap_command("bin/automateit #{params[:installer]}") do
+          File.exists?("/etc/init.d/myapp_server").should be_true
+          File.directory?("/tmp/myapp_server").should be_true
+          INTERPRETER.service_manager.started?("myapp_server", :wait => 5).should be_true
         end
       end
 
       it "should uninstall the example" do
-        INTERPRETER.instance_eval do
-          log.silence(Logger::WARN) do
-            sh("#{ruby} bin/automateit #{params[:uninstaller]} > /dev/null 2>&1")
-            File.exists?("/etc/init.d/myapp_server").should be_false
-            File.directory?("/tmp/myapp_server").should be_false
-            service_manager.stopped?("myapp_server", :wait => 5).should be_true
-          end
+        wrap_command("bin/automateit #{params[:uninstaller]}") do
+          File.exists?("/etc/init.d/myapp_server").should be_false
+          File.directory?("/tmp/myapp_server").should be_false
+          INTERPRETER.service_manager.stopped?("myapp_server", :wait => 5).should be_true
         end
       end
     rescue NotImplementedError => e

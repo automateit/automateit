@@ -26,7 +26,7 @@ if tagged?(:myapp_servers)
   mkdir_p(lookup(:path)) do
     # Run shell commands to create the app and database
     unless File.exists?("config/routes.rb")
-      sh("rails --database=sqlite3 . > /dev/null")
+      sh("rails --database=sqlite3 . > /dev/null") or raise "Rails isn't fully installed"
     end
 
     # Create the database if it doesn't exist.
