@@ -269,17 +269,21 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
     @contents != @original_contents
   end
 
+protected
+
   # Read contents from #filename. Called by the #edit command to load text
   # into the buffer.
   def _read
     @contents = \
-      if writing? or (preview? and @filename and _exists?)
+      if writing? or (preview? and @filename and _exists? and _readable?)
         File.read(@filename)
+      elsif preview? and not _readable?
+        log.info(PNOTE+"Not allowed to read file, previewing edits as if it doesn't exist: #{@filename}")
+        nil
       else
         nil
       end
   end
-  protected :_read
 
   # Write contents to #filename. Used by the #edit command to write the buffer
   # to a file.
@@ -292,7 +296,6 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
       File.open(@filename, "w+"){|writer| writer.write(@contents)}
     end
   end
-  protected :_write
 
   # Backup the original file.
   def _backup
@@ -303,11 +306,16 @@ class AutomateIt::EditManager::EditSession < AutomateIt::Common
     end
     log.debug(PNOTE+"Saved '#{@filename}' to '#{result}'")
   end
-  protected :_backup
 
   # Does the file exist?
   def _exists?
     File.exists?(@filename)
   end
-  protected :_exists?
+
+  # Is the file readable?
+  def _readable?
+    FileTest.readable?(@filename)
+  end
+
+
 end # class EditSession
