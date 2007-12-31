@@ -19,11 +19,11 @@ OptionParser.new do |parser|
 Usage: #{PROG} [options] [arguments...]
 
 IMPORTANT:
-  #{PROG} can only match against tags specified in tags.yml. It cannot 
+  #{PROG} can only match against tags specified in tags.yml. It cannot
   match against automatically generated tags like the OS, architecture and such
   which are created at runtime by PlatformManager or AddressManager. So if you
   want to run a command against all Ubuntu servers, you must define them
-  explicitly in tags.yml. 
+  explicitly in tags.yml.
 
 Examples:
   # Load 'myproject' and see if it's tagged with 'apache' or 'svn':
@@ -38,13 +38,10 @@ Examples:
   # Dump the results of a query as YAML
   #{PROG} -Y myapp#user
 
-  # Dump the results of a query as XML
-  #{PROG} -X myapp#user
-
 Options:
 EOB
   parser.on("-s", "--tags", "List tags for this host") do |v|
-    opts[:tags] = v
+    opts[:list_tags] = v
   end
 
   parser.on("-f", "--tags_for HOST", "List tags for a specific host") do |v|
@@ -67,12 +64,8 @@ EOB
     opts[:yaml] = v
   end
 
-  parser.on("-X", "--xml", "Dump as XML") do |v|
-    opts[:xml] = v
-  end
-
   parser.on("-a", "--add TAGS", "Add list of space separated tags") do |v|
-    opts[:tags] = [v.split].flatten
+    opts[:add_tags] = [v.split].flatten
   end
 
   parser.on("-v", "--version", "Display version") do |v|
@@ -93,11 +86,11 @@ EOB
 
   interpreter = AutomateIt.new(
     :project => opts[:project],
-    :tags => opts[:tags]
+    :tags => opts[:add_tags]
   )
   result = nil
 
-  unless opts[:tags] or opts[:tags_for] or opts[:tagged?] or opts[:hosts_tagged_with]
+  unless opts[:list_tags] or opts[:tags_for] or opts[:tagged?] or opts[:hosts_tagged_with]
     if args.first
       opts[:tagged?] = args.first
     else
@@ -108,8 +101,8 @@ EOB
   end
 
   result = \
-    if opts[:tags]
-      interpreter.tags
+    if opts[:list_tags]
+      interpreter.tags.to_a.sort
     elsif opts[:tags_for]
       interpreter.tags_for(opts[:tags_for])
     elsif opts[:tagged?]
@@ -123,16 +116,16 @@ EOB
       result.inspect
     elsif opts[:yaml]
       result.to_yaml
-    elsif opts[:xml]
-      require 'active_support/core_ext/hash'
-      require 'active_support/core_ext/array'
-      result.to_xml
     else
       case result
-      when String: result
-      when Set: result.sort.to_a.join(' ')
-      when Array: result.sort.join(' ')
-      else result.inspect
+      when String
+        result
+      when Set
+        result.sort.to_a.join(' ')
+      when Array
+        result.sort.join(' ')
+      else
+        result.inspect
       end
     end
   )
