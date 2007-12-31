@@ -1,14 +1,14 @@
 0.71230:
     Date: Sun, 30 Dec 2007 14:05:31 -0800
     Desc:
-    - (!) Removed all code that relied on the ActiveSupport and Builder libraries because their creators kept publishing broken versions. The new, AutomateIt-specific replacements for these libraries are guaranteed to work correctly and load much more quickly.
-    - (!) Removed the "--to-xml" option from "aitag" and "aifield" because ActiveSupport and Builder broke again and I'm tired of writing workarounds for them. If anyone relied on this functionality, post to the mailing list and I'll write a replacement.
-    - (%) Fixed PlatformManager::LSB, it no longer convers OS release versions like "7.10" into "7.1".
-    - (%) Fixed "aitags" with "--tags" options, it now returns a sorted array.
+    - (!) Removed all code that relied on the ActiveSupport and Builder libraries. The new, AutomateIt-specific replacements for these libraries are guaranteed to work correctly and load much more quickly.
+    - (!) Removed the "--to-xml" option from "aitag" and "aifield". If anyone relied on this functionality, post to the mailing list and I'll write a replacement.
+    - (%) Fixed PlatformManager::LSB, it no longer converts OS release versions like "7.10" into "7.1".
+    - (%) Fixed "aitags" with "--tags" options, it now returns a sorted array instead of a set.
     - (%) Fixed case/when statements to work with Ruby 1.9.
     - (%) Fixed TemplateManager#render, it now only runs file-related checks when rendering to a file.
     - Improved PackageManager::CPAN's "cpan_wrapper.pl". It's now just a single file that can be used as both a command and library.
-    - Improved EditManager. In preview mode, it now checks to make sure the file is readable rather than failing due to permission denied errors.
+    - Improved EditManager. In preview mode, it now checks to make sure the file is readable, rather than failing due to permission denied errors.
 
 0.71226.1:
     Date: Wed, 26 Dec 2007 11:45:03 -0800
