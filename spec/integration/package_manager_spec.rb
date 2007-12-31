@@ -26,7 +26,7 @@ else
     end
 
     def install_package(packages, opts={})
-      opts[:quiet] = true
+      opts[:quiet] = true #IK# Comment this out to see what each package manager is doing
       opts[:force] = [:pecl, :pear].include?(@d.token)
       return @d.install(packages, opts)
     end
