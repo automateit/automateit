@@ -9,6 +9,7 @@ describe AutomateIt::PackageManager::DPKG do
 
   it "should handle hash arguments" do
     # Given
+    @d.should_receive(:_raise_unless_available).any_number_of_times.and_return(true)
     @d.should_receive(:installed?).and_return(false, ["foonix"])
     @a.should_receive(:sh).and_return do |cmd|
       if cmd =~ /dpkg.*install.*\bfoonix-1.2.3.deb\b/
