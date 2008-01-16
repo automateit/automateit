@@ -3,6 +3,7 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 #===[ App ]=============================================================
 
 #---[ Quality issues ]--------------------------------------------------
+111 TagManager -- Catch bad YAML using friendly exceptions
 !!! ServiceManager -- Create new #stop_and_start, and add new #restart as #tell wrapper
 111 ServiceManager -- Write tests for start_and_enable and such
 !!! AccountManager -- Solaris fails 5% of the time on the last spec.
