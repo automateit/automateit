@@ -1,8 +1,8 @@
 0.80116:
     Date: Wed, 16 Jan 2008 23:55:44 -0800
     Desc:
-    - (!) Fixed bug that prevented AutomateIt from working without the Builder gem's "blankslate" library. This fix should completely eliminate AutomateIt's dependence on Builder and ActiveSupport, like 0.71230 was supposed to do. This error was missed because other gems provide a "blankslate"-workalike and thus merely uninstalling Builder wasn't enough to confirm the fix.
-    - (+) Improved PackageManager::Gem, it can now use commands other than "gem" to manage RubyGem packages, such as "gem1.8". It now detects the best available command, but also lets you specify a default or choose one on a per-call basis. See the PackageManager::Gem documentation for examples. Suggestions sought on the new syntax.
+    - (!) Fixed bug that prevented AutomateIt from working without the Builder gem's "blankslate" library. This fix should completely eliminate AutomateIt's dependence on Builder and ActiveSupport, like 0.71230 was supposed to do. This error was missed because other gems provide a "blankslate"-workalike and thus merely uninstalling Builder wasn't enough to confirm the previous fix.
+    - (+) Improved PackageManager::Gem, it can now use commands other than "gem" to manage RubyGem packages, such as "gem1.8". It now detects the best available command, but also lets you specify a default or choose one on a per-call basis. See the PackageManager::Gem documentation for examples. Comments are sought on the new syntax.
     - Updated misc/setup_rubygems.sh, a simple shell script that downloads and install RubyGems 1.0.1, useful for bootstrapping a system to get AutomateIt running on it.
 
 0.71230:
