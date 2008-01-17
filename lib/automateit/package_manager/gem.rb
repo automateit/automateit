@@ -2,10 +2,35 @@
 #
 # The Gem driver for the PackageManager provides a way to manage software
 # packages for RubyGems using the +gem+ command.
+#
+# === Specifying version of gem to use
+#
+# You can specify the command to use with each call using the gem option, e.g., the "gem1.8" below:
+#
+#   package_manager.install 'rails', :with => :gem, :gem => "gem1.8"
+#
+# Or set a default and all subsequent calls will use it:
+#
+#   package_manager[:gem].setup(:gem => "gem1.8")
+#   package_manager.install 'rails', :with => :gem
 class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
+  attr_accessor :gem
+
+  # FIXME Can't tell which gem program is used until we can use #which, need a new paradigm for #available?
   depends_on \
-    :programs => %w(gem), 
     :libraries => %w(expect pty)
+    ### :programs => %w(gem),
+
+  def setup(*args)
+    super(*args)
+
+    args, opts = args_and_opts(*args)
+    if opts[:gem]
+      @gem = opts[:gem]
+    else
+      @gem ||= %w(gem gem1.8 gem1.9).select{|t| interpreter.which(t)}.first
+    end
+  end
 
   def suitability(method, *args) # :nodoc:
     # Never select GEM as the default driver
@@ -15,7 +40,8 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   # See PackageManager#installed?
   def installed?(*packages)
     return _installed_helper?(*packages) do |list, opts|
-      cmd = "gem list --local 2>&1"
+      gem = opts[:gem] || self.gem
+      cmd = "#{gem} list --local 2>&1"
 
       log.debug(PEXEC+cmd)
       data = `#{cmd}`
@@ -44,6 +70,8 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   # See PackageManager#install
   def install(*packages)
     return _install_helper(*packages) do |list, opts|
+      gem = opts[:gem] || self.gem
+
       # Why is the "gem" utility such a steaming pile of offal? Lameness include:
       # - Requires interactive input to install a package, with no way to prevent this
       # - Repeatedly updates indexes even when there's no reason to, and can't be told to stop
@@ -60,7 +88,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
       # gem options:
       # -y : Include dependencies,
       # -E : use /usr/bin/env for installed executables; but only with >= 0.9.4
-      cmd = "gem install -y"
+      cmd = "#{gem} install -y"
       cmd << " --no-ri" if opts[:ri] == false or opts[:docs] == false
       cmd << " --no-rdoc" if opts[:rdoc] == false or opts[:docs] == false
       cmd << " --source #{opts[:source]}" if opts[:source]
@@ -125,6 +153,8 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   # See PackageManager#uninstall
   def uninstall(*packages)
     return _uninstall_helper(*packages) do |list, opts|
+      gem = opts[:gem] || self.gem
+
       # TODO PackageManager::gem#uninstall -- add logic to handle prompts during removal
 =begin
 # idiotic program MAY prompt you like this on uninstall:
@@ -161,7 +191,7 @@ root@ubuntu:/mnt/satori/svnwork/automateit/src/examples/myapp_rails#
       for package in list
         # gem options:
         # -x : remove installed executables
-        cmd = "gem uninstall -x #{package} < /dev/null"
+        cmd = "#{gem} uninstall -x #{package} < /dev/null"
         cmd << " > /dev/null" if opts[:quiet]
         cmd << " 2>&1"
         interpreter.sh(cmd)
