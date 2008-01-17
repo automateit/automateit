@@ -35,7 +35,7 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 000 Shell -- Incorporate which.cmd so #which can work on Windows
 
 000 Interpreter#invoke and HelpfulERB -- Extract error context code into class
-000 Interpeter -- Implement #clear, #dirty? #track_changes
+000 Interpeter -- Implement #track_changes, #changed?
 000 DatabaseManager -- Design
 000 SourceManager -- Design
 000 ScheduleManager -- Design
