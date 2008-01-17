@@ -214,7 +214,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
         packages = [packages.to_s]
       when String
         nitpick "LN Ss"
-        packages = packages.grep(LIST_NORMALIZER_RE).join(" ").split
+        packages = _string_to_packages(packages)
       when Hash
         # Don't do anything
         nitpick "LN Sh"
@@ -227,7 +227,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
 
     case packages
     when Array
-      result = packages.map(&:to_s).grep(LIST_NORMALIZER_RE)
+      result = packages.map(&:to_s).map{|t| _string_to_packages(t)}.flatten.uniq
     when Hash
       result = packages.stringify_keys
     when Symbol, String
@@ -240,8 +240,9 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     return result
   end
 
-  # Expression for matching packages in arguments
-  LIST_NORMALIZER_RE = /^\s*([^\s#]+)/
+  def _string_to_packages(string)
+    string.scan(/^\s*([^#]+)\s*/).flatten.map{|t| t.split}.flatten.uniq
+  end
 end
 
 # Drivers
