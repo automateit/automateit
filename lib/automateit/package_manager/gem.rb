@@ -28,7 +28,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
     if opts[:gem]
       @gem = opts[:gem]
     else
-      @gem ||= %w(gem gem1.8 gem1.9).select{|t| interpreter.which(t)}.first
+      @gem ||= %w(gem gem1.8 gem1.9).inject(nil){|s,v| s ? s : interpreter.which(v)}
     end
   end
 
