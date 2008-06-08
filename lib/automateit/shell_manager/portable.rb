@@ -314,7 +314,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
 
   # See ShellManager#mv
   def mv(sources, target)
-    present = [sources].flatten.select{|entry| File.exists?(entry)}
+    present = [sources].flatten.select{|entry| self._present?(entry)}
     return false if present.empty?
     present = present.first if present.size == 1
     FileUtils.mv(present, target, _fileutils_opts) && present
@@ -332,7 +332,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
         :rm
       end
 
-    present = [targets].flatten.select{|entry| File.exists?(entry)}
+    present = [targets].flatten.select{|entry| self._present?(entry)}
     return false if present.empty?
 
     msg = "rm"
@@ -514,4 +514,10 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
     return false if results.empty?
     return targets.is_a?(String) ? results.first : results
   end
+
+  # Is the file or symlink at this +path+ present?
+  def _present?(path)
+    File.symlink?(path) ? true : File.exists?(path)
+  end
+  protected :_present?
 end

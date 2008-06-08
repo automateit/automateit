@@ -350,6 +350,18 @@ describe AutomateIt::ShellManager, " in general" do
     end
   end
 
+  it "should move invalid symlinks (mv)" do
+    @m.mktempdircd do
+      file1 = "foo"
+      file2 = "bar"
+      @m.ln_s(file1, file2)
+
+      @m.mv(file2, file1) == file2
+      File.exists?(file1).should be_false
+      File.symlink?(file1).should be_true
+    end
+  end
+
   it "should delete files (rm)" do
     @m.mktempdircd do
       file1 = "foo"
@@ -362,6 +374,18 @@ describe AutomateIt::ShellManager, " in general" do
       @m.rm([file1, file2]) == [file1, file2]
       File.exists?(file1).should be_false
       File.exists?(file2).should be_false
+    end
+  end
+
+  it "should delete invalid symlinks (rm)" do
+    @m.mktempdircd do
+      file1 = "foo"
+      file2 = "bar"
+      @m.ln_s(file1, file2)
+
+      @m.rm(file2) == file1
+      File.exists?(file2).should be_false
+      File.symlink?(file2).should be_false
     end
   end
 

@@ -2,7 +2,11 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 
 #===[ App ]=============================================================
 
+#---[ Bugs ]------------------------------------------------------------
+!!! Interpreter -- def in recipes isn't visible
+
 #---[ Quality issues ]--------------------------------------------------
+111 Interpreter -- unique_methods should use symbols
 111 TagManager -- Catch bad YAML using friendly exceptions
 !!! ServiceManager -- Create new #stop_and_start, and add new #restart as #tell wrapper
 111 ServiceManager -- Write tests for start_and_enable and such
@@ -11,6 +15,7 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 !!! AccountManager -- OpenBSD fails "should add groups to a user" and "should add users to group"
 111 PackageManager -- Improve PEAR spec by having it check files with and without channel URL
 111 AccountManager::NSCD -- Uses "ps -ef", needs abstraction
+!!! ShellManager -- ln_s of a directory source to a specific non-subdirectory name creates a link
 
 #---[ Design issues ]---------------------------------------------------
 ??? PackageManager -- How to specify interpreter? E.g. reuse CPAN driver's approach?
@@ -18,6 +23,7 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 ??? PackageManager -- What's a reasonable way to leave out the ':with' option when using a hash argument to install? E.g.,  sudo ai -e "package_manager.install({'swiftfox-prescott' => '/tmp/swiftfox_3.0b3pre-1_prescott.deb'}, :with => :dpkg)"
 
 #---[ Development ]-----------------------------------------------------
+110 FieldManager -- Give friendlier error for lookup("my#deep#non-existent#path")
 111 Shell or ServiceManager -- Add pgrep/pmatch methods and import them
 111 Shell -- Write #su(user, *command) as a wrapper around #sh
 101 Shell -- Expand glob patterns, e.g. chown_R(500, 500, "*")
@@ -25,6 +31,7 @@ KEY: Important? Urgent? Easy? 1=yes, 0=no
 100 Shell -- Consistently return single items or arrays, alter specs to match
 101 PackageManager::CPAN - Implement
 
+000 Shell#chperm -- Accept varargs as argument, not just string or array
 000 Shell#chperm -- With symbolic mode, wrap `chmod -v` as temporary workaround?
 001 PackageManager::FreeBSD_Ports - Implmen(or generic ::Ports?) and FreeBSD_Pkg
 000 Darwin -- Write drivers, e.g. PackageManager for Fink and MacPorts (or generic ::Ports?)
