@@ -1,12 +1,12 @@
 class Object
   # Lists methods unique to an instance.
   def unique_methods
-    (public_methods - Object.methods).sort
+    (public_methods - Object.methods).sort.map(&:to_sym)
   end
 
   # Lists methods unique to a class.
   def self.unique_methods
-    (public_methods - Object.methods).sort
+    (public_methods - Object.methods).sort.map(&:to_sym)
   end
 
   # Returns a list of arguments and an options hash. Source taken from RSpec.

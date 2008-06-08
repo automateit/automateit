@@ -563,7 +563,7 @@ module AutomateIt
     # For situations where you don't want to override any existing methods, consider using #add_method_missing_to.
     def include_in(object, *methods)
       methods = [methods].flatten
-      methods = unique_methods.reject{|t| t =~ /^_/} if methods.empty?
+      methods = unique_methods.reject{|t| t.to_s =~ /^_/} if methods.empty?
 
       object.instance_variable_set(:@__automateit, self)
 

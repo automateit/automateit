@@ -2,6 +2,7 @@
     Date: Fri, 06 Jun 2008 23:13:56 -0700
     Desc:
     - (%) Fixed ShellManager#rm and ShellManager#mv, can now remove and move invalid symlinks.
+    - Improved Object#unique_methods, it now returns an array of symbols.
 
 0.80116:
     Date: Wed, 16 Jan 2008 23:55:44 -0800
