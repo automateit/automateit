@@ -24,6 +24,7 @@ class ::AutomateIt::AccountManager::NSCD < ::AutomateIt::AccountManager::BaseDri
     end
   end
 
+  # Invalidates the NSCD database, thus forcing a cache reload.
   def invalidate(database)
     return false unless available?
 
