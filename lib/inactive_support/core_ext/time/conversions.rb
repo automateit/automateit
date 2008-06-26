@@ -14,8 +14,10 @@ module InactiveSupport #:nodoc:
 
         def self.included(base)
           base.class_eval do
-            alias_method :to_default_s, :to_s
-            alias_method :to_s, :to_formatted_s
+            unless instance_methods.include? "to_default_s"
+              alias_method :to_default_s, :to_s
+              alias_method :to_s, :to_formatted_s
+            end
           end
         end
 
