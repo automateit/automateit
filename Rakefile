@@ -113,28 +113,6 @@ task :loc => ["loc:count", "loc:diff", "loc:churn", "loc:sloc"]
 
 #---[ RubyGems ]--------------------------------------------------------
 
-ARCHIVE_PATH = "../gem_archive"
-desc "Regenerate Gem"
-task :regem do
-  has_archive = File.directory?(ARCHIVE_PATH)
-  puts "WARNING: Archive of previously released gems at '#{ARCHIVE_PATH}' is not available, do not upload without these." unless has_archive
-  rm_r Dir["pkg/*"]
-  mkdir_p "pkg/pub/gems"
-  if has_archive && !Dir["#{ARCHIVE_PATH}/*.gem"].empty?
-    cp FileList["#{ARCHIVE_PATH}/*.gem"].to_a, "pkg/pub/gems", :preserve => true 
-  end
-  Rake::Task[:gem].invoke
-  cp Dir["pkg/*.gem"], "pkg/pub/gems", :preserve => true
-  cp Dir["pkg/*.gem"], "#{ARCHIVE_PATH}", :preserve => true if has_archive
-  sh "cd pkg/pub && ruby ../../misc/index_gem_repository.rb" if has_archive
-end
-
-desc "Populate gem_archive"
-task :download_gem_archive do
-  mkdir_p ARCHIVE_PATH unless File.exist?(ARCHIVE_PATH)
-  sh "rsync -cvaxz igal@pythia.kattare.com:automateit_org/pub/gems/ #{ARCHIVE_PATH}"
-end
-
 desc "Generate manifest"
 task :manifest do
   hoe(:manifest)
@@ -165,25 +143,29 @@ namespace :gem do
 end
 
 desc "Create a gem"
-task :gem do
+task :gem => [:manifest] do
   hoe(:gem)
 end
 
-desc "Publish to RubyForge"
-task :publish do
+desc "Release gem to RubyForge"
+task :release do
   automateit # Loads libraries
   hoe("release VERSION=#{AutomateIt::VERSION}")
-  Rake::Task[:after].invoke
+end
+
+desc "Public docs to RubyForge"
+task :publish_docs do
+  hoe("publish_docs")
 end
 
 desc "Tag a stable release"
 task :tag do
-  automateit
+  automateit # Loads libraries
   sh "hg tag #{AutomateIt::VERSION}"
   sh "hg tag -f stable"
 end
 
-desc "Push a stable release"
+desc "Push a stable release to local repo for uploading"
 task :push do
   sh "hg push -r stable ../app_stable"
 end
@@ -208,9 +190,11 @@ namespace :install do
   end
 
   desc "Install Gem from RubyForge without docs, removing existing Gem first"
-  task :rf do
+  task :rubyforge do
     install_wrapper "http://gems.rubyforge.org"
   end
+
+  task :rf => :rubyforge
 
   desc "Install Gem from website without docs, removing existing Gem first"
   task :site do
@@ -231,105 +215,42 @@ end
 
 desc "Uninstall automateit gem"
 task :uninstall do
-  automateit.package_manager.uninstall "automateit", :with => :gem
+  automateit.package_manager.uninstall("automateit", :with => :gem)
 end
 
 #---[ RDoc ]------------------------------------------------------------
 
 namespace :rdoc do
-  desc "Generate documentation"
-  task :make do
-    # Uses Jamis Buck's RDoc template from http://weblog.jamisbuck.org/2005/4/8/rdoc-template
-    sh "rdoc --op doc --template=jamis --main README.txt --promiscuous --accessor class_inheritable_accessor=R --inline-source --line-numbers --title 'AutomateIt: Open source server automation' README.txt TUTORIAL.txt TESTING.txt lib docs/*.txt"
-    # Create a tutorial index
-    File.open("doc/tutorial.html", "w+") do |writer|
-      writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
-    end
-  end
+  desc "List aliased_methods for inclusion into rdoc"
+  task :aliased_methods do
+    automateit.instance_eval do
+      methods_and_plugins = plugins.values.inject([]){|results,plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| results << [method.to_s, plugin.class.to_s]}; results}
 
-  desc "Rewrite RDoc HTML by interpolating custom tags"
-  task :rewrite do
-    require 'cgi'
-    pattern = /(\[{3})\s*(.+?)\s*(\]{3})/m
-    for filename in Dir["doc/**/*.html"]
-      input = File.read(filename)
-      next unless input and input.match(pattern)
-      puts filename
-      output = input.gsub(pattern){|m| CGI.unescapeHTML($2)}
-      if input != output
-        FileUtils.mv(filename, filename+".bak", :verbose => true)
-        File.open(filename, "w+"){|h| h.write(output)}
+      for method, plugin in methods_and_plugins.sort_by{|x| x[0]}
+        puts "  # * %s -- %s#%s" % [method, plugin, method]
       end
-    end
-  end
-
-  desc "Undo rewrite by restoring backups"
-  task :undo do
-    for filename in Dir["doc/**/*.html.bak"]
-      FileUtils.mv(filename, filename.sub(/\.bak$/, ''), :verbose => true)
-    end
-  end
-
-  desc "Generate documentation for specific files in an endless loop"
-  task :loop do
-    sources_and_targets = {
-      "doc/files/TUTORIAL_txt.html" => "TUTORIAL.txt"
-    }
-
-    while true
-      different = false
-      for source, target in sources_and_targets
-        if ! File.exists?(target) or (File.exists?(target) and File.mtime(target) > File.mtime(source))
-          different = true
-          break
-        end
-      end
-
-      puts "checking %s" % File.mtime(target)
-      puts "different" if different
-
-      sh "rdoc --template=jamis --promiscuous --accessor class_inheritable_accessor=R --title 'AutomateIt: Open source server automation' %s" % sources_and_targets.values.join(" ") if different
-      sleep 1
     end
   end
 end
 
-desc "Generate Rdoc"
+desc "Generate documentation"
 task :rdoc do
-  # TODO Something is broke in rdoc recently. It decides to only generate rdocs for newer files, which is very bad because if you re-run "rdoc" without deleting the "doc" directory, it'll can end up creating a set of documentation that only contains the single file you changed. This sucks. 
-  sh "rm -rf doc" if File.exist?("doc")
+  hoe(:docs)
 
-  Rake::Task["rdoc:make"].invoke
-  Rake::Task["rdoc:rewrite"].invoke
-end
-
-desc "List aliased_methods for inclusion into rdoc"
-task :aliased_methods do
-  automateit.instance_eval do
-    methods_and_plugins = []
-    plugins.values.each{|plugin| plugin.aliased_methods && plugin.aliased_methods.each{|method| methods_and_plugins << [method.to_s, plugin.class.to_s]}}
-
-    for method, plugin in methods_and_plugins.sort_by{|x| x[0]}
-      puts "  # * %s -- %s#%s" % [method, plugin, method]
-    end
+  # Create a tutorial index
+  File.open("doc/tutorial.html", "w+") do |writer|
+    writer.write(File.read("doc/index.html").sub(/README_txt.html/, 'TUTORIAL_txt.html'))
   end
 end
 
 #---[ Misc ]------------------------------------------------------------
 
-desc "Chown files if needed"
+desc "Chown files in checkout if needed"
 task :chown do
   if automateit.superuser?
     stat = File.stat("..")
     automateit.chown_R(stat.uid, stat.gid, FileList["*", ".*"], :details => true)
   end
 end
-
-desc "Link to local rdoc stash"
-task :rdoclink do
-  automateit.ln_s("/home/lagi/stash/automateit_rdoc", "doc")
-end
-
-task :after => [:rdoclink, :rdoc, :regem]
 
 #===[ fin ]=============================================================
