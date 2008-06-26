@@ -1,3 +1,9 @@
+0.80624:
+    Date: Tue, 24 Jun 2008 23:13:35 -0700
+    Desc:
+    - Fixed collision of time conversion methods when loading AutomateIt into Rails.
+    - Improved documentation, reworked Rakefile, updated TODO.txt.
+
 0.80607:
     Date: Fri, 06 Jun 2008 23:13:56 -0700
     Desc:
