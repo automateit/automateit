@@ -2,25 +2,21 @@
 
 <em>AutomateIt is an open source tool for automating the setup and maintenance of servers, applications and their dependencies.</em>
 
-Information about AutomateIt is best read in the following order:
 1. http://AutomateIt.org -- website explaining what it is and why it's useful
 2. Screenshots[http://AutomateIt.org/screenshots] -- quick tour of sample AutomateIt code
 3. TUTORIAL.txt[link:files/TUTORIAL_txt.html] -- hands-on tutorial
-4. TESTING.txt[link:files/TESTING_txt.html] -- instructions on running the AutomateIt self-test
-5. Links on the left provide technical documentation for specific classes and methods
 
-=== Quick links
+=== Frequently-used commands
 
-Commands, run these with <tt>--help</tt> for help:
+Execute these from a terminal, use <tt>--help</tt> option for help:
 * +automateit+ or +ai+ -- Run a recipe or create a project.
 * +aitag+ -- Query project's tags.
 * +aifield+ -- Query project's fields.
 
-Execution:
+=== Frequently-used classes
+
 * AutomateIt::Interpreter -- Runs AutomateIt commands.
 * AutomateIt::Project -- Collection of related recipes, tags, fields and custom plugins.
-
-Plugins:
 * AutomateIt::AccountManager -- Manipulates users and groups.
 * AutomateIt::AddressManager -- Manipulates host's network addresses.
 * AutomateIt::DownloadManager -- Downloads files.
@@ -35,7 +31,7 @@ Plugins:
 
 === Legal
 
-Copyright (C) 2007 Igal Koshevoy (igal@pragmaticraft.com)
+Copyright (C) 2007-2008 Igal Koshevoy (igal@pragmaticraft.com)
 
 AutomateIt is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
