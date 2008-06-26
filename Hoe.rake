@@ -5,6 +5,8 @@ $LOAD_PATH.unshift('lib')
 require 'automateit'
 @interpreter = AutomateIt.new
 
+ENV["NODOT"] = "NODOT" # Never generate those crappy rdoc diagrams
+
 HoeInclude = {
   :executables => Dir['bin/*'].reject{|t|t.match(/~/)}.map{|t|File.basename(t)},
   :files => (%w(add2path.sh gpl.txt CHANGES.txt Hoe.rake Manifest.txt Rakefile README.txt TESTING.txt TODO.txt TUTORIAL.txt) + FileList["{bin,examples,docs,helpers,lib,misc,spec}/**/*"]).to_a.reject{|t| File.directory?(t)},
@@ -31,7 +33,7 @@ Hoe.new("AutomateIt", AutomateIt::VERSION.to_s) do |s|
   s.url = "http://automateit.org/"
   s.spec_extras = {
     :platform => Gem::Platform::RUBY,
-    :rdoc_options => %w(--main README.txt --promiscuous --accessor class_inheritable_accessor=R --title) << title << %w(lib docs),
+    :rdoc_options => %w(--op doc --main README.txt --promiscuous --accessor class_inheritable_accessor=R --inline-source --line-numbers --title) << title << %w(lib),
     :extra_rdoc_files => FileList[%w(README.txt TUTORIAL.txt TESTING.txt), "docs/*.txt"],
   }
   s.spec_extras.merge!(HoeInclude)
