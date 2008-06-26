@@ -55,9 +55,7 @@ module AutomateIt
   # * which -- AutomateIt::ShellManager#which
   # * which! -- AutomateIt::ShellManager#which!
   #
-  # [[[ <a name="embedding"> ]]]
   # === Embedding the Interpreter
-  # [[[ </a> ]]]
   #
   # The AutomateIt Interpreter can be embedded inside a Ruby program:
   #
@@ -193,7 +191,7 @@ module AutomateIt
             log.debug(PNOTE+"Loading project library: #{lib}")
             invoke(lib)
           end
-          
+
           tag_file = File.join(@project, "config", "tags.yml")
           if File.exists?(tag_file)
             log.debug(PNOTE+"Loading project tags: #{tag_file}")
