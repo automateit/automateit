@@ -102,7 +102,9 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     packages = _list_normalizer(packages)
     packages = packages.keys if Hash === packages
 
-    available = [installed?(packages, :details => true)].flatten
+    opts_for_check = opts.dup
+    opts_for_check[:details] = true
+    available = [installed?(packages, opts_for_check)].flatten
     missing = packages - available
     truth = (packages - missing).empty?
     result = opts[:details] ? [truth, missing] : truth
@@ -135,7 +137,10 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
         packages
       end
 
-    missing = not_installed?(check_packages, :details => true)[1]
+    opts_for_check = opts.dup
+    opts_for_check[:details] = true
+
+    missing = not_installed?(check_packages, opts_for_check)[1]
     return false if missing.blank?
 
     install_packages = \
@@ -148,7 +153,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     block.call(install_packages, opts)
 
     return true if preview?
-    unless (failed = not_installed?(check_packages, :details => true)[1]).empty?
+    unless (failed = not_installed?(check_packages, opts_for_check)[1]).empty?
       raise ArgumentError.new("Couldn't install: #{failed.join(' ')}")
     else
       return true
@@ -180,7 +185,10 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
         packages
       end
 
-    present = installed?(check_packages, :details => true)[1]
+    opts_for_check = opts.dup
+    opts_for_check[:details] = true
+
+    present = installed?(check_packages, opts_for_check)[1]
     return false if present.blank?
 
     uninstall_packages = \
@@ -193,7 +201,7 @@ class AutomateIt::PackageManager::BaseDriver < AutomateIt::Plugin::Driver
     block.call(uninstall_packages, opts)
 
     return true if preview?
-    unless (failed = installed?(check_packages, :details => true)[1]).empty?
+    unless (failed = installed?(check_packages, opts_for_check)[1]).empty?
       raise ArgumentError.new("Couldn't uninstall: #{failed.join(' ')}")
     else
       return true

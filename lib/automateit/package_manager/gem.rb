@@ -3,16 +3,26 @@
 # The Gem driver for the PackageManager provides a way to manage software
 # packages for RubyGems using the +gem+ command.
 #
-# === Specifying version of gem to use
+# === Specifying version of a particular gem to install
 #
-# You can specify the command to use with each call using the gem option, e.g., the "gem1.8" below:
+# You can specify the specific version of a particular gem to use with the
+# :version option, e.g., the "2.1.2" below:
 #
-#   package_manager.install 'rails', :with => :gem, :gem => "gem1.8"
+#   package_manager.install "rails", :with => :gem, :version => "2.1.2"
+#
+# Note that you can only install one single gem with a version at a time.
+#
+# === Specifying instance of the "gem" program to use
+#
+# You can specify the command to use with each call using the :gem option,
+# e.g., the "gem1.8" below:
+#
+#   package_manager.install "rails", :with => :gem, :gem => "gem1.8"
 #
 # Or set a default and all subsequent calls will use it:
 #
 #   package_manager[:gem].setup(:gem => "gem1.8")
-#   package_manager.install 'rails', :with => :gem
+#   package_manager.install "rails", :with => :gem
 class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   attr_accessor :gem
 
@@ -38,23 +48,41 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   end
 
   # See PackageManager#installed?
+  #
+  # Special options:
+  # * :version -- Version number of a Gem to install. However, if you use this
+  #   option, you may only specify a single package.
   def installed?(*packages)
     return _installed_helper?(*packages) do |list, opts|
+      if opts[:version] && list.size != 1
+        raise ArgumentError, ":version option can only be specified for a single package"
+      end
+
       gem = opts[:gem] || self.gem
       cmd = "#{gem} list --local 2>&1"
 
       log.debug(PEXEC+cmd)
       data = `#{cmd}`
 
-      # Gem lists packages out of order, which screws up the
-      # install/uninstall sequence, so we need to put them back in the
-      # order that the user specified.
-      present = data.scan(/^([^\s\(]+)\s+\([^\)]+\)\s*$/).flatten
-      available = []
-      for package in list
-        available << package if present.include?(package)
+      if opts[:version]
+        package = list.first
+        if match = data.match(/^#{package} \(([^\)]+)\)/m)
+          versions = match[1].split(', ')
+          versions.include?(opts[:version].to_s) ? [package] : []
+        else
+          []
+        end
+      else
+        # Gem lists packages out of order, which screws up the
+        # install/uninstall sequence, so we need to put them back in the
+        # order that the user specified.
+        present = data.scan(/^([^\s\(]+)\s+\([^\)]+\)\s*$/).flatten
+        available = []
+        for package in list
+          available << package if present.include?(package)
+        end
+        available
       end
-      available
     end
   end
 
@@ -66,10 +94,16 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
   # Special options:
   # * :docs -- If set to false, won't install rdoc or ri.
   # * :source -- URL source to retrieve Gems from.
+  # * :version -- Version number of a Gem to install. However, if you use this
+  #   option, you may only specify a single package.
   #
   # See PackageManager#install
   def install(*packages)
     return _install_helper(*packages) do |list, opts|
+      if opts[:version] && list.size != 1
+        raise ArgumentError, ":version option can only be specified for a single package"
+      end
+
       gem = opts[:gem] || self.gem
 
       # Why is the "gem" utility such a steaming pile of offal? Lameness include:
@@ -92,6 +126,7 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
       cmd << " --no-ri" if opts[:ri] == false or opts[:docs] == false
       cmd << " --no-rdoc" if opts[:rdoc] == false or opts[:docs] == false
       cmd << " --source #{opts[:source]}" if opts[:source]
+      cmd << " --version #{opts[:version]}" if opts[:version]
       cmd << " "+list.join(" ")
       cmd << " " << opts[:args] if opts[:args]
       cmd << " 2>&1"
