@@ -1,0 +1,9 @@
+*.diff
+*.rcov
+*.swp
+*.tmp
+coverage
+doc
+pkg
+prof.txt
+tags
