@@ -151,6 +151,9 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
         uninstall(list, opts)
 
         raise ArgumentError.new("Gem install failed because it's invalid, missing a dependency, or can't talk with Gem server: #{list.inspect}")
+      else
+        # Clear the RubyGems paths cache so it'll see changes.
+        Gem.clear_paths rescue nil unless preview?
       end
     end
   end
@@ -201,6 +204,9 @@ root@ubuntu:/mnt/satori/svnwork/automateit/src/examples/myapp_rails#
         cmd << " 2>&1"
         interpreter.sh(cmd)
       end
+
+      # Clear the RubyGems paths cache so it'll see changes.
+      Gem.clear_paths rescue nil unless preview?
     end
   end
 end
