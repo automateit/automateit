@@ -32,9 +32,11 @@ class HelpfulERB
       for i in 0..e.backtrace.size
         l = e.backtrace[i]
         #puts "%s %s" % [i, l];
-        break if l =~ /^([^:]+):(\d+):in `(render|result)'$/
+        if l =~ /^([^:]+):(\d+):in `(render|result)'$/ or l =~ /^(#{@filename}):(\d+):in /
+          break
+        end
       end
-      template = $1
+      template = $1 || @filename
       line_number = $2.to_i
       raise Exception.new("Caught ERB error but couldn't find line number in backtrace:\n#{e.backtrace.join("\n")}") unless line_number
 
@@ -56,8 +58,7 @@ class HelpfulERB
       end
       msg << "\n\n(#{e.exception.class}) #{e.message}"
 
-
-      raise NestedError.new(msg, e)
+      raise HelpfulERB::Error.new(msg, e)
     end
   end
 end
