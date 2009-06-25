@@ -372,7 +372,7 @@ describe AutomateIt::Interpreter do
 
   it "should instantiate plugins" do
     @a.should respond_to(:plugins)
-    @a.plugins.should include(:my_manager)
+    @a.plugins.keys.should include(:my_manager)
   end
 
   it "should expose plugin instance aliases" do
@@ -394,14 +394,14 @@ describe AutomateIt::Interpreter do
   end
 
   it "should not see abstract managers" do
-    @a.plugins.should_not include(MyManagerSubclass.token)
+    @a.plugins.keys.should_not include(MyManagerSubclass.token)
   end
 
   it "should not see abstract drivers" do
-    @a.my_manager.drivers.should_not include(MyManager::AnotherBaseDriver.token)
+    @a.my_manager.drivers.keys.should_not include(MyManager::AnotherBaseDriver.token)
   end
 
   it "should not see base drivers" do
-    @a.my_manager.drivers.should_not include(MyManager::BaseDriver.token)
+    @a.my_manager.drivers.keys.should_not include(MyManager::BaseDriver.token)
   end
 end
