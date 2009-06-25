@@ -7,16 +7,15 @@ class AutomateIt::AddressManager::BaseDriver< AutomateIt::Plugin::Driver
   # See AddressManager#hostnames
   def hostnames()
     # NOTE: depends on driver's implementation of addresses
-    names = manager.addresses.inject(Set.new) do |sum, address|
+    names = manager.addresses.inject([]) do |sum, address|
       # Some addresses can't be resolved, bummer.
       sum.merge(Resolv.getnames(address)) rescue Resolv::ResolvError; sum
     end
-    names << Socket.gethostname
-    names.merge(Socket.gethostbyname(Socket.gethostname)[1]) rescue SocketError
-
-    names.each{|name| names.merge(hostnames_for(name))}
     names << "localhost"
-    return names.to_a.sort
+    names << Socket.gethostname
+    names += Socket.gethostbyname(Socket.gethostname)[1] rescue SocketError
+    names += names.map{|name| hostnames_for(name)}.flatten
+    return names.sort.uniq
   end
 
   # See AddressManager#hostname_for

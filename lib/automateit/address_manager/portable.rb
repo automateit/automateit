@@ -19,13 +19,12 @@ class AutomateIt::AddressManager::Portable < AutomateIt::AddressManager::BaseDri
 
   # See AddressManager#hostnames
   def hostnames
-    results = Set.new
+    results = []
     results << Socket.gethostname
-    results.merge(Socket.gethostbyname(Socket.gethostname)[1]) rescue SocketError
-
-    results.each{|name| results.merge(hostnames_for(name))}
     results << "localhost"
-    return results.to_a.sort
+    results += Socket.gethostbyname(Socket.gethostname)[1] rescue SocketError
+    results += results.map{|name| hostnames_for(name)}.flatten
+    return results.sort.uniq
   end
 
   # See AddressManager#addresses
