@@ -108,17 +108,22 @@ class AutomateIt::PackageManager::Gem < AutomateIt::PackageManager::BaseDriver
         exitstruct = Open4::popen4(cmd) do |pid, sin, sout, serr|
           $expect_verbose = opts[:quiet] ? false : true
 
+          re_success=/Successfully installed/m
           re_missing=/Could not find.+in any repository/m
           re_select=/Select which gem to install.+>/m
           re_failed=/Gem files will remain.+for inspection/m
           re_refused=/Errno::ECONNREFUSED reading .+?\.gem/m
-          re_all=/#{re_missing}|#{re_select}|#{re_failed}|#{re_refused}/m
+          re_all=/#{re_success}|#{re_missing}|#{re_select}|#{re_failed}|#{re_refused}/m
 
           while true
             begin
               captureded = sout.expect(re_all)
             rescue NoMethodError
-              log.debug(PNOTE+"Gem seems to be done")
+              log.debug(PNOTE+"Gem quit without closing STDOUT")
+              break
+            end
+            if captureded.nil?
+              log.debug(PNOTE+"Gem quit without emitting STDOUT")
               break
             end
             ### puts "Captureded %s" % captureded.inspect
