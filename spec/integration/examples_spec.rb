@@ -44,7 +44,7 @@ else
         wrap_command("bin/automateit #{params[:installer]}") do
           File.exists?("/etc/init.d/myapp_server").should be_true
           File.directory?("/tmp/myapp_server").should be_true
-          INTERPRETER.service_manager.started?("myapp_server", :wait => 5).should be_true
+          INTERPRETER.service_manager.started?("myapp_server", :wait => 30).should be_true
         end
       end
 
