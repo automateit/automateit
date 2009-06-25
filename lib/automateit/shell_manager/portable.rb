@@ -442,6 +442,7 @@ class AutomateIt::ShellManager::Portable < AutomateIt::ShellManager::BaseDriver
       msg << " -R" if opts[:recursive]
       msg << " %s" % opts[:user] if opts[:user]
       msg << ":" if opts[:user] and opts[:group]
+      msg << " " if ! opts[:user] and opts[:group]
       msg << "%s" % opts[:group] if opts[:group]
       msg << " " << display_entries.join(' ')
       log.info(PEXEC+msg)
