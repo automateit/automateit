@@ -411,17 +411,26 @@ module AutomateIt
             return instance_eval(data, filename, 1)
           rescue Exception => e
             if @friendly_exceptions
-              # TODO Extract this routine and its companion in HelpfulERB
+              # TODO Extract this routine and its companion in HelpfulERB to another helper
+              # TODO Figure out if we can steal the Rails equivalent of this complex code
 
               # Capture initial stack in case we add a debug/breakpoint after this
               stack = caller
 
               # Extract trace for recipe after the Interpreter#invoke call
               preresult = []
-              for line in e.backtrace
-                # Stop at the Interpreter#invoke call
-                break if line == stack.first
-                preresult << line
+              match_interpreter = %r{.*/lib/automateit/interpreter.rb:\d+:in .*}
+              began_interpreter = false
+              ended_interpreter = false
+              e.backtrace.reverse.each do |line|
+                unless began_interpreter
+                  began_interpreter |= line =~ match_interpreter
+                end
+                if began_interpreter and not ended_interpreter
+                  ended_interpreter |= line !~ match_interpreter
+                end
+                #IK# p [began_interpreter, ended_interpreter, line]
+                preresult.unshift(line) if began_interpreter && ended_interpreter
               end
 
               # Extract the recipe filename
@@ -432,10 +441,10 @@ module AutomateIt
               result = []
               for line in preresult
                 # Ignore manager wrapper and dispatch methods
-                next if line =~ %r{lib/automateit/.+manager\.rb:\d+:in `.+'$}
+                next if line =~ %r{.*/lib/automateit/.+manager\.rb:\d+:in `.+'$}
                 result << line
                 # Stop at the first mention of this recipe
-                break if line =~ /^#{recipe}/
+                break if line =~ /^#{recipe}:\d+:in `invoke'/
               end
 
               # Extract line number
