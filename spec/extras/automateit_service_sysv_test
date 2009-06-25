@@ -3,6 +3,8 @@ set -e
 
 ### BEGIN INIT INFO
 # Provides:          automateit_service_test
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
 # Default-Start:     5
 # Default-Stop:      6
 # Short-Description: automateit_service_test
