@@ -322,7 +322,7 @@ else
       end
 
       # Create a user
-      (user = add_user(:groups => groups_expected)).should_not be_true
+      add_user(:groups => groups_expected).should_not be_blank
 
       # Make sure they have the right number of groups
       groups_found = @m.groups_for_user(@username)
