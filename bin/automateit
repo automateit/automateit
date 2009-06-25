@@ -6,13 +6,32 @@ if File.directory?(libdir) and File.exists?(File.join(libdir, "automateit.rb"))
   $LOAD_PATH.unshift(libdir)
 end
 
-require 'rubygems'
+# Standard libraries
 require 'logger'
 require 'optparse'
+
+# Third-party libraries
+require 'rubygems'
+
+# Our libraries
 require 'automateit'
 
+# Our constants
 include AutomateIt::Constants
 
+# Return pretty string containing the backtrace for an +exception+ object with
+# a string +header+ at the top (e.g., "Something went terribly wrong:").
+def get_pretty_backtrace(header, exception)
+  msg = "#{PERROR}#{header}\n"
+  stack = exception.backtrace.clone
+  msg << "#{stack.shift}: #{exception.message} (#{exception.exception.class})}";
+  for line in stack
+    msg << "\n  "+line
+  end
+  return msg
+end
+
+# Parse the command-line options and act accordingly.
 OptionParser.new do |parser|
   PROG = File.basename($0)
   opts = {}
@@ -99,6 +118,7 @@ EOB
   # Display newline at the end
   newline = true
 
+  # Actually run AutomateIt!
   begin
     rv = AutomateIt::CLI.run(opts)
   rescue SystemExit
@@ -108,22 +128,23 @@ EOB
     msg = nil
     if e.is_a?(AutomateIt::Error) and e.cause.to_s =~ /IRB_EXIT/
       # Don't display errors interpreter is closed with 'CTRL-D'
-    elsif opts[:friendly_exceptions] != false and e.is_a?(AutomateIt::Error)
+    elsif opts[:friendly_exceptions] != false and (e.is_a?(AutomateIt::Error) or e.is_a?(HelpfulERB::Error))
       # Friendly message
       msg = PERROR+e.message
       msg << "\n\n"+PNOTE+"Use 'automateit --trace' to see complete backtrace"
     else
       # Raw backtrace
-      puts PERROR+"AutomateIt error trace:"
-      stack = e.backtrace.clone
-      msg = "#{stack.shift}: #{e.message} (#{e.exception.class})}";
-      for line in stack
-        msg << "\n  "+line
+      msg = "Raw backtrace:\n"
+      if e.kind_of?(NestedError)
+        msg << get_pretty_backtrace("NestedError trace:", e.cause) << "\n\n"
       end
+      msg << get_pretty_backtrace("AutomateIt error trace:", e)
     end
     puts msg
     exit 1
   end
+
+  # Shutdown
   if optscopy[:create] or optscopy[:eval] or argscopy.size > 0
     exit rv ? 0 :1
   elsif newline
