@@ -23,7 +23,7 @@ when "status"
     Process.kill(0, File.read(File.join(path, pid)).to_i)
     exit 0
   rescue Errno::ENOENT, Errno::ESRCH
-    exit -1 # File or pid not found
+    exit 1 # File or pid not found
   end
 else
   puts "ERROR: expected argument -- start, stop or status"
