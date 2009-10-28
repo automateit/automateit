@@ -23,9 +23,7 @@ module AutomateIt
   # 2. Automatically loads tags from project's <tt>config/tags.yml</tt> file.
   # 3. Loads fields from the <tt>config/fields.yml</tt> file.
   # 4. Loads all custom plugins and libraries found in the +lib+ directory.
-  # 5. Provides a +dist+ method that corresponds to your project's +dist+
-  #   directory. Using this method will save you from having to type paths for
-  #   files you intend to distribute from recipes, e.g.:
+  # 5. Provides a +dist+ method that corresponds to your project's +dist+ directory. Using this method will save you from having to type paths for files you intend to distribute from recipes, e.g.:
   #     cp(dist+"/source.txt", "/tmp/target.txt")
   #
   # === Using a project
@@ -132,7 +130,7 @@ module AutomateIt
   #
   # And then make the file executable:
   #
-  #   chmod a+X /tmp/hello_project/recipes/greet.rb
+  #   chmod a+x /tmp/hello_project/recipes/greet.rb
   #
   # And execute the recipe directly:
   #
