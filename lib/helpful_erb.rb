@@ -18,7 +18,7 @@ class HelpfulERB
     @text = text
     @filename = filename
     @lines_before = opts[:before] || 5
-    @lines_after = opts[:before] || 1
+    @lines_after = opts[:after] || 1
 
     @erb = ::ERB.new(@text, nil, '-')
     @erb.filename = @filename if @filename
