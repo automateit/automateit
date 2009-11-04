@@ -248,7 +248,7 @@ end
 desc "Chown files in checkout if needed"
 task :chown do
   if automateit.superuser?
-    stat = File.stat("..")
+    stat = File.stat(".")
     automateit.chown_R(stat.uid, stat.gid, FileList["*", ".*"], :details => true)
   end
 end
