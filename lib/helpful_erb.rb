@@ -2,6 +2,9 @@ require 'erb'
 require 'nested_error'
 
 class HelpfulERB
+  # Exception raised if there's a rendering error. An instance has a +cause+
+  # method for retreiving the exception that was actually thrown, and a
+  # +to_s+ that contains a pretty formatted message describing the exception.
   class Error < ::NestedError; end
 
   # ERB object
@@ -14,6 +17,12 @@ class HelpfulERB
   # Template filename
   attr_accessor :filename
 
+  # Instantiate a new object with ERB +text+ content. For displaying exception
+  # backtrace, also specify the +filename+ the ERB content was read from.
+  #
+  # Options:
+  # * :before => Number of lines of context to display before an exception.
+  # * :after => Number of lines of context to display after an exception.
   def initialize(text, filename=nil, opts={})
     @text = text
     @filename = filename
@@ -24,6 +33,9 @@ class HelpfulERB
     @erb.filename = @filename if @filename
   end
 
+  # Return the rendered string produced from the ERB template. Optionally
+  # provide the +binding+ context to use. If an exception is caught when
+  # rendering the template, raise a HelpfulERB::Error.
   def result(binder=nil)
     begin
       return @erb.result(binder)
