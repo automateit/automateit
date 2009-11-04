@@ -1,3 +1,5 @@
+#!/usr/bin/env perl
+
 # This file can be used as both a Perl library (read the POD below) and a
 # stand-alone program (run it with "--help" for instructions).
 
@@ -71,19 +73,34 @@ sub uninstall {
 
 =item CpanWrapper->install($module_name)
 
-Install the module. Returns 0 if can't find module.
+Install the module. 
 
+Returns:
+1 if successful
+0 if can't find module
+-1 if module is already installed
 =cut
 sub install {
-  no warnings;
   my($class, $module) = @_;
+
+  # Don't install module if already installed.
+  if ($class->query($module)) {
+      return -1;
+  }
+
+  no warnings;
   tie *NO, 'NoHandle';
   open(SAVEIN, ">&STDIN");
   open(STDIN, ">&NO"); # TODO why isn't this enough?
   *STDIN = *NO;
   my $result;
   if (my $module_ref = CPAN::Shell->expand('Module', $module)) {
-    $module_ref->install unless $DRYRUN;
+    unless ($DRYRUN) {
+        # Ignore errors from "clean", because it may not exist.
+        eval { $module_ref->clean; };
+        # Actually install the module.
+        $module_ref->install;
+    };
     $result = 1;
   } else {
     $result = 0;
@@ -175,11 +192,15 @@ HERE
 
   if ($install) {
     foreach my $module (@modules) {
-      if (CpanWrapper->install($module)) {
+      my $status = CpanWrapper->install($module);
+      if ($status == 1) {
         print "* Installed: $module\n" unless $quiet;
-      } else {
+      } elsif ($status == 0) {
         print "! Can't find CPAN module: $module\n";
         exit 1
+      } elsif ($status == -1) {
+        print "* Already installed: $module\n" unless $quiet;
+      } else {
       }
     }
   } elsif ($uninstall) {
