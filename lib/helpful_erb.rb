@@ -40,17 +40,20 @@ class HelpfulERB
     begin
       return @erb.result(binder)
     rescue Exception => e
+      # Extract filename and line number of exception.
       stack = caller 0
-      for i in 0..e.backtrace.size
-        l = e.backtrace[i]
-        #puts "%s %s" % [i, l];
-        if l =~ /^([^:]+):(\d+):in `(render|result)'$/ or l =~ /^(#{@filename}):(\d+):in /
+      line_number = nil
+      template = @filename
+      for frame in e.backtrace
+        if frame =~ /^([^:]+):(\d+):in `(render|result)'$/ or frame =~ /^(#{@filename}):(\d+):in /
+          template = $1
+          line_number = $2.to_i
           break
         end
       end
-      template = $1 || @filename
-      line_number = $2.to_i
-      raise Exception.new("Caught ERB error but couldn't find line number in backtrace:\n#{e.backtrace.join("\n")}") unless line_number
+      unless line_number
+        raise Exception.new("Caught ERB error but couldn't find line number in backtrace:\n#{e.backtrace.join("\n")}")
+      end
 
       lines = @text.split(/\n/)
 
