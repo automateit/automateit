@@ -253,4 +253,9 @@ task :chown do
   end
 end
 
+desc "Generate 'tags' file for text editor"
+task :tags do
+  sh "ctags -R ."
+end
+
 #===[ fin ]=============================================================
