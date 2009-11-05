@@ -1,3 +1,16 @@
+0.91104:
+    Date: Wed, 11 Nov 2009 17:45:24 -0700
+    Desc:
+    - (%) Fixed AddressManager, it now works with versions of Ruby that don't allow modifications to sets during iteration.
+    - (%) Fixed PackageManager::Gem, it now works with newer versions of Open4 that may incorrectly return nil STDOUT.
+    - (%) Fixed AutomateIt's test suite, it now works with newer versions of RSpec.
+    - (%) Fixed PackageManager::Cpan, it now works with newer versions of CPAN when installing a package that's been uninstalled before.
+    - (%) Fixed ShellManager#ln_s, it can now link a directory to a directory and understand a target symlink's relative path. 
+    - (+) Improved HelpfulERB, it now displays friendly errors containing filename and line number in templates, including "fields.yml" and "tags.yml", and will honor the "--trace" flag to optionally display backtraces.
+    - (+) Improved DownloadManager, it will now only download if the file isn't already present, but you can override this with a :force option.
+    - (+) Improved PackageManager::Gem, it can now install a specific version of a gem: `package_manager.install("rails", :with => :gem, :version => "2.3.4")`
+    - Improved PackageManager::Gem, it will now clear the local Gem cache so that "require" calls can see newly-installed packages without restarting AutomateIt.
+
 0.80624:
     Date: Tue, 24 Jun 2008 23:13:35 -0700
     Desc:

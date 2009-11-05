@@ -131,6 +131,9 @@ misc/setup_gem_dependencies.sh
 misc/setup_rubygems.sh
 spec/breaker.rb
 spec/extras/automateit_service_sysv_test
+spec/extras/bad_recipe.rb
+spec/extras/bad_template.erb
+spec/extras/bad_template_caller.rb
 spec/extras/scratch.rb
 spec/extras/simple_recipe.rb
 spec/integration/account_manager_nscd_spec.rb
