@@ -834,5 +834,22 @@ describe AutomateIt::ShellManager, " when managing symbolic links" do
         Pathname.new(target).realpath == Pathname.new(source).realpath
       end
     end
+
+    it "should not create symlinks if they're already pointing to desired target (ln_sf)" do
+      @m.mktempdircd do
+        source = "foo"
+        target = "bar"
+        @m.touch(source)
+        File.exists?(source).should be_true
+        File.exists?(target).should be_false
+
+        @m.ln_s(source, target).should == source
+        File.symlink?(target).should be_true
+        Pathname.new(target).realpath == Pathname.new(source).realpath
+
+        target = "./bar"
+        @m.ln_sf(source, target).should be_false
+      end
+    end
   end
 end
