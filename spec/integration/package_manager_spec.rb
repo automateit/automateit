@@ -20,15 +20,24 @@ else
       @d.uninstall(@package, :quiet => true)
     end
 
+    # Uninstall the +packages+ using the given +opts+.
     def uninstall_package(packages, opts={})
       opts[:quiet] = true
       return @d.uninstall(packages, opts)
     end
 
+    # Install the +packages+ using the given +opts+.
     def install_package(packages, opts={})
       opts[:quiet] = true #IK# Comment this out to see what each package manager is doing
       opts[:force] = [:pecl, :pear].include?(@d.token)
       return @d.install(packages, opts)
+    end
+
+    # Return array of arguments to use with #install_package and #uninstall_package for +package+ and optional +version+.
+    def arguments(package, version=nil)
+      response = [package]
+      response << {:version => version} if version
+      return response
     end
 
     # Some specs below leave side-effects which others depend on, although
@@ -44,19 +53,19 @@ else
     end
 
     it "should install a package" do
-      install_package(@package).should be_true
+      install_package(*arguments(@package, @version)).should be_true
       # Leaves behind an installed package
     end
 
     it "should not re-install an installed package" do
       # Expects package to be installed
-      install_package(@package).should be_false
+      install_package(*arguments(@package, @version)).should be_false
     end
 
     it "should find an installed package" do
       # Expects package to be installed
-      @d.installed?(@package).should be_true
-      @d.not_installed?(@package).should be_false
+      @d.installed?(*arguments(@package, @version)).should be_true
+      @d.not_installed?(*arguments(@package, @version)).should be_false
     end
 
     it "should not find a package that's not installed" do
@@ -72,11 +81,11 @@ else
 
     it "should uninstall a package" do
       # Expects package to be installed
-      uninstall_package(@package).should be_true
+      uninstall_package(*arguments(@package, @version)).should be_true
     end
 
     it "should not uninstall a package that's not installed" do
-      uninstall_package(@package).should be_false
+      uninstall_package(*arguments(@package, @version)).should be_false
     end
   end
 
@@ -87,6 +96,7 @@ else
     :yum => "nomarch", # Obscure package for extracting ARC files from the 80's
     :portage => "arc", # Obscure package for extracting ARC files from the 80's
     :gem => "s33r", # Alpha-grade package its author deprecated in favor of another
+    :gem => ["s33r", "0.5.4"], # Specific, old version of s33r.
     :egg => "_sre.py", # Slower reimplementation of ancient Python Regexps
     :pear => "File_DICOM", # Obscure package for DICOM X-rays, abandoned in 2003
     :pecl => "ecasound", # Obscure package for Ecasound libs, abandoned in 2003
@@ -112,7 +122,12 @@ else
 
         before(:all) do
           @d = @m[driver_token]
-          @package = package
+          if package.kind_of?(Array)
+            @package, @version = package
+          else
+            @package = package
+            @version = nil
+          end
           raise PACKAGE_FOUND_ERROR % [@package, @d.class] if @d.installed?(@package)
         end
       end
