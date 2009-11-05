@@ -24,10 +24,23 @@ class AutomateIt::ShellManager::BaseLink < AutomateIt::ShellManager::BaseDriver
     end
 
     for source in sources
-      peer = peer_for(source, target)
       begin
-        peer_stat = File.stat(peer)
         source_stat = File.stat(source)
+
+        # If linking one node to another, stop if they're the same.
+        if sources.size == 1
+          if File.symlink?(target)
+            link_relative_path = File.readlink(target)
+            link_abolute_path = File.expand_path(link_relative_path, File.dirname(target))
+            if File.stat(link_abolute_path).ino == source_stat.ino
+              next
+            end
+          end
+        end
+
+        # Link source to the target (when a file) or within the target (when a directory).
+        peer = peer_for(source, target)
+        peer_stat = File.stat(peer)
 
         if peer_stat.ino == source_stat.ino
           next

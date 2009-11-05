@@ -851,5 +851,42 @@ describe AutomateIt::ShellManager, " when managing symbolic links" do
         @m.ln_sf(source, target).should be_false
       end
     end
+
+    it "should create symlink from directory to directory (ln_s)" do
+      @m.mktempdircd do
+        source = "foo"
+        target = "bar"
+        @m.mkdir("foo")
+
+        @m.ln_s(source, target).should == source
+
+        File.directory?(target).should be_true
+        Pathname.new(source).realpath == Pathname.new(target).readlink.realpath
+      end
+    end
+
+    it "should not create symlink for directory that's already pointing to desired target (ln_s)" do
+      @m.mktempdircd do
+        source = "foo"
+        target = "bar"
+        @m.mkdir(source)
+        @m.ln_s(source, target).should == source
+
+        @m.ln_s(source, target).should be_blank
+      end
+    end
+
+    it "should not create symlink if an equivalent relative link exists (ln_s)" do
+      @m.mktempdircd do
+        directory = "baz"
+        source = "#{directory}/foo"
+        target = "#{directory}/bar"
+        @m.mkdir(directory)
+        @m.touch(source)
+        @m.sh "ln -s ../#{source} #{target}"
+
+        @m.ln_s(source, target).should be_blank
+      end
+    end
   end
 end
