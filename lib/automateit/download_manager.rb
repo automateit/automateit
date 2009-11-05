@@ -5,10 +5,11 @@ module AutomateIt
   class DownloadManager < Plugin::Manager
     alias_methods :download
 
-    # Downloads the +source+ document.
+    # Downloads the +source+ document if needed.
     #
     # Options:
     # * :to -- Saves source to this filename or directory. Defaults to current directory.
+    # * :force -- Downloads even if file is already present.
     def download(*arguments) dispatch(*arguments) end
 
     # == DownloadManager::BaseDriver
@@ -33,6 +34,12 @@ module AutomateIt
         source = args[0] or raise ArgumentError.new("No source specified")
         target = args[1] || opts[:to] || File.basename(source)
         target = File.join(target, File.basename(source)) if File.directory?(target)
+        force  = opts[:force]
+
+        if File.exist?(target) and not force
+          return false
+        end
+
         log.info(PNOTE+"Downloading #{target}")
         if writing?
           open(target, "w+") do |writer|
