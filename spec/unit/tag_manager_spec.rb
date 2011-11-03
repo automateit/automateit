@@ -15,7 +15,7 @@ def prepare_for_tagmanager
   @m = @a.tag_manager
 end
 
-describe "AutomateIt::TagManager", :shared => true do
+shared_examples_for "AutomateIt::TagManager" do
   it "should have tags" do
     @a.tags.should be_a_kind_of(Enumerable)
   end
