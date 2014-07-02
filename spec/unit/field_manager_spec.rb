@@ -1,10 +1,10 @@
 require File.join(File.dirname(File.expand_path(__FILE__)), "/../spec_helper.rb")
 
-describe "AutomateIt::FieldManager", :shared => true do
+shared_examples_for "AutomateIt::FieldManager" do
   before(:all) do
-    @a = AutomateIt.new
-    @a.tags << "magical_hosts"
-    @m = @a.field_manager
+    # @a = AutomateIt.new
+    # @a.tags << "magical_hosts"
+    # @m = @a.field_manager
   end
 
   it "should be able to lookup entire hash" do
@@ -46,6 +46,10 @@ describe AutomateIt::FieldManager::Struct do
   it_should_behave_like "AutomateIt::FieldManager"
 
   before(:all) do
+    @a = AutomateIt.new
+    @a.tags << "magical_hosts"
+    @m = @a.field_manager
+    
     @m.setup(:default => :struct, :struct => {
       "key" => "value",
       "hash" => {
@@ -62,6 +66,9 @@ describe AutomateIt::FieldManager::YAML do
   it_should_behave_like "AutomateIt::FieldManager"
 
   before(:all) do
+    @a = AutomateIt.new
+    @a.tags << "magical_hosts"
+    @m = @a.field_manager
     @m[:yaml].should_receive(:_read).with("demo.yml").and_return(<<-EOB)
       <%="key"%>: value
       hash:

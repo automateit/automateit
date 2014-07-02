@@ -144,7 +144,7 @@ class Tempster
 
   # Returns a string of random characters.
   def self._armor_string(length=DEFAULT_ARMOR_LENGTH)
-    (1..length).collect{ARMOR_CHARACTERS[rand(ARMOR_CHARACTERS.size)]}.pack("C*")
+    (1..length).collect{ARMOR_CHARACTERS[rand(ARMOR_CHARACTERS.size)]}.join('')
   end
 
   # Creates a temporary file.

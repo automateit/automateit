@@ -23,14 +23,15 @@ class AutomateIt::AddressManager::Portable < AutomateIt::AddressManager::BaseDri
     results << Socket.gethostname
     results.merge(Socket.gethostbyname(Socket.gethostname)[1]) rescue SocketError
 
-    results.each{|name| results.merge(hostnames_for(name))}
+    tmp = results.dup
+    tmp.each{|name| results.merge(hostnames_for(name))}
     results << "localhost"
     return results.to_a.sort
   end
 
   # See AddressManager#addresses
   def addresses
-    results = Set.new("127.0.0.1")
+    results = Set.new(["127.0.0.1"])
     results.merge(TCPSocket.gethostbyname(Socket.gethostname)[3]) rescue SocketError
     return results.flatten
   end
